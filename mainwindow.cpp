@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->setInteraction(QCP::iRangeDrag, true);
     ui->plot->setInteraction(QCP::iRangeZoom, true);
-                                                                                          // Slot for printing coordinates
+    // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
 
     serialPort = NULL;                                                                    // Set serial port pointer to NULL initially
@@ -233,11 +233,12 @@ void MainWindow::on_connectButton_clicked()
         connected = false;                                                                // Set connected status flag to false
         plotting = false;                                                                 // Not plotting anymore
         receivedData.clear();                                                             // Clear received string
+        noMsgReceivedData.clear();
         ui->stopPlotButton->setEnabled(false);                                            // Take care of controls
         ui->saveJPGButton->setEnabled(false);
         enableControls(true);
     } else {                                                                              // If application is not connected, connect
-                                                                                          // Get parameters from controls first
+        // Get parameters from controls first
         QSerialPortInfo portInfo(ui->comboPort->currentText());                           // Temporary object, needed to create QSerialPort
         int baudRate = ui->comboBaud->currentText().toInt();                              // Get baud rate from combo box
         int dataBitsIndex = ui->comboData->currentIndex();                                // Get index of data bits combo box
@@ -262,7 +263,7 @@ void MainWindow::on_connectButton_clicked()
         }
 
         if(stopBitsIndex == 0) {                                                          // Set stop bits according to the selected index
-             stopBits = QSerialPort::OneStop;
+            stopBits = QSerialPort::OneStop;
         } else {
             stopBits = QSerialPort::TwoStop;
         }
@@ -387,6 +388,17 @@ void MainWindow::onNewDataArrived(QStringList newData)
 }
 /******************************************************************************************************************/
 
+void MainWindow::addMessageText(QString data, QString color) {
+    //if (data.isEmpty()) return;
+    if(data.trimmed().isEmpty()) return;
+    data = data.replace("\n", "");
+    data = data.replace("\r", "\n");
+    QString string = QUrl::fromPercentEncoding(data.toLatin1());
+    ui->receiveTerminal->moveCursor (QTextCursor::End);
+    QString html = "<span style=\"color:"+color+";font-weight:bold\">"+string+"</span>";
+    ui->receiveTerminal->appendHtml(html);
+    ui->receiveTerminal->moveCursor (QTextCursor::End);
+}
 
 /******************************************************************************************************************/
 /* Slot for spin box for plot minimum value on y axis */
@@ -417,10 +429,13 @@ void MainWindow::readData()
 {
     if(serialPort->bytesAvailable()) {                                                    // If any bytes are available
         QByteArray data = serialPort->readAll();                                          // Read all data in QByteArray
+        //        ui->receiveTerminal->appendPlainText(QString::fromStdString(data.data()));
 
+        //        ui->receiveTerminal->moveCursor (QTextCursor::End);
+        //        ui->receiveTerminal->insertPlainText(QString::fromStdString(data.data()));
+        //        ui->receiveTerminal->moveCursor (QTextCursor::End);
         if(!data.isEmpty()) {                                                             // If the byte array is not empty
             char *temp = data.data();                                                     // Get a '\0'-terminated char* to the data
-
             for(int i = 0; temp[i] != '\0'; i++) {                                        // Iterate over the char*
                 switch(STATE) {                                                           // Switch the current state of the message
                 case WAIT_START:                                                          // If waiting for start [$], examine each char
@@ -429,6 +444,21 @@ void MainWindow::readData()
                         receivedData.clear();                                             // Clear temporary QString that holds the message
                         break;                                                            // Break out of the switch
                     }
+                    if (STATE != IN_MESSAGE) {
+                        if (temp[i] == '\n') {
+                            if (!noMsgReceivedData.isEmpty()) {
+                                addMessageText(noMsgReceivedData, "orange");
+//                                qDebug() <<  noMsgReceivedData;
+                            }
+
+                            noMsgReceivedData.clear();
+                        } else {
+                            if (temp[i] != '\r') {
+                            noMsgReceivedData.append(temp[i]);
+                            }
+                        }
+                    }
+
                     break;
                 case IN_MESSAGE:                                                          // If state is IN_MESSAGE
                     if(temp[i] == END_MSG) {                                              // If char examined is ;, switch state to END_MSG
@@ -441,10 +471,12 @@ void MainWindow::readData()
                         receivedData.append(temp[i]);
                     }
                     break;
-                default: break;
+                default:
+                    break;
                 }
             }
         }
+
     }
 }
 /******************************************************************************************************************/
@@ -456,7 +488,7 @@ void MainWindow::readData()
 void MainWindow::on_comboAxes_currentIndexChanged(int index)
 {
     if(index == 0) {
-      ui->statusBar->showMessage("Axis 1: Red");
+        ui->statusBar->showMessage("Axis 1: Red");
     } else if(index == 1) {
         ui->statusBar->showMessage("Axis 1: Red; Axis 2: Yellow");
     } else {
@@ -535,3 +567,26 @@ void MainWindow::on_actionHow_to_use_triggered()
     helpWindow->show();
 }
 /******************************************************************************************************************/
+
+void MainWindow::on_sendLine_returnPressed()
+{
+
+    QString data = ui->sendLine->text();
+    if (data.isEmpty()) return; // Nothing to send
+    data += "\n";
+    // Send data
+    qint64 result = serialPort->write(data.toLocal8Bit());
+    if (result != -1) {
+        // If data was sent successfully, clear line edit
+        //ui->receiveTerminal->appendHtml("&rarr;&nbsp;");
+        addMessageText("&rarr;&nbsp;" + data + "\n", "lightblue");
+        ui->sendLine->clear();
+    }
+
+}
+
+void MainWindow::on_clearTermButton_clicked()
+{
+    ui->receiveTerminal->clear();
+    ui->receiveTerminal->moveCursor (QTextCursor::End);
+}
