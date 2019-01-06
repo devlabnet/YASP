@@ -70,8 +70,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->setInteraction(QCP::iRangeZoom, true);
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
-
-    serialPort = NULL;                                                                    // Set serial port pointer to NULL initially
+    serialPort = nullptr;                                                                    // Set serial port pointer to NULL initially
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));                       // Connect update timer to replot slot
 }
 /******************************************************************************************************************/
@@ -82,10 +81,21 @@ MainWindow::MainWindow(QWidget *parent) :
 /******************************************************************************************************************/
 MainWindow::~MainWindow()
 {
-    if(serialPort != NULL) delete serialPort;
+    qDebug() << "MainWindows Destructor";
+    if(serialPort != nullptr) delete serialPort;
+//    widgets.hide();
+//    widgets.deleteLater();
     delete ui;
 }
 /******************************************************************************************************************/
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    qDebug() << "MainWindows closeEvent";
+//    widgets.close();
+//    dockW->deleteLater();
+   // or event->accept(); but fine 'moments' are there
+   QMainWindow::closeEvent(event);
+}
 
 
 /******************************************************************************************************************/
@@ -184,7 +194,7 @@ void MainWindow::setupPlot()
 /******************************************************************************************************************/
 void MainWindow::openPort(QSerialPortInfo portInfo, int baudRate, QSerialPort::DataBits dataBits, QSerialPort::Parity parity, QSerialPort::StopBits stopBits)
 {
-    serialPort = new QSerialPort(portInfo, 0);                                            // Create a new serial port
+    serialPort = new QSerialPort(portInfo, nullptr);                                            // Create a new serial port
 
     connect(this, SIGNAL(portOpenOK()), this, SLOT(portOpenedSuccess()));                 // Connect port signals to GUI slots
     connect(this, SIGNAL(portOpenFail()), this, SLOT(portOpenedFail()));
@@ -227,7 +237,7 @@ void MainWindow::on_connectButton_clicked()
         serialPort->close();                                                              // Close serial port
         emit portClosed();                                                                // Notify application
         delete serialPort;                                                                // Delete the pointer
-        serialPort = NULL;                                                                // Assign NULL to dangling pointer
+        serialPort = nullptr;                                                                // Assign NULL to dangling pointer
         ui->connectButton->setText("Connect");                                            // Change Connect button text, to indicate disconnected
         ui->statusBar->showMessage("Disconnected!");                                      // Show message in status bar
         connected = false;                                                                // Set connected status flag to false
@@ -268,7 +278,7 @@ void MainWindow::on_connectButton_clicked()
             stopBits = QSerialPort::TwoStop;
         }
 
-        serialPort = new QSerialPort(portInfo, 0);                                        // Use local instance of QSerialPort; does not crash
+        serialPort = new QSerialPort(portInfo, nullptr);                                        // Use local instance of QSerialPort; does not crash
         openPort(portInfo, baudRate, dataBits, parity, stopBits);                         // Open serial port and connect its signals
     }
 }
@@ -514,7 +524,13 @@ void MainWindow::on_spinYStep_valueChanged(int arg1)
 /******************************************************************************************************************/
 void MainWindow::on_saveJPGButton_clicked()
 {
-    ui->plot->saveJpg(QString::number(dataPointNumber) + ".jpg");
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Plot"),
+                               "",
+                               tr("Images (*.jpg)"));
+
+    qDebug() << "Save JPEG : " << fileName;
+//    ui->plot->saveJpg(QString::number(dataPointNumber) + ".jpg");
+    ui->plot->saveJpg(fileName);
 }
 /******************************************************************************************************************/
 
@@ -537,8 +553,9 @@ void MainWindow::on_resetPlotButton_clicked()
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event)
 {
-    int xx = ui->plot->xAxis->pixelToCoord(event->x());
-    int yy = ui->plot->yAxis->pixelToCoord(event->y());
+    int xx = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->x()));
+    int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
+    //int yy = ui->plot->yAxis->pixelToCoord(event->y());
     QString coordinates("X: %1 Y: %2");
     coordinates = coordinates.arg(xx).arg(yy);
     ui->statusBar->showMessage(coordinates);
@@ -562,9 +579,11 @@ void MainWindow::on_spinPoints_valueChanged(int arg1)
 /******************************************************************************************************************/
 void MainWindow::on_actionHow_to_use_triggered()
 {
-    helpWindow = new HelpWindow(this);
-    helpWindow->setWindowTitle("How to use this application");
-    helpWindow->show();
+    if (helpWindow == nullptr) {
+        helpWindow = new HelpWindow(this);
+        helpWindow->setWindowTitle("How to use this application");
+        helpWindow->show();
+    }
 }
 /******************************************************************************************************************/
 
@@ -589,4 +608,33 @@ void MainWindow::on_clearTermButton_clicked()
 {
     ui->receiveTerminal->clear();
     ui->receiveTerminal->moveCursor (QTextCursor::End);
+}
+
+void MainWindow::on_actionShowWidgets_triggered()
+{
+//    if (widgets.isHidden()) {
+//        widgets.show();
+//    } else {
+//        widgets.hide();
+//    }
+    qDebug() << widgets;
+
+//    if (helpWindow == nullptr) {
+//        helpWindow = new HelpWindow(this);
+//        helpWindow->setWindowTitle("How to use this application");
+//        helpWindow->show();
+//    }
+
+    if (widgets == nullptr) {
+        widgets = new DialogWidgets(this);
+        widgets->setWindowTitle("Widgets");
+        widgets->show();
+    }
+    else {
+        if (widgets->isHidden()) {
+            widgets->show();
+        } else {
+            widgets->hide();
+        }
+    }
 }

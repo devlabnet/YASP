@@ -16,15 +16,20 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     	qcustomplot.cpp \
-    helpwindow.cpp
+    helpwindow.cpp \
+    dialogwidgets.cpp \
+    sliderwidget.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
-    helpwindow.hpp
+    helpwindow.hpp \
+    dialogwidgets.h \
+    sliderwidget.h
 
 
 FORMS    += mainwindow.ui \
-    helpwindow.ui
+    helpwindow.ui \
+    dialogwidgets.ui
 
 RC_FILE = myapp.rc
 

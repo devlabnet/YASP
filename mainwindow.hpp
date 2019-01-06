@@ -31,6 +31,7 @@
 #include <QtSerialPort/QtSerialPort>
 #include <QSerialPortInfo>
 #include "helpwindow.hpp"
+#include "dialogwidgets.h"
 
 #define START_MSG       '$'
 #define END_MSG         ';'
@@ -48,8 +49,11 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+protected:
+    void closeEvent(QCloseEvent *event);
 
 private slots:
     void on_comboPort_currentIndexChanged(const QString &arg1);                           // Slot displays message on status bar
@@ -76,6 +80,8 @@ private slots:
 
     void on_clearTermButton_clicked();
 
+    void on_actionShowWidgets_triggered();
+
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void portOpenOK();                                                                    // Emitted when port is open
@@ -84,7 +90,6 @@ signals:
 
 private:
     Ui::MainWindow *ui;
-
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
     int dataPointNumber;                                                                  // Keep track of data points
@@ -97,8 +102,8 @@ private:
     QString noMsgReceivedData;                                                                 // Used for reading from the port
     int STATE;                                                                            // State of recieiving message from port
     int NUMBER_OF_POINTS;                                                                 // Number of points plotted
-    HelpWindow *helpWindow;
-
+    HelpWindow *helpWindow = nullptr;
+    DialogWidgets *widgets = nullptr;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();                                                                     // Setup the QCustomPlot
