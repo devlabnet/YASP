@@ -11,8 +11,9 @@
 #include "dialogwidgets.h"
 #include <QSpinBox>
 
-sliderWidget::sliderWidget(QWidget *parent) : QWidget(parent)
+sliderWidget::sliderWidget(QTableWidget* tbl, QWidget *parent) : QWidget(parent)
 {
+    tableWidget = tbl;
     QVBoxLayout* layout = new QVBoxLayout();
     QTabWidget *onglets = new QTabWidget();
     layout->addWidget(onglets);
@@ -23,6 +24,17 @@ sliderWidget::sliderWidget(QWidget *parent) : QWidget(parent)
     //QWidget *page3 = new QWidget;
     // Page 1
     QHBoxLayout* hbox1 = new QHBoxLayout();
+    QLabel* cmdLabelId = new QLabel("ID");
+    cmdLabelId->setStyleSheet("font-weight: bold; color: blue");
+    cmdLabelValue = new QLabel("CMD");
+    cmdLabelLine = new QLineEdit();
+    cmdLabelLine->setText("CMD");
+    cmdLabelLine->setMaxLength(5);
+//    QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+//    cmdLabel->setSizePolicy(sizePolicy);
+    cmdLabelLine->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+//    cmdLabelLine->setMinimumWidth(6);
+//    cmdLabelLine->setMaximumWidth(6);
     minLabelBox1 = new QLabel("MIN");
     minLabelBox1->setStyleSheet("font-weight: bold; color: red");
     maxLabelBox1 = new QLabel("MAX");
@@ -40,7 +52,7 @@ sliderWidget::sliderWidget(QWidget *parent) : QWidget(parent)
     slide->setTickInterval(tickInterval);
     slide->setSingleStep(tickInterval);
     valLabelBox1 = new QLabel("VALUE : " + QString::number(slide->value()));
-    valLabelBox1->setStyleSheet("font-weight: bold; border: 1px solid blue; margin: 2px;");
+//    valLabelBox1->setStyleSheet("font-weight: bold; border: 1px solid blue; margin: 2px;");
     valLabelBox1->setAlignment(Qt::AlignHCenter);
 
 //        QLineEdit *lineEdit = new QLineEdit("Entrez votre nom");
@@ -49,6 +61,8 @@ sliderWidget::sliderWidget(QWidget *parent) : QWidget(parent)
     QVBoxLayout *vbox1 = new QVBoxLayout;
 //        vbox1->addWidget(lineEdit);
 //        vbox1->addWidget(bouton1);
+    hbox1->addWidget(cmdLabelId);
+    hbox1->addWidget(cmdLabelValue);
     hbox1->addWidget(minLabelBox1);
     hbox1->addWidget(minValLabelBox1);
     hbox1->addWidget(maxLabelBox1);
@@ -77,13 +91,18 @@ sliderWidget::sliderWidget(QWidget *parent) : QWidget(parent)
     ticksIntervalSpinBox->setSingleStep(tickInterval);
 
     QGridLayout *controlsLayout = new QGridLayout;
-    controlsLayout->addWidget(minimumLabel, 0, 0);
-    controlsLayout->addWidget(maximumLabel, 1, 0);
-    controlsLayout->addWidget(tickIntervalLabel, 2, 0);
-    controlsLayout->addWidget(minimumSpinBox, 0, 1);
-    controlsLayout->addWidget(maximumSpinBox, 1, 1);
-    controlsLayout->addWidget(ticksIntervalSpinBox, 2, 1);
+    QLabel* commandLabel = new QLabel("Command Label");
+    controlsLayout->addWidget(commandLabel, 0, 0);
+    controlsLayout->addWidget(cmdLabelLine, 0, 1);
+    controlsLayout->addWidget(minimumLabel, 1, 0);
+    controlsLayout->addWidget(minimumSpinBox, 1, 1);
+    controlsLayout->addWidget(maximumLabel, 2, 0);
+    controlsLayout->addWidget(maximumSpinBox, 2, 1);
+    controlsLayout->addWidget(tickIntervalLabel, 3, 0);
+    controlsLayout->addWidget(ticksIntervalSpinBox, 3, 1);
 
+
+    connect(cmdLabelLine, SIGNAL(editingFinished()), this, SLOT(cmdIdEditingFinished()));
     connect(minimumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMinimumSlide(int)));
     connect(maximumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMaximumSlide(int)));
     connect(ticksIntervalSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setSingleStepSlide(int)));
@@ -107,7 +126,6 @@ sliderWidget::sliderWidget(QWidget *parent) : QWidget(parent)
     help->setAlignment(Qt::AlignCenter);
     help->setReadOnly(true);
     help->setHtml("<h1>Help</h1>");
-    QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
     help->setSizePolicy(sizePolicy);
@@ -162,6 +180,10 @@ void sliderWidget::setSingleStepSlide(int v) {
     }
 }
 
+void sliderWidget::cmdIdEditingFinished() {
+    cmdLabelValue->setText(cmdLabelLine->text());
+}
+
 void sliderWidget::ShowContextMenu(const QPoint &pos)
 {
    QMenu contextMenu(tr("Context menu"), this);
@@ -171,9 +193,20 @@ void sliderWidget::ShowContextMenu(const QPoint &pos)
    contextMenu.exec(mapToGlobal(pos));
 }
 
+//void sliderWidget::deleteWidget() {
+//   qDebug() << "sliderWidget::deleteWidget";
+//   emit deleteRow(this);
+////   DialogWidgets* p =  dynamic_cast<DialogWidgets*>(parent());
+////   p->deleteWidget(this);
+//}
+
 void sliderWidget::deleteWidget() {
-   qDebug() << "sliderWidget::deleteWidget";
-   emit deleteRow(this);
-//   DialogWidgets* p =  dynamic_cast<DialogWidgets*>(parent());
-//   p->deleteWidget(this);
+    qDebug() << "DialogWidgets::rows: " << tableWidget->rowCount();
+    for (int i=0; i < tableWidget->rowCount(); i++)
+      for (int j=0; j < tableWidget->columnCount(); j++) {
+          if (tableWidget->cellWidget(i,j) == this) {
+              qDebug() << "DialogWidgets::deleteWidget row : " << i;
+              tableWidget->removeRow(i);
+          }
+      }
 }

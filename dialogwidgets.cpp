@@ -33,18 +33,18 @@ void DialogWidgets::on_addWidgetBtn_clicked()
     qDebug() << "Add Widget : " << wText;
     if (wText == "Dial") {
         qDebug() << "DIAL WIDGET";
-        widget = new sliderWidget(this);
+        widget = new sliderWidget(ui->tableWidgets, this);
         widget->show();
     } else if (wText == "Slider") {
         qDebug() << "SLIDER WIDGET";
-        widget = new sliderWidget(this);
+        widget = new sliderWidget(ui->tableWidgets, this);
         widget->show();
     }
     int rCount = ui->tableWidgets->rowCount();
     ui->tableWidgets->setRowCount(rCount + 1);
 //    qDebug() << "w: " << ui->tableWidgets->columnWidth(0);
     ui->tableWidgets->setCellWidget(rCount, 0, widget);
-    connect(widget, SIGNAL(deleteRow(QWidget*)), this, SLOT(deleteRow(QWidget*)));
+//    connect(widget, SIGNAL(deleteRow(QWidget*)), this, SLOT(deleteRow(QWidget*)));
     ui->tableWidgets->resizeRowsToContents();
 }
 
@@ -53,13 +53,13 @@ void DialogWidgets::on_comboBoxWidgets_activated(const QString &arg1)
     qDebug() << "on_comboBoxWidgets_activated : " << arg1;
 }
 
-void DialogWidgets::deleteRow(QWidget* w) {
-    qDebug() << "DialogWidgets::rows: " << ui->tableWidgets->rowCount();
-    for (int i=0; i < ui->tableWidgets->rowCount(); i++)
-      for (int j=0; j < ui->tableWidgets->columnCount(); j++) {
-          if (ui->tableWidgets->cellWidget(i,j) == w) {
-              qDebug() << "DialogWidgets::deleteWidget row : " << i;
-              ui->tableWidgets->removeRow(i);
-          }
-      }
-}
+//void DialogWidgets::deleteRow(QWidget* w) {
+//    qDebug() << "DialogWidgets::rows: " << ui->tableWidgets->rowCount();
+//    for (int i=0; i < ui->tableWidgets->rowCount(); i++)
+//      for (int j=0; j < ui->tableWidgets->columnCount(); j++) {
+//          if (ui->tableWidgets->cellWidget(i,j) == w) {
+//              qDebug() << "DialogWidgets::deleteWidget row : " << i;
+//              ui->tableWidgets->removeRow(i);
+//          }
+//      }
+//}

@@ -3,6 +3,8 @@
 
 #include <QDialog>
 #include <QMenu>
+#include <QTableWidget>
+
 namespace Ui {
 class DialogWidgets;
 }
@@ -15,7 +17,7 @@ public:
     explicit DialogWidgets(QWidget *parent = nullptr);
     ~DialogWidgets();
 public slots:
-    void deleteRow(QWidget* w);
+//    void deleteRow(QWidget* w);
 
 private slots:
     void on_addWidgetBtn_clicked();
