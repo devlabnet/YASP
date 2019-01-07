@@ -5,9 +5,10 @@
 #include <QSlider>
 #include "sliderwidget.h"
 
-DialogWidgets::DialogWidgets(QWidget *parent) :
+DialogWidgets::DialogWidgets(QSerialPort* p, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DialogWidgets)
+    ui(new Ui::DialogWidgets),
+    port(p)
 {
     ui->setupUi(this);
     ui->tableWidgets->setColumnCount(1);
@@ -52,14 +53,3 @@ void DialogWidgets::on_comboBoxWidgets_activated(const QString &arg1)
 {
     qDebug() << "on_comboBoxWidgets_activated : " << arg1;
 }
-
-//void DialogWidgets::deleteRow(QWidget* w) {
-//    qDebug() << "DialogWidgets::rows: " << ui->tableWidgets->rowCount();
-//    for (int i=0; i < ui->tableWidgets->rowCount(); i++)
-//      for (int j=0; j < ui->tableWidgets->columnCount(); j++) {
-//          if (ui->tableWidgets->cellWidget(i,j) == w) {
-//              qDebug() << "DialogWidgets::deleteWidget row : " << i;
-//              ui->tableWidgets->removeRow(i);
-//          }
-//      }
-//}

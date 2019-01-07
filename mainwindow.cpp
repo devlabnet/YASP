@@ -72,6 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
     serialPort = nullptr;                                                                    // Set serial port pointer to NULL initially
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));                       // Connect update timer to replot slot
+    ui->menuWidgets->menuAction()->setVisible(false);
 }
 /******************************************************************************************************************/
 
@@ -290,6 +291,10 @@ void MainWindow::on_connectButton_clicked()
 /******************************************************************************************************************/
 void MainWindow::portOpenedSuccess()
 {
+    ui->menuWidgets->menuAction()->setVisible(true);
+    if ((widgets != nullptr)) {
+        widgets->setSerialPort(serialPort);
+    }
     //qDebug() << "Port opened signal received!";
     ui->connectButton->setText("Disconnect");                                             // Change buttons
     ui->statusBar->showMessage("Connected!");
@@ -322,6 +327,10 @@ void MainWindow::portOpenedFail()
 void MainWindow::onPortClosed()
 {
     //qDebug() << "Port closed signal received!";
+    ui->menuWidgets->menuAction()->setVisible(false);
+    if ((widgets != nullptr) && widgets->isVisible()) {
+            widgets->hide();
+    }
     updateTimer.stop();
     connected = false;
     disconnect(serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
@@ -626,7 +635,7 @@ void MainWindow::on_actionShowWidgets_triggered()
 //    }
 
     if (widgets == nullptr) {
-        widgets = new DialogWidgets(this);
+        widgets = new DialogWidgets(serialPort, this);
         widgets->setWindowTitle("Widgets");
         widgets->show();
     }

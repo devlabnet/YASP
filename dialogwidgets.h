@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QMenu>
 #include <QTableWidget>
+#include <QSerialPort>
 
 namespace Ui {
 class DialogWidgets;
@@ -14,11 +15,13 @@ class DialogWidgets : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogWidgets(QWidget *parent = nullptr);
+    explicit DialogWidgets(QSerialPort* p, QWidget *parent = nullptr);
     ~DialogWidgets();
 public slots:
 //    void deleteRow(QWidget* w);
-
+    void setSerialPort(QSerialPort* p) {
+        port = p;
+    }
 private slots:
     void on_addWidgetBtn_clicked();
     void on_comboBoxWidgets_activated(const QString &arg1);
@@ -26,7 +29,7 @@ private slots:
 private:
     Ui::DialogWidgets *ui;
     QMenu *editMenu;
-
+    QSerialPort* port;
 signals:
 
 };
