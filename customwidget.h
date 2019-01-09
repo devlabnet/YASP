@@ -7,22 +7,23 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QTextEdit>
+#include "dialogwidgets.h"
 
 class customWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit customWidget(QTableWidget *tbl, QWidget *parent = nullptr);
+    explicit customWidget(QWidget *parent, QDomElement* domElt = nullptr);
+    virtual void buildXml(QDomDocument& doc) = 0;
 
 private:
-    QTableWidget* tableWidget;
+    DialogWidgets* dw;
     QVBoxLayout* layout;
     QTabWidget *onglets = new QTabWidget();
-    QLineEdit* cmdLabelLine;
     QLabel* cmdLabelValue;
     QLabel* cmdLabelId;
     QLabel* commandLabel;
-
+    QString commandIdStr = "";
     QString getCommandId();
 protected:
     // pages
@@ -34,6 +35,7 @@ protected:
     QVBoxLayout *vBoxSettings;
     QGridLayout *controlsLayout;
     QTextEdit *help;
+    QLineEdit* cmdLabelLine;
     void sendToPort(int v);
 
 signals:

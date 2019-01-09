@@ -2,10 +2,31 @@
 #include <QDebug>
 #include <QMenu>
 #include <QMessageBox>
+#include "dialogwidgets.h"
 
-customWidget::customWidget(QTableWidget *tbl, QWidget *parent) : QWidget(parent)
+customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(parent)
 {
-    tableWidget = tbl;
+    dw = qobject_cast<DialogWidgets*>(parent);
+    Q_ASSERT( dw != nullptr ); // Check that a cast was successfull
+
+    qDebug() << "customWidget ----> " << domElt;
+
+    if (domElt != nullptr) {
+        QDomElement Child = *domElt;
+        bool cmdIdFound = false;
+        while (!Child.isNull() && !cmdIdFound) {
+            // Read Name and value
+            if (Child.tagName() == "CMD_ID") {
+                commandIdStr = Child.firstChild().toText().data();
+                break;
+            }
+            // Next child
+            if (!cmdIdFound) {
+                Child = Child.nextSibling().toElement();
+            }
+        }
+    }
+
     layout = new QVBoxLayout();
     onglets = new QTabWidget();
     layout->addWidget(onglets);
@@ -20,10 +41,10 @@ customWidget::customWidget(QTableWidget *tbl, QWidget *parent) : QWidget(parent)
 
     cmdLabelId = new QLabel("ID");
     cmdLabelId->setStyleSheet("font-weight: bold; color: blue");
-    cmdLabelValue = new QLabel("CMD");
     cmdLabelLine = new QLineEdit();
+    cmdLabelValue = new QLabel(commandIdStr);
     cmdLabelLine->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    cmdLabelLine->setText("");
+    cmdLabelLine->setText(commandIdStr);
     cmdLabelLine->setMaxLength(5);
     hBoxCommands->addWidget(cmdLabelId);
     hBoxCommands->addWidget(cmdLabelValue);
@@ -59,20 +80,19 @@ customWidget::customWidget(QTableWidget *tbl, QWidget *parent) : QWidget(parent)
     onglets->addTab(cmdPage, "Command");
     onglets->addTab(settingsPage, "Settings");
     onglets->addTab(helpPage, "Help");
-    onglets->setTabEnabled(0, false);
+    onglets->setTabEnabled(0, (!cmdLabelLine->text().isEmpty()));
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
             this, SLOT(ShowContextMenu(const QPoint &)));
-
 }
 
 void customWidget::ShowContextMenu(const QPoint &pos)
 {
-   QMenu contextMenu(tr("Context menu"), this);
-   QAction action1("Delete Widget", this);
-   connect(&action1, SIGNAL(triggered()), this, SLOT(deleteWidget()));
-   contextMenu.addAction(&action1);
-   contextMenu.exec(mapToGlobal(pos));
+    QMenu contextMenu(tr("Context menu"), this);
+    QAction action1("Delete Widget", this);
+    connect(&action1, SIGNAL(triggered()), this, SLOT(deleteWidget()));
+    contextMenu.addAction(&action1);
+    contextMenu.exec(mapToGlobal(pos));
 }
 
 QString customWidget::getCommandId() {
@@ -80,19 +100,19 @@ QString customWidget::getCommandId() {
 }
 
 void customWidget::deleteWidget() {
-//    qDebug() << "DialogWidgets::rows: " << tableWidget->rowCount();
-    for (int i=0; i < tableWidget->rowCount(); i++)
-      for (int j=0; j < tableWidget->columnCount(); j++) {
-          if (tableWidget->cellWidget(i,j) == this) {
-//              qDebug() << "DialogWidgets::deleteWidget row : " << i;
-              tableWidget->removeRow(i);
-          }
-      }
+    for (int i=0; i < dw->getTableWidget()->rowCount(); i++) {
+        for (int j=0; j < dw->getTableWidget()->columnCount(); j++) {
+            if (dw->getTableWidget()->cellWidget(i,j) == this) {
+                dw->getTableWidget()->removeRow(i);
+            }
+        }
+    }
 }
 
 void customWidget::sendToPort(int v) {
-    QString msg = cmdLabelLine->text() + QString::number(v);
+    QString msg = "#" + cmdLabelLine->text() + " " + QString::number(v);
     qDebug() << "---> " << msg;
+    dw->sendToPort(msg);
 }
 
 void customWidget::cmdIdEditingFinished() {
@@ -104,28 +124,32 @@ void customWidget::cmdIdEditingFinished() {
         msgBox.exec();
         return;
     }
-    for (int i=0; i < tableWidget->rowCount(); i++) {
-      for (int j=0; j < tableWidget->columnCount(); j++) {
-          customWidget* cw = dynamic_cast<customWidget*>(tableWidget->cellWidget(i,j));
-          if (tableWidget->cellWidget(i,j) != this) {
-              if (cmdLabelLine->text() == cw->getCommandId()) {
-                  QMessageBox msgBox;
-                  msgBox.setText("Command ID already used by another command !!!.");
-                  msgBox.exec();
-                  cmdLabelLine->setText("");
-                  cmdLabelValue->setText("");
-                  cmdPage->setEnabled(false);
-                  onglets->setTabEnabled(0, false);
-                  return;
-              }
-              //qDebug() << " row : " << i << " CMD ID: " << cw->getCommandId();
-          } else {
-              //qDebug() << " row : " << i << " ---> CMD ID: " << cw->getCommandId();
-          }
-          }
-      }
-
+    for (int i=0; i < dw->getTableWidget()->rowCount(); i++) {
+        for (int j=0; j < dw->getTableWidget()->columnCount(); j++) {
+            customWidget* cw = dynamic_cast<customWidget*>(dw->getTableWidget()->cellWidget(i,j));
+            if (dw->getTableWidget()->cellWidget(i,j) != this) {
+                if (cmdLabelLine->text() == cw->getCommandId()) {
+                    QMessageBox msgBox;
+                    msgBox.setText("Command ID already used by another command !!!.");
+                    msgBox.exec();
+                    cmdLabelLine->setText("");
+                    cmdLabelValue->setText("");
+                    cmdPage->setEnabled(false);
+                    onglets->setTabEnabled(0, false);
+                    return;
+                }
+            }
+        }
+    }
     cmdLabelValue->setText(cmdLabelLine->text());
     cmdPage->setEnabled(true);
     onglets->setTabEnabled(0, true);
 }
+
+//void customWidget::buildXml(QDomDocument &doc) {
+//    qDebug() << "customWidget::buildXml";
+////    QDomElement tag = doc.createElement("CMD_ID");
+////    widget.appendChild(tag);
+////    QDomText val = doc.createTextNode("x");
+////    tag.appendChild(val);
+//}

@@ -11,10 +11,12 @@ class sliderWidget : public customWidget
 {
     Q_OBJECT
 public:
-    explicit sliderWidget(QTableWidget *tbl, QWidget *parent = nullptr);
+    explicit sliderWidget(QWidget *parent, QDomElement* domElt = nullptr);
+    void buildXml(QDomDocument& doc);
 
 private:
     int maxValRange = 1000;
+    int minValRange = -1000;
     int tickInterval = 10;
     QLabel* valLabelBox1;
     QSlider *slide;

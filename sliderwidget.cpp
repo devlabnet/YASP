@@ -9,23 +9,33 @@
 #include <QDebug>
 #include <QSpinBox>
 
-sliderWidget::sliderWidget(QTableWidget *tbl, QWidget *parent) : customWidget (tbl, parent)
+sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget (parent, domElt)
 {
     // help Page
     help->setHtml("<h2>Help sliderWidget</h2>");
 
+    if (domElt != nullptr) {
+        QDomElement Child = *domElt;
+        while (!Child.isNull()) {
+            // Read Name and value
+            if (Child.tagName() == "VALUE_MIN") minValRange = Child.firstChild().toText().data().toInt();
+            if (Child.tagName() == "VALUE_MAX") maxValRange = Child.firstChild().toText().data().toInt();
+            if (Child.tagName() == "VALUE_TICK") tickInterval = Child.firstChild().toText().data().toInt();
+            // Next child
+            Child = Child.nextSibling().toElement();
+        }
+    }
     // command Page
     minLabelBox1 = new QLabel("MIN");
     minLabelBox1->setStyleSheet("font-weight: bold; color: red");
     maxLabelBox1 = new QLabel("MAX");
     maxLabelBox1->setStyleSheet("font-weight: bold; color: red");
-    minValLabelBox1 = new QLabel(QString::number(-maxValRange));
+    minValLabelBox1 = new QLabel(QString::number(minValRange));
     maxValLabelBox1 = new QLabel(QString::number((maxValRange)));
     slide = new QSlider(Qt::Horizontal);
     slide->setTickPosition(QSlider::TicksBelow);
-    connect(slide, SIGNAL(valueChanged(int)), this, SLOT(slideValue(int)));
     slide->setValue(0);
-    slide->setRange(-maxValRange, maxValRange);
+    slide->setRange(minValRange, maxValRange);
     slide->setTickInterval(tickInterval);
     slide->setSingleStep(tickInterval);
     valLabelBox1 = new QLabel("VALUE : " + QString::number(slide->value()));
@@ -42,12 +52,12 @@ sliderWidget::sliderWidget(QTableWidget *tbl, QWidget *parent) : customWidget (t
     // Settings Page
     QLabel* minimumLabel = new QLabel("Minimum");
     minimumSpinBox = new QSpinBox();
-    minimumSpinBox->setRange(-maxValRange, maxValRange);
-    minimumSpinBox->setValue(-maxValRange);
+    minimumSpinBox->setRange(minValRange, maxValRange);
+    minimumSpinBox->setValue(minValRange);
     minimumSpinBox->setSingleStep(100);
     QLabel* maximumLabel = new QLabel("Maximum");
     maximumSpinBox = new QSpinBox();
-    maximumSpinBox->setRange(-maxValRange, maxValRange);
+    maximumSpinBox->setRange(minValRange, maxValRange);
     maximumSpinBox->setValue(maxValRange);
     maximumSpinBox->setSingleStep(100);
     QLabel* tickIntervalLabel = new QLabel("Ticks Interval");
@@ -62,6 +72,7 @@ sliderWidget::sliderWidget(QTableWidget *tbl, QWidget *parent) : customWidget (t
     controlsLayout->addWidget(tickIntervalLabel, 3, 0);
     controlsLayout->addWidget(ticksIntervalSpinBox, 3, 1);
 
+    connect(slide, SIGNAL(valueChanged(int)), this, SLOT(slideValue(int)));
     connect(minimumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMinimumSlide(int)));
     connect(maximumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMaximumSlide(int)));
     connect(ticksIntervalSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setSingleStepSlide(int)));
@@ -102,6 +113,30 @@ void sliderWidget::setSingleStepSlide(int v) {
     }
 }
 
+void sliderWidget::buildXml(QDomDocument& doc) {
+//    customWidget::buildXml(doc);
+    qDebug() << "sliderWidget::buildXml";
+    QDomElement widget = doc.createElement("WIDGET");
+    widget.setAttribute("TYPE", "Slider");
+
+    QDomElement tag = doc.createElement("CMD_ID");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(cmdLabelLine->text()));
+    doc.appendChild(widget);
+
+    tag = doc.createElement("VALUE_MIN");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(minimumSpinBox->value())));
+    doc.appendChild(widget);
+    tag = doc.createElement("VALUE_MAX");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(maximumSpinBox->value())));
+    doc.appendChild(widget);
+    tag = doc.createElement("VALUE_TICK");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(slide->tickInterval())));
+    doc.appendChild(widget);
+}
 
 
 

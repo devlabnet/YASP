@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
 /******************************************************************************************************************/
 MainWindow::~MainWindow()
 {
-    qDebug() << "MainWindows Destructor";
+//    qDebug() << "MainWindows Destructor";
     if(serialPort != nullptr) delete serialPort;
 //    widgets.hide();
 //    widgets.deleteLater();
@@ -91,9 +91,7 @@ MainWindow::~MainWindow()
 /******************************************************************************************************************/
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    qDebug() << "MainWindows closeEvent";
-//    widgets.close();
-//    dockW->deleteLater();
+//    qDebug() << "MainWindows closeEvent";
    // or event->accept(); but fine 'moments' are there
    QMainWindow::closeEvent(event);
 }
@@ -486,7 +484,7 @@ void MainWindow::readData()
                         emit newData(incomingData);                                       // Emit signal for data received with the list
                         break;
                     }
-                    else if(isdigit(temp[i]) || isspace(temp[i]) ) {                      // If examined char is a digit, and not '$' or ';', append it to temporary string
+                    else if(isdigit(temp[i]) || isspace(temp[i]) || (temp[i] == '-') ) {            // If examined char is a digit, and not '$' or ';', append it to temporary string
                         receivedData.append(temp[i]);
                     }
                     break;
@@ -621,19 +619,6 @@ void MainWindow::on_clearTermButton_clicked()
 
 void MainWindow::on_actionShowWidgets_triggered()
 {
-//    if (widgets.isHidden()) {
-//        widgets.show();
-//    } else {
-//        widgets.hide();
-//    }
-    qDebug() << widgets;
-
-//    if (helpWindow == nullptr) {
-//        helpWindow = new HelpWindow(this);
-//        helpWindow->setWindowTitle("How to use this application");
-//        helpWindow->show();
-//    }
-
     if (widgets == nullptr) {
         widgets = new DialogWidgets(serialPort, this);
         widgets->setWindowTitle("Widgets");
