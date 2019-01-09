@@ -36,8 +36,13 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     settingsPage = new QWidget();
     helpPage = new QWidget();
 
+    hBoxInfos = new QHBoxLayout();
     hBoxCommands = new QHBoxLayout();
+    hBoxValue = new QHBoxLayout();
     vBoxCommands = new QVBoxLayout();
+    vBoxCommands->addLayout(hBoxInfos);
+    vBoxCommands->addLayout(hBoxCommands);
+    vBoxCommands->addLayout(hBoxValue);
 
     cmdLabelId = new QLabel("ID");
     cmdLabelId->setStyleSheet("font-weight: bold; color: blue");
@@ -46,8 +51,8 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     cmdLabelLine->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     cmdLabelLine->setText(commandIdStr);
     cmdLabelLine->setMaxLength(5);
-    hBoxCommands->addWidget(cmdLabelId);
-    hBoxCommands->addWidget(cmdLabelValue);
+    hBoxInfos->addWidget(cmdLabelId);
+    hBoxInfos->addWidget(cmdLabelValue);
     controlsLayout = new QGridLayout;
     commandLabel = new QLabel("Command Label");
     controlsLayout->addWidget(commandLabel, 0, 0);
@@ -145,11 +150,3 @@ void customWidget::cmdIdEditingFinished() {
     cmdPage->setEnabled(true);
     onglets->setTabEnabled(0, true);
 }
-
-//void customWidget::buildXml(QDomDocument &doc) {
-//    qDebug() << "customWidget::buildXml";
-////    QDomElement tag = doc.createElement("CMD_ID");
-////    widget.appendChild(tag);
-////    QDomText val = doc.createTextNode("x");
-////    tag.appendChild(val);
-//}

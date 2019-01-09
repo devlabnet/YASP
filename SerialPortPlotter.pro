@@ -20,14 +20,16 @@ SOURCES += main.cpp\
     helpwindow.cpp \
     dialogwidgets.cpp \
     sliderwidget.cpp \
-    customwidget.cpp
+    customwidget.cpp \
+    dialwidget.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
     helpwindow.hpp \
     dialogwidgets.h \
     sliderwidget.h \
-    customwidget.h
+    customwidget.h \
+    dialwidget.h
 
 
 FORMS    += mainwindow.ui \

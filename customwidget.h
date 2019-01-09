@@ -31,6 +31,8 @@ protected:
     QWidget *settingsPage;
     QWidget *helpPage;
     QVBoxLayout *vBoxCommands;
+    QHBoxLayout* hBoxInfos;
+    QHBoxLayout* hBoxValue;
     QHBoxLayout* hBoxCommands;
     QVBoxLayout *vBoxSettings;
     QGridLayout *controlsLayout;

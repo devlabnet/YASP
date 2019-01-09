@@ -1,4 +1,5 @@
-#include "sliderwidget.h"
+#include "dialwidget.h"
+#include "dialwidget.h"
 #include <QTabWidget>
 #include <QLineEdit>
 #include <QPushButton>
@@ -9,10 +10,10 @@
 #include <QDebug>
 #include <QSpinBox>
 
-sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget (parent, domElt)
+dialwidget::dialwidget(QWidget *parent, QDomElement *domElt) : customWidget (parent, domElt)
 {
     // help Page
-    help->setHtml("<h2>Help sliderWidget</h2>");
+    help->setHtml("<h2>Help dialwidget</h2>");
 
     if (domElt != nullptr) {
         QDomElement Child = *domElt;
@@ -20,7 +21,7 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
             // Read Name and value
             if (Child.tagName() == "VALUE_MIN") minValRange = Child.firstChild().toText().data().toInt();
             if (Child.tagName() == "VALUE_MAX") maxValRange = Child.firstChild().toText().data().toInt();
-            if (Child.tagName() == "VALUE_TICK") tickInterval = Child.firstChild().toText().data().toInt();
+            if (Child.tagName() == "VALUE_STEP") tickInterval = Child.firstChild().toText().data().toInt();
             // Next child
             Child = Child.nextSibling().toElement();
         }
@@ -32,25 +33,33 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
     maxLabelBox1->setStyleSheet("font-weight: bold; color: red");
     minValLabelBox1 = new QLabel(QString::number(minValRange));
     maxValLabelBox1 = new QLabel(QString::number((maxValRange)));
-    slide = new QSlider(Qt::Horizontal);
-    slide->setTickPosition(QSlider::TicksBelow);
-    slide->setValue(0);
-    slide->setRange(minValRange, maxValRange);
-    slide->setTickInterval(tickInterval);
-    slide->setSingleStep(tickInterval);
+    dial = new QDial();
+    dial->setNotchesVisible(true);
+    dial->setValue(0);
+    dial->setRange(minValRange, maxValRange);
+    //dial->setTickInterval(tickInterval);
+    dial->setSingleStep(tickInterval);
     valLabelBox1 = new QLabel("VALUE : ");
 //    valLabelBox1->setStyleSheet("font-weight: bold; border: 1px solid blue; margin: 2px;");
     valLabelBox1->setAlignment(Qt::AlignHCenter);
-    valueBox = new QLineEdit( QString::number(slide->value()));
+    valueBox = new QLineEdit( QString::number(dial->value()));
+
+//    hBoxInfos->addWidget(minLabelBox1);
+//    hBoxInfos->addWidget(minValLabelBox1);
+//    hBoxInfos->addWidget(maxLabelBox1);
+//    hBoxInfos->addWidget(maxValLabelBox1);
+//    vBoxCommands->addWidget(dial);
+//    vBoxCommands->addWidget(valLabelBox1);
 
     hBoxInfos->addWidget(minLabelBox1);
     hBoxInfos->addWidget(minValLabelBox1);
     hBoxInfos->addWidget(maxLabelBox1);
     hBoxInfos->addWidget(maxValLabelBox1);
 //    vBoxCommands->addLayout(hBoxInfos);
-    hBoxCommands->addWidget(slide);
+    hBoxCommands->addWidget(dial);
     hBoxValue->addWidget(valLabelBox1);
     hBoxValue->addWidget(valueBox);
+//    vBoxCommands->addLayout(hBoxInfos);
 
     // Settings Page
     QLabel* minimumLabel = new QLabel("Minimum");
@@ -63,7 +72,7 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
     maximumSpinBox->setRange(minValRange, maxValRange);
     maximumSpinBox->setValue(maxValRange);
     maximumSpinBox->setSingleStep(100);
-    QLabel* tickIntervalLabel = new QLabel("Ticks Interval");
+    QLabel* tickIntervalLabel = new QLabel("Steps Interval");
     QSpinBox* ticksIntervalSpinBox = new QSpinBox();
     ticksIntervalSpinBox->setRange(0, maxValRange);
     ticksIntervalSpinBox->setValue(tickInterval);
@@ -75,59 +84,61 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
     controlsLayout->addWidget(tickIntervalLabel, 3, 0);
     controlsLayout->addWidget(ticksIntervalSpinBox, 3, 1);
 
-    connect(slide, SIGNAL(valueChanged(int)), this, SLOT(slideValue(int)));
+    connect(dial, SIGNAL(valueChanged(int)), this, SLOT(slideValue(int)));
     connect(minimumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMinimumSlide(int)));
     connect(maximumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMaximumSlide(int)));
     connect(ticksIntervalSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setSingleStepSlide(int)));
     connect(valueBox, SIGNAL(editingFinished()), this, SLOT(valueBoxEditingFinished()));
 }
 
-void sliderWidget::slideValue(int value) {
+void dialwidget::slideValue(int value) {
+//    valLabelBox1->setText("VALUE : " + QString::number(value));
     valueBox->setText(QString::number(value));
     sendToPort(value);
 }
 
-void sliderWidget::setMinimumSlide(int v) {
-    if (v > slide->maximum()) {
-        minimumSpinBox->setValue(slide->maximum());
-        v = slide->maximum();
+void dialwidget::setMinimumSlide(int v) {
+    if (v > dial->maximum()) {
+        minimumSpinBox->setValue(dial->maximum());
+        v = dial->maximum();
     }
-    slide->setMinimum(v);
+    dial->setMinimum(v);
     minValLabelBox1->setText(QString::number(v));
-    slide->setValue((slide->maximum() + slide->minimum()) / 2);
+    dial->setValue((dial->maximum() + dial->minimum()) / 2);
 }
 
-void sliderWidget::setMaximumSlide(int v) {
-    if (v < slide->minimum()) {
-        maximumSpinBox->setValue(slide->maximum());
-        v = slide->minimum();
+void dialwidget::setMaximumSlide(int v) {
+    if (v < dial->minimum()) {
+        maximumSpinBox->setValue(dial->maximum());
+        v = dial->minimum();
     }
-    slide->setMaximum(v);
+    dial->setMaximum(v);
     maxValLabelBox1->setText(QString::number(v));
-    slide->setValue((slide->maximum() + slide->minimum()) / 2);
+    dial->setValue((dial->maximum() + dial->minimum()) / 2);
 }
 
-void sliderWidget::setSingleStepSlide(int v) {
-    slide->setTickInterval(v);
-    slide->setSingleStep(v);
+void dialwidget::setSingleStepSlide(int v) {
+//    dial->setTickInterval(v);
+    dial->setSingleStep(v);
     if (v == 0) {
-        slide->setTickPosition(QSlider::NoTicks);
+        dial->setNotchesVisible(true);
+//        dial->setTickPosition(QSlider::NoTicks);
     } else {
-        slide->setTickPosition(QSlider::TicksBelow);
+        dial->setNotchesVisible(true);
+//        dial->setTickPosition(QSlider::TicksBelow);
     }
 }
 
-void sliderWidget::valueBoxEditingFinished() {
-    slide->setValue(valueBox->text().toInt());
+void dialwidget::valueBoxEditingFinished() {
+    dial->setValue(valueBox->text().toInt());
 }
 
-void sliderWidget::buildXml(QDomDocument& doc) {
+void dialwidget::buildXml(QDomDocument& doc) {
 //    customWidget::buildXml(doc);
-    qDebug() << "sliderWidget::buildXml";
+    qDebug() << "dialwidget::buildXml";
     QDomNode root = doc.firstChild();
-    QDomElement r = doc.firstChildElement("00");
     QDomElement widget = doc.createElement("WIDGET");
-    widget.setAttribute("TYPE", "Slider");
+    widget.setAttribute("TYPE", "Dial");
 
     QDomElement tag = doc.createElement("CMD_ID");
     widget.appendChild(tag);
@@ -142,11 +153,9 @@ void sliderWidget::buildXml(QDomDocument& doc) {
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(maximumSpinBox->value())));
     root.appendChild(widget);
-    tag = doc.createElement("VALUE_TICK");
+    tag = doc.createElement("VALUE_STEP");
     widget.appendChild(tag);
-    tag.appendChild(doc.createTextNode(QString::number(slide->tickInterval())));
+    tag.appendChild(doc.createTextNode(QString::number(dial->singleStep())));
     root.appendChild(widget);
 }
-
-
 

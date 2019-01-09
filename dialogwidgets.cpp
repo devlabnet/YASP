@@ -3,9 +3,12 @@
 #include <QDebug>
 #include <QDial>
 #include <QSlider>
-#include "sliderwidget.h"
 #include <QFileDialog>
 #include <QMessageBox>
+
+// Widgets
+#include "sliderwidget.h"
+#include "dialwidget.h"
 
 DialogWidgets::DialogWidgets(QSerialPort* p, QWidget *parent) :
     QDialog(parent),
@@ -64,13 +67,14 @@ void DialogWidgets::createWidget(QString type, QDomElement* domElt) {
     QWidget* widget = nullptr;
     qDebug() << "Add Widget : " << type;
     if (type == "Dial") {
-        widget = new sliderWidget(this, domElt);
+        widget = new dialwidget(this, domElt);
         widget->show();
     } else if (type == "Slider") {
         widget = new sliderWidget(this, domElt);
         widget->show();
     }
     if (widget != nullptr) {
+        widget->setFocus();
         int rCount = ui->tableWidgets->rowCount();
         ui->tableWidgets->setRowCount(rCount + 1);
         ui->tableWidgets->setCellWidget(rCount, 0, widget);
@@ -117,6 +121,9 @@ bool DialogWidgets::openXml() {
 
 QDomDocument DialogWidgets::buildXml() {
     QDomDocument doc("WIDGETS");
+    QDomElement root = doc.createElement("WIDGETS");
+    doc.appendChild(root);
+
     QDomElement widget = doc.createElement("WIDGET");
 //    widget.setAttribute("TYPE", "Slider");
 ////    doc.appendChild(widget);

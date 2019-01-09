@@ -1,17 +1,17 @@
-#ifndef SLIDERWIDGET_H
-#define SLIDERWIDGET_H
+#ifndef DIALWIDGET_H
+#define DIALWIDGET_H
 
 #include <QWidget>
 #include <QLabel>
-#include <QSlider>
+#include <QDial>
 #include <QSpinBox>
 #include "customwidget.h"
 
-class sliderWidget : public customWidget
+class dialwidget : public customWidget
 {
     Q_OBJECT
 public:
-    explicit sliderWidget(QWidget *parent, QDomElement* domElt = nullptr);
+    explicit dialwidget(QWidget *parent, QDomElement* domElt = nullptr);
     void buildXml(QDomDocument& doc);
 
 private:
@@ -20,7 +20,7 @@ private:
     int tickInterval = 10;
     QLabel* valLabelBox1;
     QLineEdit* valueBox;
-    QSlider *slide;
+    QDial *dial;
     QSpinBox* minimumSpinBox;
     QSpinBox* maximumSpinBox;
     QLabel* minLabelBox1;
@@ -40,4 +40,4 @@ private slots:
     void valueBoxEditingFinished();
 };
 
-#endif // SLIDERWIDGET_H
+#endif // DIALWIDGET_H
