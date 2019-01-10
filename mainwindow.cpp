@@ -26,7 +26,7 @@
 
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
-
+#include <QSplitter>
 /******************************************************************************************************************/
 /* Constructor */
 /******************************************************************************************************************/
@@ -73,6 +73,17 @@ MainWindow::MainWindow(QWidget *parent) :
     serialPort = nullptr;                                                                    // Set serial port pointer to NULL initially
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));                       // Connect update timer to replot slot
     ui->menuWidgets->menuAction()->setVisible(false);
+//    ui->splitter->setStretchFactor(0,1);
+//    ui->splitter->setStretchFactor(1,0);
+
+    /* Also, just I want to show you how to choose the color separator.
+        * To do this we need to use a class QPallete, for which you choose the background color.
+        * */
+    QPalette p;
+    p.setColor(QPalette::Background, QColor(144, 238, 144));
+    /* And sets the palette QSplitter
+        * */
+    ui->splitter->setPalette(p);
 }
 /******************************************************************************************************************/
 
