@@ -185,6 +185,8 @@ void MainWindow::setupPlot()
     if(numberOfAxes == 1) {                                                               // If 1 axis selected
         ui->plot->addGraph();                                                             // add Graph 0
         ui->plot->graph(0)->setPen(QPen(Qt::red));
+        ui->plotsToolBox->setItemText(0, "Plot 1");
+        ui->plotsToolBox->addItem(new QWidget(), "Plot 2");
     } else if(numberOfAxes == 2) {                                                        // If 2 axes selected
         ui->plot->addGraph();                                                             // add Graph 0
         ui->plot->graph(0)->setPen(QPen(Qt::red));
