@@ -32,6 +32,7 @@
 #include <QSerialPortInfo>
 #include "helpwindow.hpp"
 #include "dialogwidgets.h"
+#include <QToolBox>
 
 #define START_MSG       '$'
 #define END_MSG         ';'
@@ -104,6 +105,7 @@ private:
     int NUMBER_OF_POINTS;                                                                 // Number of points plotted
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
+    QToolBox* plotsToolBox = nullptr;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();                                                                     // Setup the QCustomPlot

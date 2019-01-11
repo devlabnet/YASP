@@ -14,6 +14,10 @@ void graphContainer::updateGraph(int pCnt) {
     NUMBER_OF_POINTS = pCnt;
 }
 
+void graphContainer::clearData() {
+    graph->clearData();
+}
+
 void graphContainer::addData(double k, double v) {
     graph->addData(k, v);                 // Add data to Graph 0
     graph->removeDataBefore(k - NUMBER_OF_POINTS);           // Remove data from graph 0

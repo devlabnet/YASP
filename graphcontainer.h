@@ -13,6 +13,7 @@ public:
 
     QCPGraph* getGraph() { return graph; }
     void addData(double k, double v);
+    void clearData();
     void updateGraph(int pCnt);
 private:
     QCPGraph* graph;

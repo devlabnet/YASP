@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     createUI();                                                                           // Create the UI
     ui->plot->setBackground(QBrush(QColor(48,47,47)));                                    // Background for the plot area
-    ui->plotsToolBox->removeItem(0);
+//    plotsToolBox->removeItem(0);
     ui->plot->hide();
     ui->stopPlotButton->setEnabled(false);                                                // Plot button is disabled initially
     //setupPlot();                                                                          // Setup plot area
@@ -173,25 +173,30 @@ void MainWindow::enableControls(bool enable)
 /******************************************************************************************************************/
 void MainWindow::cleanGraphs() {
     ui->plot->clearItems();
-    for (int i = ui->plotsToolBox->count(); i >= 0; i--) {
-        QWidget* w = ui->plotsToolBox->widget(i);
-        qDebug() << "widget: " << w;
-        if (w != nullptr) {
-            qDebug() << "delete widget: " << w;
-            delete w;
+    if (plotsToolBox != nullptr) {
+        for (int i = plotsToolBox->count(); i >= 0; i--) {
+            graphContainer* gc = dynamic_cast<graphContainer*>(plotsToolBox->widget(i));
+            qDebug() << "graphContainer: " << gc;
+            if (gc != nullptr) {
+                gc->clearData();
+                qDebug() << "delete widget: " << gc;
+                delete gc;
+            }
+            // Remove everything from the plot
+            plotsToolBox->removeItem(i);
         }
-        // Remove everything from the plot
-        ui->plotsToolBox->removeItem(i);
+        delete plotsToolBox;
+        plotsToolBox = nullptr;
     }
-    ui->plotsToolBox->hide();
+//    plotsToolBox->hide();
     ui->plot->hide();
 }
 
 /******************************************************************************************************************/
 void MainWindow::updateGraphs() {
     ui->plot->clearItems();
-    for (int i = ui->plotsToolBox->count(); i >= 0; i--) {
-        graphContainer* gc = dynamic_cast<graphContainer*>(ui->plotsToolBox->widget(i));
+    for (int i = plotsToolBox->count(); i >= 0; i--) {
+        graphContainer* gc = dynamic_cast<graphContainer*>(plotsToolBox->widget(i));
         if (gc != nullptr) {
             gc->updateGraph(NUMBER_OF_POINTS);
         }
@@ -203,7 +208,13 @@ void MainWindow::updateGraphs() {
 /******************************************************************************************************************/
 void MainWindow::setupPlot()
 {
+    //ui->verticalLayoutPlots->addWidget(new QPushButton("0"));
     cleanGraphs();
+    plotsToolBox = new QToolBox();
+    ui->verticalLayoutPlots->addWidget(plotsToolBox);
+    plotsToolBox->setMinimumSize(400,200);
+    plotsToolBox->setMaximumWidth(400);
+    //ui->verticalLayoutPlots->addWidget(new QPushButton("1"));
     ui->plot->show();
     ui->plot->yAxis->setTickStep(ui->spinYStep->value());                                // Set tick step according to user spin box
     numberOfAxes = ui->comboAxes->currentText().toInt();                                 // Get number of axes from the user combo
@@ -211,17 +222,15 @@ void MainWindow::setupPlot()
     ui->plot->xAxis->setRange(0, NUMBER_OF_POINTS);                                      // Set x axis range for specified number of points
 //ui->plot->xAxis->setTickLabels(false);
 //    ui->plot->xAxis->setTickStep(25.0);
-    ui->verticalLayoutPlots->addWidget(new QPushButton("test"));
-
 
     if(numberOfAxes == 1) {                                                               // If 1 axis selected
                                                            // add Graph 0
 //        ui->plot->graph(0)->setPen(QPen(Qt::red));
-        //ui->plotsToolBox->setItemText(0, "Plot 1");
-        ui->plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 1");
+        //plotsToolBox->setItemText(0, "Plot 1");
+        plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 1");
     } else if(numberOfAxes == 2) {                                                        // If 2 axes selected
-        ui->plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 0");
-        ui->plotsToolBox->insertItem(1, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 1");
+        plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 0");
+        plotsToolBox->insertItem(1, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 1");
 //        ui->plot->addGraph();                                                             // add Graph 0
 //        ui->plot->graph(0)->setPen(QPen(Qt::red));
 //        ui->plot->addGraph();                                                             // add Graph 1
@@ -432,12 +441,12 @@ void MainWindow::onNewDataArrived(QStringList newData)
         dataPointNumber++;                                                                    // Increment data number
 
         if(numberOfAxes == 1 && dataListSize > 0) {                                           // Add data to graphs according to number of axes
-            dynamic_cast<graphContainer*>(ui->plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toInt());
+            dynamic_cast<graphContainer*>(plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toInt());
 //            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());                 // Add data to Graph 0
 //            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);           // Remove data from graph 0
         } else if(numberOfAxes == 2) {
-            dynamic_cast<graphContainer*>(ui->plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toInt());
-            dynamic_cast<graphContainer*>(ui->plotsToolBox->widget(1))->addData(dataPointNumber, newData[1].toInt());
+            dynamic_cast<graphContainer*>(plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toInt());
+            dynamic_cast<graphContainer*>(plotsToolBox->widget(1))->addData(dataPointNumber, newData[1].toInt());
 //            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());
 //            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
 //            if(dataListSize > 1){
