@@ -291,7 +291,7 @@
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_11">
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout">
+          <layout class="QVBoxLayout" name="verticalLayoutPlots">
            <item>
             <widget class="QGroupBox" name="groupBox">
              <property name="title">

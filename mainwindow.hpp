@@ -107,7 +107,8 @@ private:
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();                                                                     // Setup the QCustomPlot
-                                                                                          // Open the inside serial port with these parameters
+    void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
+    void updateGraphs();
     void openPort(QSerialPortInfo portInfo, int baudRate, QSerialPort::DataBits dataBits, QSerialPort::Parity parity, QSerialPort::StopBits stopBits);
 
     void addMessageText(QString data, QString color = "black");

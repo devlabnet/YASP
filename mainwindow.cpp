@@ -27,6 +27,8 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 #include <QSplitter>
+#include "graphcontainer.h"
+
 /******************************************************************************************************************/
 /* Constructor */
 /******************************************************************************************************************/
@@ -38,8 +40,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     createUI();                                                                           // Create the UI
     ui->plot->setBackground(QBrush(QColor(48,47,47)));                                    // Background for the plot area
-    setupPlot();                                                                          // Setup plot area
+    ui->plotsToolBox->removeItem(0);
+    ui->plot->hide();
     ui->stopPlotButton->setEnabled(false);                                                // Plot button is disabled initially
+    //setupPlot();                                                                          // Setup plot area
 
     ui->plot->setNotAntialiasedElements(QCP::aeAll);                                      // used for higher performance (see QCustomPlot real time example)
     QFont font;
@@ -166,40 +170,71 @@ void MainWindow::enableControls(bool enable)
 }
 /******************************************************************************************************************/
 
+/******************************************************************************************************************/
+void MainWindow::cleanGraphs() {
+    ui->plot->clearItems();
+    for (int i = ui->plotsToolBox->count(); i >= 0; i--) {
+        QWidget* w = ui->plotsToolBox->widget(i);
+        qDebug() << "widget: " << w;
+        if (w != nullptr) {
+            qDebug() << "delete widget: " << w;
+            delete w;
+        }
+        // Remove everything from the plot
+        ui->plotsToolBox->removeItem(i);
+    }
+    ui->plotsToolBox->hide();
+    ui->plot->hide();
+}
+
+/******************************************************************************************************************/
+void MainWindow::updateGraphs() {
+    ui->plot->clearItems();
+    for (int i = ui->plotsToolBox->count(); i >= 0; i--) {
+        graphContainer* gc = dynamic_cast<graphContainer*>(ui->plotsToolBox->widget(i));
+        if (gc != nullptr) {
+            gc->updateGraph(NUMBER_OF_POINTS);
+        }
+    }
+}
 
 /******************************************************************************************************************/
 /* Setup the plot area */
 /******************************************************************************************************************/
 void MainWindow::setupPlot()
 {
-    ui->plot->clearItems();                                                              // Remove everything from the plot
-
+    cleanGraphs();
+    ui->plot->show();
     ui->plot->yAxis->setTickStep(ui->spinYStep->value());                                // Set tick step according to user spin box
     numberOfAxes = ui->comboAxes->currentText().toInt();                                 // Get number of axes from the user combo
     ui->plot->yAxis->setRange(ui->spinAxesMin->value(), ui->spinAxesMax->value());       // Set lower and upper plot range
     ui->plot->xAxis->setRange(0, NUMBER_OF_POINTS);                                      // Set x axis range for specified number of points
 //ui->plot->xAxis->setTickLabels(false);
 //    ui->plot->xAxis->setTickStep(25.0);
+    ui->verticalLayoutPlots->addWidget(new QPushButton("test"));
 
 
     if(numberOfAxes == 1) {                                                               // If 1 axis selected
-        ui->plot->addGraph();                                                             // add Graph 0
-        ui->plot->graph(0)->setPen(QPen(Qt::red));
-        ui->plotsToolBox->setItemText(0, "Plot 1");
-        ui->plotsToolBox->addItem(new QWidget(), "Plot 2");
+                                                           // add Graph 0
+//        ui->plot->graph(0)->setPen(QPen(Qt::red));
+        //ui->plotsToolBox->setItemText(0, "Plot 1");
+        ui->plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 1");
     } else if(numberOfAxes == 2) {                                                        // If 2 axes selected
-        ui->plot->addGraph();                                                             // add Graph 0
-        ui->plot->graph(0)->setPen(QPen(Qt::red));
-        ui->plot->addGraph();                                                             // add Graph 1
-        ui->plot->graph(1)->setPen(QPen(Qt::yellow));
-    } else if(numberOfAxes == 3) {                                                        // If 3 axis selected
-        ui->plot->addGraph();                                                             // add Graph 0
-        ui->plot->graph(0)->setPen(QPen(Qt::red));
-        ui->plot->addGraph();                                                             // add Graph 1
-        ui->plot->graph(1)->setPen(QPen(Qt::yellow));
-        ui->plot->addGraph();                                                             // add Graph 2
-        ui->plot->graph(2)->setPen(QPen(Qt::green));
+        ui->plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 0");
+        ui->plotsToolBox->insertItem(1, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 1");
+//        ui->plot->addGraph();                                                             // add Graph 0
+//        ui->plot->graph(0)->setPen(QPen(Qt::red));
+//        ui->plot->addGraph();                                                             // add Graph 1
+//        ui->plot->graph(1)->setPen(QPen(Qt::yellow));
     }
+//    else if(numberOfAxes == 3) {                                                        // If 3 axis selected
+//        ui->plot->addGraph();                                                             // add Graph 0
+//        ui->plot->graph(0)->setPen(QPen(Qt::red));
+//        ui->plot->addGraph();                                                             // add Graph 1
+//        ui->plot->graph(1)->setPen(QPen(Qt::yellow));
+//        ui->plot->addGraph();                                                             // add Graph 2
+//        ui->plot->graph(2)->setPen(QPen(Qt::green));
+//    }
 }
 /******************************************************************************************************************/
 
@@ -340,6 +375,7 @@ void MainWindow::portOpenedFail()
 /******************************************************************************************************************/
 void MainWindow::onPortClosed()
 {
+    cleanGraphs();
     //qDebug() << "Port closed signal received!";
     ui->menuWidgets->menuAction()->setVisible(false);
     if ((widgets != nullptr) && widgets->isVisible()) {
@@ -396,26 +432,29 @@ void MainWindow::onNewDataArrived(QStringList newData)
         dataPointNumber++;                                                                    // Increment data number
 
         if(numberOfAxes == 1 && dataListSize > 0) {                                           // Add data to graphs according to number of axes
-            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());                 // Add data to Graph 0
-            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);           // Remove data from graph 0
+            dynamic_cast<graphContainer*>(ui->plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toInt());
+//            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());                 // Add data to Graph 0
+//            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);           // Remove data from graph 0
         } else if(numberOfAxes == 2) {
-            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());
-            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
-            if(dataListSize > 1){
-                ui->plot->graph(1)->addData(dataPointNumber, newData[1].toInt());
-                ui->plot->graph(1)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
-            }
-        } else if(numberOfAxes == 3) {
-            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());
-            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
-            if(dataListSize > 1) {
-                ui->plot->graph(1)->addData(dataPointNumber, newData[1].toInt());
-                ui->plot->graph(1)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
-            }
-            if(dataListSize > 2) {
-                ui->plot->graph(2)->addData(dataPointNumber, newData[2].toInt());
-                ui->plot->graph(2)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
-            }
+            dynamic_cast<graphContainer*>(ui->plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toInt());
+            dynamic_cast<graphContainer*>(ui->plotsToolBox->widget(1))->addData(dataPointNumber, newData[1].toInt());
+//            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());
+//            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
+//            if(dataListSize > 1){
+//                ui->plot->graph(1)->addData(dataPointNumber, newData[1].toInt());
+//                ui->plot->graph(1)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
+//            }
+//        } else if(numberOfAxes == 3) {
+//            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());
+//            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
+//            if(dataListSize > 1) {
+//                ui->plot->graph(1)->addData(dataPointNumber, newData[1].toInt());
+//                ui->plot->graph(1)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
+//            }
+//            if(dataListSize > 2) {
+//                ui->plot->graph(2)->addData(dataPointNumber, newData[2].toInt());
+//                ui->plot->graph(2)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
+//            }
         } else return;
     }
 }
@@ -592,6 +631,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event)
 void MainWindow::on_spinPoints_valueChanged(int arg1)
 {
     NUMBER_OF_POINTS = arg1;
+    updateGraphs();
     ui->plot->replot();
 }
 /******************************************************************************************************************/

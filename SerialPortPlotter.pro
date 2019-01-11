@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     dialogwidgets.cpp \
     sliderwidget.cpp \
     customwidget.cpp \
-    dialwidget.cpp
+    dialwidget.cpp \
+    graphcontainer.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
@@ -29,7 +30,8 @@ HEADERS  += mainwindow.hpp \
     dialogwidgets.h \
     sliderwidget.h \
     customwidget.h \
-    dialwidget.h
+    dialwidget.h \
+    graphcontainer.h
 
 
 FORMS    += mainwindow.ui \
