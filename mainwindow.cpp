@@ -178,6 +178,9 @@ void MainWindow::setupPlot()
     numberOfAxes = ui->comboAxes->currentText().toInt();                                 // Get number of axes from the user combo
     ui->plot->yAxis->setRange(ui->spinAxesMin->value(), ui->spinAxesMax->value());       // Set lower and upper plot range
     ui->plot->xAxis->setRange(0, NUMBER_OF_POINTS);                                      // Set x axis range for specified number of points
+//ui->plot->xAxis->setTickLabels(false);
+//    ui->plot->xAxis->setTickStep(25.0);
+
 
     if(numberOfAxes == 1) {                                                               // If 1 axis selected
         ui->plot->addGraph();                                                             // add Graph 0

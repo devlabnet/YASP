@@ -37,7 +37,7 @@
       </property>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabPorts">
         <attribute name="title">
@@ -311,23 +311,31 @@
             </size>
            </property>
            <widget class="QWidget" name="pagePlot1">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>400</width>
+              <height>448</height>
+             </rect>
+            </property>
             <attribute name="label">
              <string>Page 1</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout">
              <item>
-              <widget class="QGroupBox" name="PlotControlsBox">
+              <widget class="QFrame" name="PlotControlsBox">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="title">
-                <string>PLOT CONTROLS</string>
+               <property name="frameShape">
+                <enum>QFrame::WinPanel</enum>
                </property>
-               <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+               <property name="frameShadow">
+                <enum>QFrame::Plain</enum>
                </property>
                <layout class="QGridLayout" name="gridLayout_2">
                 <item row="0" column="0">
@@ -534,8 +542,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>400</width>
-              <height>448</height>
+              <width>100</width>
+              <height>30</height>
              </rect>
             </property>
             <attribute name="label">
@@ -554,7 +562,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>1024</width>
+             <width>1000</width>
              <height>0</height>
             </size>
            </property>
@@ -563,7 +571,7 @@
         </layout>
        </widget>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayoutTerminal">
         <item>
          <widget class="QLabel" name="label_3">
