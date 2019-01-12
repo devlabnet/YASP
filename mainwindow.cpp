@@ -39,8 +39,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     createUI();                                                                           // Create the UI
-    QColor bgColor = QColor(220,220,220);
     QColor gridColor = QColor(170,170,170);
+    //ui->bgColorButton.
+    ui->bgColorButton->setAutoFillBackground(true);
+    ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
+
     QColor subGridColor = QColor(80,80,80);
     ui->plot->setBackground(QBrush(bgColor));                                    // Background for the plot area
 //    plotsToolBox->removeItem(0);
@@ -701,4 +704,11 @@ void MainWindow::on_actionShowWidgets_triggered()
             widgets->hide();
         }
     }
+}
+
+void MainWindow::on_bgColorButton_pressed()
+{
+    bgColor = QColorDialog::getColor(bgColor, this, "Select Background Color");
+    ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
+    ui->plot->setBackground(QBrush(bgColor));   // Background for the plot area
 }

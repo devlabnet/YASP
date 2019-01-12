@@ -89,9 +89,6 @@ void graphContainer::addData(double k, double v) {
 
 void graphContainer::handleColor() {
     penColor = QColorDialog::getColor(penColor, this, "Select Plot Color");
-    QPalette palette;
-    palette.setColor(QPalette::Base, QColor(penColor));
-    colorButton->setPalette(palette);    //    QColorDialog*  colorDialog = new QColorDialog();
     pen.setColor(penColor);
     axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
     graph->setPen(pen);

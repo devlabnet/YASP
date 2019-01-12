@@ -83,6 +83,8 @@ private slots:
 
     void on_actionShowWidgets_triggered();
 
+    void on_bgColorButton_pressed();
+
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void portOpenOK();                                                                    // Emitted when port is open
@@ -91,6 +93,7 @@ signals:
 
 private:
     Ui::MainWindow *ui;
+    QColor bgColor = QColor(20,20,20);
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
     int dataPointNumber;                                                                  // Keep track of data points
