@@ -39,7 +39,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     createUI();                                                                           // Create the UI
-    ui->plot->setBackground(QBrush(QColor(48,47,47)));                                    // Background for the plot area
+    QColor bgColor = QColor(220,220,220);
+    QColor gridColor = QColor(170,170,170);
+    QColor subGridColor = QColor(80,80,80);
+    ui->plot->setBackground(QBrush(bgColor));                                    // Background for the plot area
 //    plotsToolBox->removeItem(0);
     ui->plot->hide();
     ui->stopPlotButton->setEnabled(false);                                                // Plot button is disabled initially
@@ -54,20 +57,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->plot->yAxis->setAutoTickStep(false);                                              // User can change tick step with a spin box
     ui->plot->yAxis->setTickStep(500);                                                    // Set initial tick step
-    ui->plot->xAxis->setTickLabelColor(QColor(170,170,170));                              // Tick labels color
-    ui->plot->yAxis->setTickLabelColor(QColor(170,170,170));                              // See QCustomPlot examples / styled demo
-    ui->plot->xAxis->grid()->setPen(QPen(QColor(170,170,170), 1, Qt::DotLine));
-    ui->plot->yAxis->grid()->setPen(QPen(QColor(170,170,170), 1, Qt::DotLine));
-    ui->plot->xAxis->grid()->setSubGridPen(QPen(QColor(80,80,80), 1, Qt::DotLine));
-    ui->plot->yAxis->grid()->setSubGridPen(QPen(QColor(80,80,80), 1, Qt::DotLine));
+    ui->plot->xAxis->setTickLabelColor(gridColor);                              // Tick labels color
+    ui->plot->yAxis->setTickLabelColor(gridColor);                              // See QCustomPlot examples / styled demo
+    ui->plot->xAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
+    ui->plot->yAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
+    ui->plot->xAxis->grid()->setSubGridPen(QPen(subGridColor, 1, Qt::DotLine));
+    ui->plot->yAxis->grid()->setSubGridPen(QPen(subGridColor, 1, Qt::DotLine));
     ui->plot->xAxis->grid()->setSubGridVisible(true);
     ui->plot->yAxis->grid()->setSubGridVisible(true);
-    ui->plot->xAxis->setBasePen(QPen(QColor(170,170,170)));
-    ui->plot->yAxis->setBasePen(QPen(QColor(170,170,170)));
-    ui->plot->xAxis->setTickPen(QPen(QColor(170,170,170)));
-    ui->plot->yAxis->setTickPen(QPen(QColor(170,170,170)));
-    ui->plot->xAxis->setSubTickPen(QPen(QColor(170,170,170)));
-    ui->plot->yAxis->setSubTickPen(QPen(QColor(170,170,170)));
+    ui->plot->xAxis->setBasePen(QPen(gridColor));
+    ui->plot->yAxis->setBasePen(QPen(gridColor));
+    ui->plot->xAxis->setTickPen(QPen(gridColor));
+    ui->plot->yAxis->setTickPen(QPen(gridColor));
+    ui->plot->xAxis->setSubTickPen(QPen(gridColor));
+    ui->plot->yAxis->setSubTickPen(QPen(gridColor));
     ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->setInteraction(QCP::iRangeDrag, true);
@@ -487,6 +490,7 @@ void MainWindow::addMessageText(QString data, QString color) {
 void MainWindow::on_spinAxesMin_valueChanged(int arg1)
 {
     ui->plot->yAxis->setRangeLower(arg1);
+    updateGraphs();
     ui->plot->replot();
 }
 /******************************************************************************************************************/
@@ -498,6 +502,7 @@ void MainWindow::on_spinAxesMin_valueChanged(int arg1)
 void MainWindow::on_spinAxesMax_valueChanged(int arg1)
 {
     ui->plot->yAxis->setRangeUpper(arg1);
+    updateGraphs();
     ui->plot->replot();
 }
 /******************************************************************************************************************/

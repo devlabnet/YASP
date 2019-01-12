@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "qcustomplot.h"
+#include <QVBoxLayout>
 
 class graphContainer : public QWidget
 {
@@ -18,6 +19,18 @@ public:
 private:
     QCPGraph* graph;
     int NUMBER_OF_POINTS;                                                                 // Number of points plotted
+    QGridLayout* layout;
+    QPushButton *colorButton;
+    QSlider* deltaSlider;
+    QPen pen;
+    QColor penColor;
+    QCPItemLine *axisLine;
+    int delta;
+
+private slots:
+   void handleColor();
+   void handleWidth(int i);
+   void handleDelta(int i);
 
 signals:
 
