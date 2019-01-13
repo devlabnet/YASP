@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QPushButton>
 #include <QPalette>
+#include <QSpacerItem>
 
 graphContainer::graphContainer(QCPGraph *g, int nop, QWidget *parent) : QWidget(parent), graph(g), NUMBER_OF_POINTS(nop) {
 
@@ -29,7 +30,9 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QWidget *parent) : QWidget(
              <<" ur:" << graph->parentPlot()->yAxis->range().upper
              <<" minr:" << graph->parentPlot()->yAxis->range().minRange
              <<" maxr:" << graph->parentPlot()->yAxis->range().maxRange;
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     layout = new QGridLayout();
+    //layout->setContentsMargins(0,0,0,0);
     this->setLayout(layout);
     colorButton = new QPushButton();
     colorButton->setAutoFillBackground(true);
@@ -42,29 +45,37 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QWidget *parent) : QWidget(
     QLabel* colorLabel = new QLabel("Color");
     colorLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
     colorButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    layout->addWidget(colorLabel, 0, 0);
-    layout->addWidget(colorButton, 0, 1);
+    layout->addWidget(colorLabel, 0, 0, Qt::AlignTop);
+    layout->addWidget(colorButton, 0, 1, Qt::AlignTop);
     connect(colorButton, SIGNAL (clicked()), this, SLOT (handleColor()));
     QLabel* widthLabel = new QLabel("Width");
     widthLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
     widthSpinBox->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    layout->addWidget(widthLabel, 1 , 0);
-    layout->addWidget(widthSpinBox, 1 , 1);
+    layout->addWidget(widthLabel, 1 , 0, Qt::AlignTop);
+    layout->addWidget(widthSpinBox, 1 , 1, Qt::AlignTop);
     connect(widthSpinBox, SIGNAL (valueChanged(int)), this, SLOT (handleWidth(int)));
-    QLabel* deltaLabel = new QLabel("Delta");
-    deltaLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-    layout->addWidget(deltaLabel, 2 , 0);
-    deltaSlider = new QSlider(Qt::Orientation::Horizontal);
-    layout->addWidget(deltaSlider, 2 , 1);
-    deltaSlider->setRange(graph->parentPlot()->yAxis->range().lower, graph->parentPlot()->yAxis->range().upper);
-    deltaSlider->setValue(0);
-    deltaSlider->setSingleStep(10);
-    deltaSlider->setPageStep(100);
-
+//    QLabel* deltaLabel = new QLabel("Delta");
+//    deltaLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+//    layout->addWidget(deltaLabel, 2 , 0, Qt::AlignTop);
+//    deltaSlider = new QSlider(Qt::Orientation::Horizontal);
+//    layout->addWidget(deltaSlider, 2 , 1, Qt::AlignTop);
+//    deltaSlider->setRange(graph->parentPlot()->yAxis->range().lower, graph->parentPlot()->yAxis->range().upper);
+//    deltaSlider->setValue(0);
+//    deltaSlider->setSingleStep(10);
+//    deltaSlider->setPageStep(100);
+    slideDelta = new FormSliderInfo("Delta", graph->parentPlot()->yAxis->range().lower,
+                                                    graph->parentPlot()->yAxis->range().upper, 0);
+    slideDelta->setValue(0);
+    slideDelta->setSingleStep(10);
+    slideDelta->setPageStep(100);
+    layout->addWidget(slideDelta, 2, 0, 1, -1, Qt::AlignTop);
+    //slideDelta->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     delta = 0;
-    deltaSlider->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    connect(deltaSlider, SIGNAL (valueChanged(int)), this, SLOT (handleDelta(int)));
-
+    //deltaSlider->setFixedHeight(100);
+//    connect(deltaSlider, SIGNAL (valueChanged(int)), this, SLOT (handleDelta(int)));
+    connect(slideDelta, SIGNAL (valueChanged(int)), this, SLOT (handleDelta(int)));
+//    QSpacerItem* spacer = new QSpacerItem(10,10, QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+//    layout->addItem(spacer, 4, 0, 1, -1);
 }
 
 graphContainer::~graphContainer() {
@@ -73,7 +84,7 @@ graphContainer::~graphContainer() {
 
 void graphContainer::updateGraph(int pCnt) {
     NUMBER_OF_POINTS = pCnt;
-    deltaSlider->setRange(graph->parentPlot()->yAxis->range().lower, graph->parentPlot()->yAxis->range().upper);
+    slideDelta->setRange(graph->parentPlot()->yAxis->range().lower, graph->parentPlot()->yAxis->range().upper);
 }
 
 void graphContainer::clearData() {

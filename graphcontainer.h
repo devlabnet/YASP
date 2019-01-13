@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "qcustomplot.h"
 #include <QVBoxLayout>
+#include "formsliderinfo.h"
 
 class graphContainer : public QWidget
 {
@@ -21,11 +22,11 @@ private:
     int NUMBER_OF_POINTS;                                                                 // Number of points plotted
     QGridLayout* layout;
     QPushButton *colorButton;
-    QSlider* deltaSlider;
     QPen pen;
     QColor penColor;
     QCPItemLine *axisLine;
     int delta;
+    FormSliderInfo* slideDelta;
 
 private slots:
    void handleColor();

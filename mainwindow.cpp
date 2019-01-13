@@ -445,14 +445,14 @@ void MainWindow::onNewDataArrived(QStringList newData)
     if(plotting) {
         int dataListSize = newData.size();                                                    // Get size of received list
         dataPointNumber++;                                                                    // Increment data number
-
+//        plotsToolBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
         if(numberOfAxes == 1 && dataListSize > 0) {                                           // Add data to graphs according to number of axes
-            dynamic_cast<graphContainer*>(plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toInt());
+            dynamic_cast<graphContainer*>(plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toDouble());
 //            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());                 // Add data to Graph 0
 //            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);           // Remove data from graph 0
         } else if(numberOfAxes == 2) {
-            dynamic_cast<graphContainer*>(plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toInt());
-            dynamic_cast<graphContainer*>(plotsToolBox->widget(1))->addData(dataPointNumber, newData[1].toInt());
+            dynamic_cast<graphContainer*>(plotsToolBox->widget(0))->addData(dataPointNumber, newData[0].toDouble());
+            dynamic_cast<graphContainer*>(plotsToolBox->widget(1))->addData(dataPointNumber, newData[1].toDouble());
 //            ui->plot->graph(0)->addData(dataPointNumber, newData[0].toInt());
 //            ui->plot->graph(0)->removeDataBefore(dataPointNumber - NUMBER_OF_POINTS);
 //            if(dataListSize > 1){
