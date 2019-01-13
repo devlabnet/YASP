@@ -26,12 +26,15 @@ private:
     QColor penColor;
     QCPItemLine *axisLine;
     int delta;
+    int mult;
     FormSliderInfo* slideDelta;
+    FormSliderInfo* slideMult;
 
 private slots:
    void handleColor();
    void handleWidth(int i);
    void handleDelta(int i);
+   void handleMult(int i);
 
 signals:
 

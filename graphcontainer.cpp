@@ -63,6 +63,7 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QWidget *parent) : QWidget(
 //    deltaSlider->setValue(0);
 //    deltaSlider->setSingleStep(10);
 //    deltaSlider->setPageStep(100);
+    delta = 0;
     slideDelta = new FormSliderInfo("Delta", graph->parentPlot()->yAxis->range().lower,
                                                     graph->parentPlot()->yAxis->range().upper, 0);
     slideDelta->setValue(0);
@@ -70,12 +71,19 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QWidget *parent) : QWidget(
     slideDelta->setPageStep(100);
     layout->addWidget(slideDelta, 2, 0, 1, -1, Qt::AlignTop);
     //slideDelta->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    delta = 0;
     //deltaSlider->setFixedHeight(100);
 //    connect(deltaSlider, SIGNAL (valueChanged(int)), this, SLOT (handleDelta(int)));
     connect(slideDelta, SIGNAL (valueChanged(int)), this, SLOT (handleDelta(int)));
 //    QSpacerItem* spacer = new QSpacerItem(10,10, QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 //    layout->addItem(spacer, 4, 0, 1, -1);
+    mult = 1;
+    slideMult = new FormSliderInfo("Mult", 1, 1000, 1);
+    slideMult->setValue(1);
+    slideMult->setSingleStep(1);
+    slideMult->setPageStep(10);
+    layout->addWidget(slideMult, 3, 0, 1, -1, Qt::AlignTop);
+    connect(slideMult, SIGNAL (valueChanged(int)), this, SLOT (handleMult(int)));
+
 }
 
 graphContainer::~graphContainer() {
@@ -92,7 +100,7 @@ void graphContainer::clearData() {
 }
 
 void graphContainer::addData(double k, double v) {
-    graph->addData(k, v + delta);                 // Add data to Graph 0
+    graph->addData(k, (v * mult) + delta);                 // Add data to Graph 0
     graph->removeDataBefore(k - NUMBER_OF_POINTS);           // Remove data from graph 0
     axisLine->start->setCoords(k - NUMBER_OF_POINTS, delta);
     axisLine->end->setCoords(k, delta);
@@ -114,5 +122,11 @@ void graphContainer::handleWidth(int i) {
 void graphContainer::handleDelta(int i) {
     qDebug() << "Delta: " << i;
     delta = i;
+    graph->clearData();
+}
+
+void graphContainer::handleMult(int i) {
+    qDebug() << "Mult: " << i;
+    mult = i;
     graph->clearData();
 }
