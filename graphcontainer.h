@@ -10,7 +10,7 @@ class graphContainer : public QWidget
 {
     Q_OBJECT
 public:
-    explicit graphContainer(QCPGraph* g, int nop, QWidget *parent = nullptr);
+    explicit graphContainer(QCPGraph* g, int nop, QString pName, int id, QWidget *parent = nullptr);
     ~graphContainer();
 
     QCPGraph* getGraph() { return graph; }
@@ -19,7 +19,13 @@ public:
     void updateGraph(int pCnt);
 private:
     QCPGraph* graph;
-    int NUMBER_OF_POINTS;                                                                 // Number of points plotted
+    // Number of points plotted
+    int NUMBER_OF_POINTS;
+    QString plotName;
+    QFont font;
+    QCPItemText *textLabel;
+    QPoint labelPos;
+
     QGridLayout* layout;
     QPushButton *colorButton;
     QPen pen;
@@ -35,7 +41,7 @@ private slots:
    void handleWidth(int i);
    void handleDelta(int i);
    void handleMult(int i);
-
+    void handleComboMult(const QString str);
 signals:
 
 public slots:

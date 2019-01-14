@@ -49,7 +49,14 @@ MainWindow::MainWindow(QWidget *parent) :
 //    plotsToolBox->removeItem(0);
     ui->plot->hide();
     ui->stopPlotButton->setEnabled(false);                                                // Plot button is disabled initially
-    //setupPlot();                                                                          // Setup plot area
+
+//    // Legend
+//    ui->plot->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
+//    ui->plot->legend->setVisible(true);
+//    QFont legendFont = font();  // start out with MainWindow's font..
+//    legendFont.setPointSize(9); // and make a bit smaller for legend
+//    ui->plot->legend->setFont(legendFont);
+//    ui->plot->legend->setBrush(QBrush(QColor(255,255,255,230)));
 
     ui->plot->setNotAntialiasedElements(QCP::aeAll);                                      // used for higher performance (see QCustomPlot real time example)
     QFont font;
@@ -228,15 +235,16 @@ void MainWindow::setupPlot()
     ui->plot->xAxis->setRange(0, NUMBER_OF_POINTS);                                      // Set x axis range for specified number of points
 //ui->plot->xAxis->setTickLabels(false);
 //    ui->plot->xAxis->setTickStep(25.0);
-
+    QString plotStr = "Plot 0";
     if(numberOfAxes == 1) {                                                               // If 1 axis selected
                                                            // add Graph 0
 //        ui->plot->graph(0)->setPen(QPen(Qt::red));
         //plotsToolBox->setItemText(0, "Plot 1");
-        plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 1");
+        plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS, plotStr, 0), plotStr);
     } else if(numberOfAxes == 2) {                                                        // If 2 axes selected
-        plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 0");
-        plotsToolBox->insertItem(1, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS),"Plot 1");
+        plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS, plotStr, 0), plotStr);
+        plotStr = "Plot 1";
+        plotsToolBox->insertItem(1, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS, plotStr, 1), plotStr);
 //        ui->plot->addGraph();                                                             // add Graph 0
 //        ui->plot->graph(0)->setPen(QPen(Qt::red));
 //        ui->plot->addGraph();                                                             // add Graph 1
@@ -493,7 +501,7 @@ void MainWindow::addMessageText(QString data, QString color) {
 void MainWindow::on_spinAxesMin_valueChanged(int arg1)
 {
     ui->plot->yAxis->setRangeLower(arg1);
-    updateGraphs();
+//    updateGraphs();
     ui->plot->replot();
 }
 /******************************************************************************************************************/
@@ -505,7 +513,7 @@ void MainWindow::on_spinAxesMin_valueChanged(int arg1)
 void MainWindow::on_spinAxesMax_valueChanged(int arg1)
 {
     ui->plot->yAxis->setRangeUpper(arg1);
-    updateGraphs();
+//    updateGraphs();
     ui->plot->replot();
 }
 /******************************************************************************************************************/
