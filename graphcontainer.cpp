@@ -10,7 +10,7 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, int id, QWid
      //penColor = QColor::fromRgb(QRandomGenerator::global()->generate());
      QColor colours[10] = {QColor("#ffffff"), QColor("#ffff00"), QColor("#aaffaf"),
                            QColor("#ffaa00"), QColor("#ffaaff"), QColor("#00ffff"),
-                           QColor("#ff0000"), QColor("#0000ff"), QColor("#00ff00"),
+                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                            QColor("#ff00aa")};
 
 //    // this are the numbers of the QT default colors

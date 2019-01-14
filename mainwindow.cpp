@@ -85,8 +85,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->setInteraction(QCP::iRangeDrag, true);
     ui->plot->setInteraction(QCP::iRangeZoom, true);
+
+
     // Slot for printing coordinates
-    connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
+    connect(ui->plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
+    connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
+    connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
+
     serialPort = nullptr;                                                                    // Set serial port pointer to NULL initially
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));                       // Connect update timer to replot slot
     ui->menuWidgets->menuAction()->setVisible(false);
@@ -231,8 +236,9 @@ void MainWindow::setupPlot()
     ui->plot->show();
     ui->plot->yAxis->setTickStep(ui->spinYStep->value());                                // Set tick step according to user spin box
     numberOfAxes = ui->comboAxes->currentText().toInt();                                 // Get number of axes from the user combo
-    ui->plot->yAxis->setRange(ui->spinAxesMin->value(), ui->spinAxesMax->value());       // Set lower and upper plot range
+    ui->plot->yAxis->setRange(-1000, 1000);       // Set lower and upper plot range
     ui->plot->xAxis->setRange(0, NUMBER_OF_POINTS);                                      // Set x axis range for specified number of points
+    setAutoYRange(ui->plot->yAxis->range().size());
 //ui->plot->xAxis->setTickLabels(false);
 //    ui->plot->xAxis->setTickStep(25.0);
     QString plotStr = "Plot 0";
@@ -578,7 +584,26 @@ void MainWindow::readData()
 }
 /******************************************************************************************************************/
 
-
+void MainWindow::setAutoYRange(double r) {
+    int step = 10;
+    if (r < step) {
+        ui->spinYStep->setMinimum(1);
+        ui->spinYStep->setMaximum(50);
+        ui->spinYStep->setValue(1);
+        return;
+    }
+    int m = r / step;
+    int v = qMax((int)(log10(m)), 1);
+    int mult =  pow(10, v);
+    int x = m / mult;
+    qDebug() <<  r << " -> " << m  << " -> " <<  v << " -> " << x;
+    int vMin = qMax(x * mult, 5);
+    int vMax = vMin * step;
+    ui->spinYStep->setMinimum(vMin);
+    ui->spinYStep->setMaximum(vMax);
+    ui->spinYStep->setValue(vMin);
+    qDebug() <<  vMin << " -> " << vMax;
+}
 /******************************************************************************************************************/
 /* Number of axes combo; when changed, display axes colors in status bar */
 /******************************************************************************************************************/
@@ -648,6 +673,20 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event)
     ui->statusBar->showMessage(coordinates);
 }
 /******************************************************************************************************************/
+void MainWindow::onMouseReleaseInPlot(QMouseEvent *event)
+{
+//    int xx = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->x()));
+//    int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
+//    //int yy = ui->plot->yAxis->pixelToCoord(event->y());
+//    QString coordinates("X: %1 Y: %2");
+//    coordinates = coordinates.arg(xx).arg(yy);
+    ui->statusBar->showMessage("release");
+}
+
+void MainWindow::onMouseWheelInPlot(QWheelEvent *event)
+{
+    setAutoYRange(ui->plot->yAxis->range().size());
+}
 
 
 /******************************************************************************************************************/

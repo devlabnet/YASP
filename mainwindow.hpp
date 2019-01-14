@@ -73,6 +73,8 @@ private slots:
     void on_saveJPGButton_clicked();                                                      // Button for saving JPG
     void on_resetPlotButton_clicked();                                                    // Resets plot to initial zoom and coordinates
     void onMouseMoveInPlot(QMouseEvent *event);                                           // Displays coordinates of mouse pointer when clicked in plot in status bar
+    void onMouseReleaseInPlot(QMouseEvent *event);
+    void onMouseWheelInPlot(QWheelEvent *event);
     void on_spinPoints_valueChanged(int arg1);                                            // Spin box controls how many data points are collected and displayed
 
     void on_actionHow_to_use_triggered();
@@ -115,7 +117,7 @@ private:
     void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
     void updateGraphs();
     void openPort(QSerialPortInfo portInfo, int baudRate, QSerialPort::DataBits dataBits, QSerialPort::Parity parity, QSerialPort::StopBits stopBits);
-
+    void setAutoYRange(double r);
     void addMessageText(QString data, QString color = "black");
 };
 
