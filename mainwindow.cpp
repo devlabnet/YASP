@@ -596,13 +596,13 @@ void MainWindow::setAutoYRange(double r) {
     int v = qMax((int)(log10(m)), 1);
     int mult =  pow(10, v);
     int x = m / mult;
-    qDebug() <<  r << " -> " << m  << " -> " <<  v << " -> " << x;
+//    qDebug() <<  r << " -> " << m  << " -> " <<  v << " -> " << x;
     int vMin = qMax(x * mult, 5);
     int vMax = vMin * step;
     ui->spinYStep->setMinimum(vMin);
     ui->spinYStep->setMaximum(vMax);
     ui->spinYStep->setValue(vMin);
-    qDebug() <<  vMin << " -> " << vMax;
+//    qDebug() <<  vMin << " -> " << vMax;
 }
 /******************************************************************************************************************/
 /* Number of axes combo; when changed, display axes colors in status bar */

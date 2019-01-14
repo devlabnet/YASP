@@ -115,7 +115,8 @@ void customWidget::deleteWidget() {
 }
 
 void customWidget::sendToPort(int v) {
-    QString msg = "#" + cmdLabelLine->text() + " " + QString::number(v);
+//    QString msg = "#" + cmdLabelLine->text() + " " + QString::number(v);
+    QString msg =  cmdLabelLine->text() + " " + QString::number(v);
     qDebug() << "---> " << msg;
     dw->sendToPort(msg);
 }

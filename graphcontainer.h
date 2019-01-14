@@ -35,12 +35,17 @@ private:
     int mult;
     FormSliderInfo* slideDelta;
     FormSliderInfo* slideMult;
+    double dataMin = 0;
+    double dataMax = 0;
+    double dataAverage = 0;
+    void updateLabel(QString lStr);
 
 private slots:
    void handleColor();
    void handleWidth(int i);
    void handleDelta(int i);
-   void handleMult(int i);
+   void handleResetInfo();
+//   void handleMult(int i);
     void handleComboMult(const QString str);
 signals:
 

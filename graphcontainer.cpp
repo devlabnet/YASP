@@ -29,7 +29,7 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, int id, QWid
      font.setWeight(50);
      font.setFixedPitch(true);
 //     QString lStr =  plotName + " -> Mult = 1";
-     QString lStr =  plotName + " -> Mult = 1 Delta = 0";
+     QString lStr =  plotName + " -> Mult = 1 Delta = 0 Min = 0 Max = 0 Val = 0";
 
      textLabel = new QCPItemText(graph->parentPlot());
      textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
@@ -79,6 +79,11 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, int id, QWid
     layout->addWidget(colorLabel, 0, 0, Qt::AlignTop);
     layout->addWidget(colorButton, 0, 1, Qt::AlignTop);
     connect(colorButton, SIGNAL (clicked()), this, SLOT (handleColor()));
+
+    QPushButton* resetInfoButton = new QPushButton("Clear Info");
+    layout->addWidget(resetInfoButton, 0, 2, Qt::AlignTop);
+    connect(resetInfoButton, SIGNAL (clicked()), this, SLOT (handleResetInfo()));
+
     QLabel* widthLabel = new QLabel("Width");
     widthLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
     widthSpinBox->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -138,13 +143,33 @@ void graphContainer::updateGraph(int pCnt) {
 
 void graphContainer::clearData() {
     graph->clearData();
+    handleResetInfo();
 }
 
 void graphContainer::addData(double k, double v) {
+    dataMin = qMin(dataMin, v);
+    dataMax = qMax(dataMax, v);
+//    dataAverage = v;
+    int avr = 5;
+    dataAverage = ((dataAverage * avr) + v) / (avr + 1);
     graph->addData(k, (v * mult) + delta);                 // Add data to Graph 0
     graph->removeDataBefore(k - NUMBER_OF_POINTS);           // Remove data from graph 0
     axisLine->start->setCoords(k - NUMBER_OF_POINTS, delta);
     axisLine->end->setCoords(k, delta);
+    QString lStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
+            + " Min = " + QString::number(dataMin)
+            + " Max = " + QString::number(dataMax)
+            + " Val = " + QString::number(dataAverage , 'f', 1);
+    updateLabel(lStr);
+
+}
+
+void graphContainer::updateLabel(QString lStr) {
+    QFontMetricsF fm(font);
+    qreal pixelsWide = fm.width(lStr);
+    textLabel->setText(lStr);
+    labelPos.setX(pixelsWide + 100);
+    textLabel->position->setCoords(labelPos.x(), labelPos.y());
 }
 
 void graphContainer::handleColor() {
@@ -156,6 +181,17 @@ void graphContainer::handleColor() {
     textLabel->setColor(penColor);
 }
 
+void graphContainer::handleResetInfo() {
+    dataMin = 0;
+    dataMax = 0;
+    QString lStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
+            + " Min = " + QString::number(dataMin)
+            + " Max = " + QString::number(dataMax)
+            + " Val = " + QString::number(dataAverage );
+    qDebug() << lStr;
+    updateLabel(lStr);
+}
+
 void graphContainer::handleWidth(int i) {
     pen.setWidth(i);
     graph->setPen(pen);
@@ -164,30 +200,27 @@ void graphContainer::handleWidth(int i) {
 void graphContainer::handleDelta(int i) {
     qDebug() << "Delta: " << i;
     delta = i;
-    QString lStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta);
-    QFontMetricsF fm(font);
-    qreal pixelsWide = fm.width(lStr);
-    textLabel->setText(lStr);
-    labelPos.setX(pixelsWide + 100);
-    textLabel->position->setCoords(labelPos.x(), labelPos.y());
-    graph->clearData();
+//    QString lStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
+//            + " Min = " + QString::number(dataMin) + " Max = " + QString::number(dataMax) ;
+//    updateLabel(lStr);
+    clearData();
+//    graph->clearData();
 }
 
-void graphContainer::handleMult(int i) {
-    qDebug() << "Mult: " << i;
-    mult = i;
-    graph->clearData();
-}
+//void graphContainer::handleMult(int i) {
+//    qDebug() << "Mult: " << i;
+//    mult = i;
+//    graph->clearData();
+//}
 
 void graphContainer::handleComboMult(const QString str) {
     qDebug() << "handleComboMult: " << str;
     mult = str.toInt();
-    QString lStr =  plotName + " -> Mult = " + str + " Delta = " + QString::number(delta);
-    QFontMetricsF fm(font);
-    qreal pixelsWide = fm.width(lStr);
-    textLabel->setText(lStr);
-    labelPos.setX(pixelsWide + 100);
-    textLabel->position->setCoords(labelPos.x(), labelPos.y());
-
-    graph->clearData();
+    QString lStr =  plotName + " -> Mult = " + str + " Delta = " + QString::number(delta)
+            + " Min = " + QString::number(dataMin)
+            + " Max = " + QString::number(dataMax)
+            + " Val = " + QString::number(dataAverage );
+    updateLabel(lStr);
+    clearData();
+//    graph->clearData();
 }
