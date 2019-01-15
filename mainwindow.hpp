@@ -65,11 +65,11 @@ private slots:
     void replot();                                                                        // Slot for repainting the plot
     void on_stopPlotButton_clicked();                                                     // Starts and stops plotting
     void onNewDataArrived(QStringList newData);                                           // Slot for new data from serial port
-    void on_spinAxesMin_valueChanged(int arg1);                                           // Changing lower limit for the plot
-    void on_spinAxesMax_valueChanged(int arg1);                                           // Changing upper limit for the plot
+//    void on_spinAxesMin_valueChanged(int arg1);                                           // Changing lower limit for the plot
+//    void on_spinAxesMax_valueChanged(int arg1);                                           // Changing upper limit for the plot
     void readData();                                                                      // Slot for inside serial port
     void on_comboAxes_currentIndexChanged(int index);                                     // Display number of axes and colors in status bar
-    void on_spinYStep_valueChanged(int arg1);                                             // Spin box for changing Y axis tick step
+//    void on_spinYStep_valueChanged(int arg1);                                             // Spin box for changing Y axis tick step
     void on_saveJPGButton_clicked();                                                      // Button for saving JPG
     void on_resetPlotButton_clicked();                                                    // Resets plot to initial zoom and coordinates
     void onMouseMoveInPlot(QMouseEvent *event);                                           // Displays coordinates of mouse pointer when clicked in plot in status bar

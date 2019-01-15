@@ -24,30 +24,9 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, int id, QWid
      qDebug() << "random color: " << c;
      penColor = colours[c];
 
-     //font.setFamily("time");
-     font.setPointSize(8);
-     font.setWeight(50);
-     font.setFixedPitch(true);
-//     QString lStr =  plotName + " -> Mult = 1";
-     QString lStr =  plotName + " -> Mult = 1 Delta = 0 Min = 0 Max = 0 Val = 0";
-
-     textLabel = new QCPItemText(graph->parentPlot());
-     textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
-//     textLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
-//     textLabel->position->setCoords(0.05, id * 0.04); // place position at center/top of axis rect
-     textLabel->position->setType(QCPItemPosition::ptAbsolute );
-     textLabel->setText(lStr);
-     QFontMetricsF fm(font);
-     qreal pixelsWide = fm.width(lStr);
-     qreal pixelsHigh = fm.height();
-     labelPos.setX(pixelsWide + 100);
-     labelPos.setY(10 + (id * pixelsHigh));
-     textLabel->position->setCoords(labelPos.x(), labelPos.y());
      //textLabel->position->setCoords(150, 10 + (id * pixelsHigh));
 
      qDebug() << "plotName: " << plotName;
-     textLabel->setColor(penColor);
-     textLabel->setFont(font); // make font a bit larger
 //     textLabel->setPen(QPen(Qt::white)); // show black border around text
 
     pen = QPen(penColor);
@@ -130,6 +109,29 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, int id, QWid
     connect(comboMult, SIGNAL (currentIndexChanged(const QString)), this, SLOT (handleComboMult(const QString)));
     layout->addWidget(comboMultLabel, 3, 0, Qt::AlignTop);
     layout->addWidget(comboMult, 3, 1, Qt::AlignTop);
+
+    //font.setFamily("time");
+    font.setPointSize(8);
+    font.setWeight(50);
+    font.setFixedPitch(true);
+//     QString lStr =  plotName + " -> Mult = 1";
+//     QString lStr =  plotName + " -> Mult = 1 Delta = 0 Min = 0 Max = 0 Val = 0";
+    QString lStr =  plotName;
+    textLabel = new QCPItemText(graph->parentPlot());
+    textLabel->setColor(penColor);
+    textLabel->setFont(font); // make font a bit larger
+    textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
+//     textLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+//     textLabel->position->setCoords(0.05, id * 0.04); // place position at center/top of axis rect
+     textLabel->position->setType(QCPItemPosition::ptAbsolute );
+     textLabel->setText(lStr);
+    QFontMetricsF fm(font);
+//    qreal pixelsWide = fm.width(lStr);
+    qreal pixelsHigh = fm.height();
+    labelPos.setX(0);
+    labelPos.setY(10 + (id * pixelsHigh));
+    textLabel->position->setCoords(labelPos.x(), labelPos.y());
+    graph->parentPlot()->clearMask();
 }
 
 graphContainer::~graphContainer() {
@@ -144,6 +146,10 @@ void graphContainer::updateGraph(int pCnt) {
 void graphContainer::clearData() {
     graph->clearData();
     handleResetInfo();
+}
+
+void graphContainer::clearLabels() {
+    delete textLabel;
 }
 
 void graphContainer::addData(double k, double v) {
@@ -167,9 +173,10 @@ void graphContainer::addData(double k, double v) {
 void graphContainer::updateLabel(QString lStr) {
     QFontMetricsF fm(font);
     qreal pixelsWide = fm.width(lStr);
-    textLabel->setText(lStr);
+//    qreal pixelsHigh = fm.height();
     labelPos.setX(pixelsWide + 100);
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
+    textLabel->setText(lStr);
 }
 
 void graphContainer::handleColor() {
@@ -188,7 +195,7 @@ void graphContainer::handleResetInfo() {
             + " Min = " + QString::number(dataMin)
             + " Max = " + QString::number(dataMax)
             + " Val = " + QString::number(dataAverage );
-    qDebug() << lStr;
+//    qDebug() << lStr;
     updateLabel(lStr);
 }
 

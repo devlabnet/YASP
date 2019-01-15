@@ -197,6 +197,7 @@ void MainWindow::cleanGraphs() {
             qDebug() << "graphContainer: " << gc;
             if (gc != nullptr) {
                 gc->clearData();
+                gc->clearLabels();
                 qDebug() << "delete widget: " << gc;
                 delete gc;
             }
@@ -234,7 +235,7 @@ void MainWindow::setupPlot()
     plotsToolBox->setMaximumWidth(400);
     //ui->verticalLayoutPlots->addWidget(new QPushButton("1"));
     ui->plot->show();
-    ui->plot->yAxis->setTickStep(ui->spinYStep->value());                                // Set tick step according to user spin box
+//    ui->plot->yAxis->setTickStep(ui->spinYStep->value());                                // Set tick step according to user spin box
     numberOfAxes = ui->comboAxes->currentText().toInt();                                 // Get number of axes from the user combo
     ui->plot->yAxis->setRange(-1000, 1000);       // Set lower and upper plot range
     ui->plot->xAxis->setRange(0, NUMBER_OF_POINTS);                                      // Set x axis range for specified number of points
@@ -502,30 +503,6 @@ void MainWindow::addMessageText(QString data, QString color) {
 }
 
 /******************************************************************************************************************/
-/* Slot for spin box for plot minimum value on y axis */
-/******************************************************************************************************************/
-void MainWindow::on_spinAxesMin_valueChanged(int arg1)
-{
-    ui->plot->yAxis->setRangeLower(arg1);
-//    updateGraphs();
-    ui->plot->replot();
-}
-/******************************************************************************************************************/
-
-
-/******************************************************************************************************************/
-/* Slot for spin box for plot maximum value on y axis */
-/******************************************************************************************************************/
-void MainWindow::on_spinAxesMax_valueChanged(int arg1)
-{
-    ui->plot->yAxis->setRangeUpper(arg1);
-//    updateGraphs();
-    ui->plot->replot();
-}
-/******************************************************************************************************************/
-
-
-/******************************************************************************************************************/
 /* Read data for inside serial port */
 /******************************************************************************************************************/
 void MainWindow::readData()
@@ -587,9 +564,10 @@ void MainWindow::readData()
 void MainWindow::setAutoYRange(double r) {
     int step = 10;
     if (r < step) {
-        ui->spinYStep->setMinimum(1);
-        ui->spinYStep->setMaximum(50);
-        ui->spinYStep->setValue(1);
+//        ui->spinYStep->setMinimum(1);
+//        ui->spinYStep->setMaximum(50);
+//        ui->spinYStep->setValue(1);
+        ui->plot->yAxis->setTickStep(1);
         return;
     }
     int m = r / step;
@@ -598,10 +576,11 @@ void MainWindow::setAutoYRange(double r) {
     int x = m / mult;
 //    qDebug() <<  r << " -> " << m  << " -> " <<  v << " -> " << x;
     int vMin = qMax(x * mult, 5);
-    int vMax = vMin * step;
-    ui->spinYStep->setMinimum(vMin);
-    ui->spinYStep->setMaximum(vMax);
-    ui->spinYStep->setValue(vMin);
+//    int vMax = vMin * step;
+//    ui->spinYStep->setMinimum(vMin);
+//    ui->spinYStep->setMaximum(vMax);
+//    ui->spinYStep->setValue(vMin);
+    ui->plot->yAxis->setTickStep(vMin);
 //    qDebug() <<  vMin << " -> " << vMax;
 }
 /******************************************************************************************************************/
@@ -623,11 +602,11 @@ void MainWindow::on_comboAxes_currentIndexChanged(int index)
 /******************************************************************************************************************/
 /* Spin box for changing the Y Tick step */
 /******************************************************************************************************************/
-void MainWindow::on_spinYStep_valueChanged(int arg1)
-{
-    ui->plot->yAxis->setTickStep(arg1);
-    ui->plot->replot();
-}
+//void MainWindow::on_spinYStep_valueChanged(int arg1)
+//{
+//    ui->plot->yAxis->setTickStep(arg1);
+//    ui->plot->replot();
+//}
 /******************************************************************************************************************/
 
 
@@ -675,6 +654,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event)
 /******************************************************************************************************************/
 void MainWindow::onMouseReleaseInPlot(QMouseEvent *event)
 {
+    Q_UNUSED(event)
 //    int xx = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->x()));
 //    int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
 //    //int yy = ui->plot->yAxis->pixelToCoord(event->y());
@@ -685,6 +665,7 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event)
 
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event)
 {
+    Q_UNUSED(event)
     setAutoYRange(ui->plot->yAxis->range().size());
 }
 
