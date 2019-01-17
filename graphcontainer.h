@@ -10,7 +10,7 @@ class graphContainer : public QWidget
 {
     Q_OBJECT
 public:
-    explicit graphContainer(QCPGraph* g, int nop, QString pName, int id, QWidget *parent = nullptr);
+    explicit graphContainer(QCPGraph* g, int nop, QString pName, QColor color, int id, QWidget *parent = nullptr);
     ~graphContainer();
 
     QCPGraph* getGraph() { return graph; }
@@ -18,11 +18,15 @@ public:
     void clearData();
     void clearLabels();
     void updateGraph(int pCnt);
+    QString getName() { return plotName; }
+    void setColor(QColor color);
+    void setName(QString name) { plotName = "Plot " + name; }
 private:
     QCPGraph* graph;
     // Number of points plotted
     int NUMBER_OF_POINTS;
     QString plotName;
+    int indexY;
     QFont font;
     QCPItemText *textLabel;
     QPoint labelPos;

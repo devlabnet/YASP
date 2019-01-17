@@ -4,29 +4,29 @@
 #include <QPalette>
 #include <QSpacerItem>
 
-graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, int id, QWidget *parent)
-    : QWidget(parent), graph(g), NUMBER_OF_POINTS(nop), plotName(pName) {
+graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color, int id, QWidget *parent)
+    : QWidget(parent), graph(g), NUMBER_OF_POINTS(nop), plotName(pName), indexY(id), penColor(color) {
 
-     //penColor = QColor::fromRgb(QRandomGenerator::global()->generate());
-     QColor colours[10] = {QColor("#ffffff"), QColor("#ffff00"), QColor("#aaffaf"),
-                           QColor("#ffaa00"), QColor("#ffaaff"), QColor("#00ffff"),
-                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
-                           QColor("#ff00aa")};
+//     //penColor = QColor::fromRgb(QRandomGenerator::global()->generate());
+//     QColor colours[10] = {QColor("#ffffff"), QColor("#ffff00"), QColor("#aaffaf"),
+//                           QColor("#ffaa00"), QColor("#ffaaff"), QColor("#00ffff"),
+//                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
+//                           QColor("#ff00aa")};
 
-//    // this are the numbers of the QT default colors
-//    int QtColours[]= { 3,2,7,13,8,14,9, 15, 10, 16, 11, 17, 12, 18, 5, 4, 6, 19, 0, 1 };
-//    int r = qrand() % ((sizeof(colours))+ 1);
-//    penColor.setRgb(QtColours[r]);
+////    // this are the numbers of the QT default colors
+////    int QtColours[]= { 3,2,7,13,8,14,9, 15, 10, 16, 11, 17, 12, 18, 5, 4, 6, 19, 0, 1 };
+////    int r = qrand() % ((sizeof(colours))+ 1);
+////    penColor.setRgb(QtColours[r]);
 
-//     g->setName("test");
+////     g->setName("test");
 
-     int c = QRandomGenerator::global()->bounded(10);
-     qDebug() << "random color: " << c;
-     penColor = colours[c];
+//     int c = QRandomGenerator::global()->bounded(10);
+//     qDebug() << "random color: " << c;
+//     penColor = colours[c];
 
-     //textLabel->position->setCoords(150, 10 + (id * pixelsHigh));
+     //textLabel->position->setCoords(150, 10 + (indexY * pixelsHigh));
 
-     qDebug() << "plotName: " << plotName;
+//     qDebug() << "plotName: " << plotName;
 //     textLabel->setPen(QPen(Qt::white)); // show black border around text
 
     pen = QPen(penColor);
@@ -36,10 +36,10 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, int id, QWid
     axisLine->start->setCoords(0,0);
     axisLine->end->setCoords(NUMBER_OF_POINTS,0);
 
-    qDebug() << "lr:" << graph->parentPlot()->yAxis->range().lower
-             <<" ur:" << graph->parentPlot()->yAxis->range().upper
-             <<" minr:" << graph->parentPlot()->yAxis->range().minRange
-             <<" maxr:" << graph->parentPlot()->yAxis->range().maxRange;
+//    qDebug() << "lr:" << graph->parentPlot()->yAxis->range().lower
+//             <<" ur:" << graph->parentPlot()->yAxis->range().upper
+//             <<" minr:" << graph->parentPlot()->yAxis->range().minRange
+//             <<" maxr:" << graph->parentPlot()->yAxis->range().maxRange;
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     layout = new QGridLayout();
     //layout->setContentsMargins(0,0,0,0);
@@ -122,20 +122,20 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, int id, QWid
     textLabel->setFont(font); // make font a bit larger
     textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
 //     textLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
-//     textLabel->position->setCoords(0.05, id * 0.04); // place position at center/top of axis rect
+//     textLabel->position->setCoords(0.05, indexY * 0.04); // place position at center/top of axis rect
      textLabel->position->setType(QCPItemPosition::ptAbsolute );
      textLabel->setText(lStr);
     QFontMetricsF fm(font);
 //    qreal pixelsWide = fm.width(lStr);
     qreal pixelsHigh = fm.height();
     labelPos.setX(0);
-    labelPos.setY(10 + (id * pixelsHigh));
+    labelPos.setY(10 + (indexY * pixelsHigh));
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
     graph->parentPlot()->clearMask();
 }
 
 graphContainer::~graphContainer() {
-    qDebug() << "graphContainer Destructor";
+//    qDebug() << "graphContainer Destructor";
 }
 
 void graphContainer::updateGraph(int pCnt) {
@@ -152,7 +152,18 @@ void graphContainer::clearLabels() {
     delete textLabel;
 }
 
+void graphContainer::setColor(QColor color) {
+    qDebug() << "graphContainer setColor " << indexY << " color:" << color;
+    penColor = color;
+    pen.setColor(penColor);
+    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+    graph->setPen(pen);
+    colorButton->setStyleSheet("background-color:" + penColor.name() + "; color: rgb(0, 0, 0)");
+    textLabel->setColor(penColor);
+}
+
 void graphContainer::addData(double k, double v) {
+    //qDebug() << "--> " << k << " / " << v;
     dataMin = qMin(dataMin, v);
     dataMax = qMax(dataMax, v);
 //    dataAverage = v;
