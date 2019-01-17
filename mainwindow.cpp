@@ -106,6 +106,8 @@ MainWindow::MainWindow(QWidget *parent) :
     /* And sets the palette QSplitter
         * */
     ui->splitter->setPalette(p);
+    ui->tabWidget->setCurrentIndex(0);
+
     // Clear the terminal
     on_clearTermButton_clicked();
 
@@ -205,7 +207,7 @@ void MainWindow::cleanGraphs() {
                 delete gc;
             }
             // Remove everything from the plot
-            plotsToolBox->removeItem(i);
+            plotsToolBox->removeTab(i);
         }
         delete plotsToolBox;
         plotsToolBox = nullptr;
@@ -232,7 +234,8 @@ void MainWindow::setupPlot()
 {
     //ui->verticalLayoutPlots->addWidget(new QPushButton("0"));
     cleanGraphs();
-    plotsToolBox = new QToolBox();
+    plotsToolBox = new QTabWidget();
+    plotsToolBox->setTabPosition(QTabWidget::North);
     ui->verticalLayoutPlots->addWidget(plotsToolBox);
     plotsToolBox->setMinimumSize(400,200);
     plotsToolBox->setMaximumWidth(400);
@@ -240,50 +243,26 @@ void MainWindow::setupPlot()
     ui->plot->show();
     addPlots();
 }
-/******************************************************************************************************************/
 
+/******************************************************************************************************************/
 void MainWindow::addPlots() {
-    for (int var = 0; var < 10; ++var) {
+    for (int  tabInd = 0;  tabInd < 10; ++ tabInd) {
         ui->plot->yAxis->setRange(-1000, 1000);       // Set lower and upper plot range
         ui->plot->xAxis->setRange(0, NUMBER_OF_POINTS);                                      // Set x axis range for specified number of points
         setAutoYRange(ui->plot->yAxis->range().size());
-    //ui->plot->xAxis->setTickLabels(false);
-    //    ui->plot->xAxis->setTickStep(25.0);
-        QString plotStr = "Plot " + QString::number(var);
-        plotsToolBox->insertItem(var, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS, plotStr, colours[var], var), plotStr);
-
+        QString plotStr = "Plot " + QString::number( tabInd);
+        graphContainer* gc = new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS, plotStr, colours[ tabInd],  tabInd);
+        plotsToolBox->insertTab( tabInd, gc, plotStr);
+        plotColorChanged( tabInd, colours[ tabInd]);
+        connect(gc, SIGNAL(plotColorChanged(int, QColor)), this, SLOT(plotColorChanged(int, QColor)));
     }
-//    //    ui->plot->yAxis->setTickStep(ui->spinYStep->value());                                // Set tick step according to user spin box
-//        numberOfAxes = ui->comboAxes->currentText().toInt();                                 // Get number of axes from the user combo
-//        ui->plot->yAxis->setRange(-1000, 1000);       // Set lower and upper plot range
-//        ui->plot->xAxis->setRange(0, NUMBER_OF_POINTS);                                      // Set x axis range for specified number of points
-//        setAutoYRange(ui->plot->yAxis->range().size());
-//    //ui->plot->xAxis->setTickLabels(false);
-//    //    ui->plot->xAxis->setTickStep(25.0);
-//        QString plotStr = "Plot 0";
-//        if(numberOfAxes == 1) {                                                               // If 1 axis selected
-//                                                               // add Graph 0
-//    //        ui->plot->graph(0)->setPen(QPen(Qt::red));
-//            //plotsToolBox->setItemText(0, "Plot 1");
-//            plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS, plotStr, 0), plotStr);
-//        } else if(numberOfAxes == 2) {                                                        // If 2 axes selected
-//            plotsToolBox->insertItem(0, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS, plotStr, 0), plotStr);
-//            plotStr = "Plot 1";
-//            plotsToolBox->insertItem(1, new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS, plotStr, 1), plotStr);
-//    //        ui->plot->addGraph();                                                             // add Graph 0
-//    //        ui->plot->graph(0)->setPen(QPen(Qt::red));
-//    //        ui->plot->addGraph();                                                             // add Graph 1
-//    //        ui->plot->graph(1)->setPen(QPen(Qt::yellow));
-//        }
-//    //    else if(numberOfAxes == 3) {                                                        // If 3 axis selected
-//    //        ui->plot->addGraph();                                                             // add Graph 0
-//    //        ui->plot->graph(0)->setPen(QPen(Qt::red));
-//    //        ui->plot->addGraph();                                                             // add Graph 1
-//    //        ui->plot->graph(1)->setPen(QPen(Qt::yellow));
-//    //        ui->plot->addGraph();                                                             // add Graph 2
-//    //        ui->plot->graph(2)->setPen(QPen(Qt::green));
-//    //    }
+}
 
+/******************************************************************************************************************/
+void MainWindow::plotColorChanged(int tabInd, QColor color) {
+    QPixmap pixmap(16, 16);
+    pixmap.fill(color);
+    plotsToolBox->tabBar()->setTabIcon(tabInd, QIcon(pixmap));
 }
 
 /******************************************************************************************************************/
@@ -339,10 +318,7 @@ void MainWindow::openPort() {
         ui->statusBar->showMessage("Cannot open port!");
         qDebug() << serialPort->errorString();
     }
-
 }
-/******************************************************************************************************************/
-
 
 /******************************************************************************************************************/
 /* Port Combo Box index changed slot; displays info for selected port when combo box is changed */
@@ -358,22 +334,18 @@ void MainWindow::on_comboPort_currentIndexChanged(const QString &arg1)
 /******************************************************************************************************************/
 /* Connect Button clicked slot; handles connect and disconnect */
 /******************************************************************************************************************/
-void MainWindow::on_connectButton_clicked()
-{
+void MainWindow::on_connectButton_clicked() {
     if (connected) {
         closePort();
     } else {                                                                              // If application is not connected, connect
         openPort();                         // Open serial port and connect its signals
     }
 }
-/******************************************************************************************************************/
-
 
 /******************************************************************************************************************/
 /* Slot for port opened successfully */
 /******************************************************************************************************************/
-void MainWindow::portOpenedSuccess()
-{
+void MainWindow::portOpenedSuccess() {
     serialPort->setDataTerminalReady(false);
     ui->menuWidgets->menuAction()->setVisible(true);
     if ((widgets != nullptr)) {
@@ -394,10 +366,8 @@ void MainWindow::portOpenedSuccess()
     serialPort->setDataTerminalReady(true);
 
     //connect(cmdSerial,SIGNAL(readyRead()),this,SLOT(onDataReadyRead()));
-
     connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
     connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
-
 }
 
 /******************************************************************************************************************/
@@ -506,6 +476,8 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
         } else {
             if ((!param1.isEmpty()) && (plot->getName() != param1)) {
                 plot->setName(param1);
+                plotsToolBox->tabBar()->setTabText(plotId, param1);
+
             }
         }
         if (isColor(param2)) {
@@ -513,6 +485,7 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
         } else {
             if ((!param2.isEmpty()) && (plot->getName() != param2)) {
                 plot->setName(param2);
+                plotsToolBox->tabBar()->setTabText(plotId, param2);
             }
         }
     }

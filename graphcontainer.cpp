@@ -5,7 +5,7 @@
 #include <QSpacerItem>
 
 graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color, int id, QWidget *parent)
-    : QWidget(parent), graph(g), NUMBER_OF_POINTS(nop), plotName(pName), indexY(id), penColor(color) {
+    : QWidget(parent), graph(g), NUMBER_OF_POINTS(nop), plotName(pName), tabIndex(id), penColor(color) {
 
 //     //penColor = QColor::fromRgb(QRandomGenerator::global()->generate());
 //     QColor colours[10] = {QColor("#ffffff"), QColor("#ffff00"), QColor("#aaffaf"),
@@ -24,7 +24,7 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
 //     qDebug() << "random color: " << c;
 //     penColor = colours[c];
 
-     //textLabel->position->setCoords(150, 10 + (indexY * pixelsHigh));
+     //textLabel->position->setCoords(150, 10 + (tabIndex * pixelsHigh));
 
 //     qDebug() << "plotName: " << plotName;
 //     textLabel->setPen(QPen(Qt::white)); // show black border around text
@@ -46,7 +46,7 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     this->setLayout(layout);
     colorButton = new QPushButton();
     colorButton->setAutoFillBackground(true);
-    colorButton->setStyleSheet("background-color:" + penColor.name() + "; color: rgb(0, 0, 0)");
+    colorButton->setStyleSheet("background-color:" + penColor.name() + "; color: rgb(0, 0, 0); border: 2px solid black");
     QSpinBox *widthSpinBox = new QSpinBox;
     widthSpinBox->setRange(0, 10);
     widthSpinBox->setSingleStep(1);
@@ -63,24 +63,21 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     layout->addWidget(resetInfoButton, 0, 2, Qt::AlignTop);
     connect(resetInfoButton, SIGNAL (clicked()), this, SLOT (handleResetInfo()));
 
+    chkBox = new QCheckBox("show");
+    chkBox->setChecked(true);
+    layout->addWidget(chkBox, 0, 3, Qt::AlignTop);
+    connect(chkBox, SIGNAL(stateChanged(int)), this, SLOT (handleShowPlot(int)));
+
     QLabel* widthLabel = new QLabel("Width");
     widthLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
     widthSpinBox->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     layout->addWidget(widthLabel, 1 , 0, Qt::AlignTop);
     layout->addWidget(widthSpinBox, 1 , 1, Qt::AlignTop);
     connect(widthSpinBox, SIGNAL (valueChanged(int)), this, SLOT (handleWidth(int)));
-//    QLabel* deltaLabel = new QLabel("Delta");
-//    deltaLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-//    layout->addWidget(deltaLabel, 2 , 0, Qt::AlignTop);
-//    deltaSlider = new QSlider(Qt::Orientation::Horizontal);
-//    layout->addWidget(deltaSlider, 2 , 1, Qt::AlignTop);
-//    deltaSlider->setRange(graph->parentPlot()->yAxis->range().lower, graph->parentPlot()->yAxis->range().upper);
-//    deltaSlider->setValue(0);
-//    deltaSlider->setSingleStep(10);
-//    deltaSlider->setPageStep(100);
     delta = 0;
-    slideDelta = new FormSliderInfo("Delta", graph->parentPlot()->yAxis->range().lower,
-                                                    graph->parentPlot()->yAxis->range().upper, 0);
+    slideDelta = new FormSliderInfo("Delta",
+                                    graph->parentPlot()->yAxis->range().lower,
+                                    graph->parentPlot()->yAxis->range().upper, 0);
 
     slideDelta->setValue(0);
     slideDelta->setSingleStep(10);
@@ -89,13 +86,6 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     connect(slideDelta, SIGNAL (valueChanged(int)), this, SLOT (handleDelta(int)));
 
     mult = 1;
-//    slideMult = new FormSliderInfo("Mult", 1, 1000, 1);
-//    slideMult->setValue(1);
-//    slideMult->setSingleStep(1);
-//    slideMult->setPageStep(10);
-//    layout->addWidget(slideMult, 3, 0, 1, -1, Qt::AlignTop);
-//    connect(slideMult, SIGNAL (valueChanged(int)), this, SLOT (handleMult(int)));
-
     QLabel* comboMultLabel = new QLabel("Mult");
     QComboBox* comboMult = new QComboBox();
     comboMult->addItem("1");
@@ -122,14 +112,14 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     textLabel->setFont(font); // make font a bit larger
     textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
 //     textLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
-//     textLabel->position->setCoords(0.05, indexY * 0.04); // place position at center/top of axis rect
+//     textLabel->position->setCoords(0.05, tabIndex * 0.04); // place position at center/top of axis rect
      textLabel->position->setType(QCPItemPosition::ptAbsolute );
      textLabel->setText(lStr);
     QFontMetricsF fm(font);
 //    qreal pixelsWide = fm.width(lStr);
     qreal pixelsHigh = fm.height();
     labelPos.setX(0);
-    labelPos.setY(10 + (indexY * pixelsHigh));
+    labelPos.setY(10 + (tabIndex * pixelsHigh));
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
     graph->parentPlot()->clearMask();
 }
@@ -152,17 +142,38 @@ void graphContainer::clearLabels() {
     delete textLabel;
 }
 
+void graphContainer::handleShowPlot(int state) {
+    QString lStr;
+    if (state == Qt::Unchecked) {
+        graph->setVisible(false);
+        lStr = "";
+    } else {
+        graph->setVisible(true);
+        lStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
+                + " Min = " + QString::number(dataMin)
+                + " Max = " + QString::number(dataMax)
+                + " Val = " + QString::number(dataAverage , 'f', 1);
+    }
+    updateLabel(lStr);
+
+
+}
+
 void graphContainer::setColor(QColor color) {
-    qDebug() << "graphContainer setColor " << indexY << " color:" << color;
+    qDebug() << "graphContainer setColor " << tabIndex << " color:" << color;
     penColor = color;
     pen.setColor(penColor);
     axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
     graph->setPen(pen);
     colorButton->setStyleSheet("background-color:" + penColor.name() + "; color: rgb(0, 0, 0)");
     textLabel->setColor(penColor);
+    emit plotColorChanged(tabIndex, penColor);
 }
 
 void graphContainer::addData(double k, double v) {
+    if (!chkBox->isChecked()) {
+        return;
+    }
     //qDebug() << "--> " << k << " / " << v;
     dataMin = qMin(dataMin, v);
     dataMax = qMax(dataMax, v);
@@ -192,11 +203,12 @@ void graphContainer::updateLabel(QString lStr) {
 
 void graphContainer::handleColor() {
     penColor = QColorDialog::getColor(penColor, this, "Select Plot Color");
-    pen.setColor(penColor);
-    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
-    graph->setPen(pen);
-    colorButton->setStyleSheet("background-color:" + penColor.name() + "; color: rgb(0, 0, 0)");
-    textLabel->setColor(penColor);
+    setColor(penColor);
+//    pen.setColor(penColor);
+//    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+//    graph->setPen(pen);
+//    colorButton->setStyleSheet("background-color:" + penColor.name() + "; color: rgb(0, 0, 0)");
+//    textLabel->setColor(penColor);
 }
 
 void graphContainer::handleResetInfo() {

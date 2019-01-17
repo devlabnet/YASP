@@ -33,6 +33,7 @@
 #include "helpwindow.hpp"
 #include "dialogwidgets.h"
 #include <QToolBox>
+//#include "tabwidget.h"
 
 #define START_MSG       '$'
 #define PLOT_MSG       '@'
@@ -63,6 +64,7 @@ private slots:
     void onNewDataArrived(QStringList newData);                                           // Slot for new data from serial port
     void onNewPlotDataArrived(QStringList newData);                                       // Slot for new data from serial port
     void readData();                                                                      // Slot for inside serial port
+    void plotColorChanged(int tabInd, QColor color);
 
     void on_comboPort_currentIndexChanged(const QString &arg1);                           // Slot displays message on status bar
     void on_connectButton_clicked();                                                      // Manages connect/disconnect
@@ -79,7 +81,6 @@ private slots:
     void on_clearTermButton_clicked();
     void on_actionShowWidgets_triggered();
     void on_bgColorButton_pressed();
-
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
@@ -88,7 +89,7 @@ signals:
 private:
     Ui::MainWindow *ui;
     QColor bgColor = QColor(20,20,20);
-    QColor colours[10] = {QColor("#ffffff"), QColor("#ffff00"), QColor("#aaffaf"),
+    QColor colours[10] = {QColor("#EEEEEE"), QColor("#ffff00"), QColor("#aaffaf"),
                           QColor("#ffaa00"), QColor("#ffaaff"), QColor("#00ffff"),
                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                           QColor("#ff00aa")};
@@ -107,7 +108,7 @@ private:
     int NUMBER_OF_POINTS;                                                                 // Number of points plotted
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
-    QToolBox* plotsToolBox = nullptr;
+    QTabWidget* plotsToolBox = nullptr;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();

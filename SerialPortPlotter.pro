@@ -33,7 +33,8 @@ HEADERS  += mainwindow.hpp \
     customwidget.h \
     dialwidget.h \
     graphcontainer.h \
-    formsliderinfo.h
+    formsliderinfo.h \
+    tabwidget.h
 
 
 FORMS    += mainwindow.ui \

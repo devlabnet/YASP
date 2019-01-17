@@ -26,13 +26,14 @@ private:
     // Number of points plotted
     int NUMBER_OF_POINTS;
     QString plotName;
-    int indexY;
+    int tabIndex;
     QFont font;
     QCPItemText *textLabel;
     QPoint labelPos;
 
     QGridLayout* layout;
     QPushButton *colorButton;
+    QCheckBox* chkBox;
     QPen pen;
     QColor penColor;
     QCPItemLine *axisLine;
@@ -52,8 +53,10 @@ private slots:
    void handleResetInfo();
 //   void handleMult(int i);
     void handleComboMult(const QString str);
-signals:
+    void handleShowPlot(int state);
 
+signals:
+    void plotColorChanged(int, QColor);
 public slots:
 };
 
