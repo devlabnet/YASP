@@ -527,7 +527,7 @@ void MainWindow::addMessageText(QString data, QString color) {
 }
 
 /******************************************************************************************************************/
-bool MainWindow::checkEndMsgMissed(unsigned char cc) {
+bool MainWindow::checkEndMsgMissed( char cc) {
     if ( cc == START_MSG) {
         // Houps, seems we missed the END_MSG (maybe an external reset of the device !)
         // Just start MSG scanning again
@@ -565,17 +565,29 @@ bool MainWindow::checkEndMsgMissed(unsigned char cc) {
 }
 
 /******************************************************************************************************************/
+bool MainWindow::isNumericChar(char cc) {
+//  Fixed Strange Behavior !!
+//    From ---> https://en.cppreference.com/w/cpp/string/byte/isdigit
+//    Like all other functions from <cctype>, the behavior of std::isdigit is undefined if the argument's
+//    value is neither representable as unsigned char nor equal to EOF. To use these functions safely with
+//    plain chars (or signed chars), the argument should first be converted to unsigned char:
+    unsigned char ucc = static_cast<unsigned char>(cc);
+    return isdigit( ucc) || isspace( ucc) || ( ucc == '-') || ( ucc == '.');
+}
+
+/******************************************************************************************************************/
 /* Read data for inside serial port */
 /******************************************************************************************************************/
 void MainWindow::readData() {
 //    if (!serialPort->isDataTerminalReady()) return;
     if (serialPort->bytesAvailable()) {                                                    // If any bytes are available
         data = serialPort->readAll();         // Read all data in QByteArray
+//        qDebug() << ">> " << data;
         if(!data.isEmpty()) {                                                             // If the byte array is not empty
             char *temp = data.data();
             // Get a '\0'-terminated char* to the data
             for(int i = 0; temp[i] != '\0'; i++) {                                        // Iterate over the char*
-                unsigned char cc = temp[i];
+                char cc = temp[i];
                 switch(STATE) {                                                           // Switch the current state of the message
                 case WAIT_START:                                                          // If waiting for start [$], examine each char
                     if( cc == START_MSG) {                                            // If the char is $, change STATE to IN_MESSAGE
@@ -598,7 +610,8 @@ void MainWindow::readData() {
                             noMsgReceivedData.clear();
                         } else {
                             // Check if printable char
-                            if ( !(cc < 0x20 || cc > 127)) {
+//                            if ( !(cc < 0x20 || cc > 127)) {
+                            if (cc > 0x1F) {
                                 noMsgReceivedData.append( cc);
                             }
                         }
@@ -613,7 +626,7 @@ void MainWindow::readData() {
                         break;
                     } else if (checkEndMsgMissed(cc)) {
                         break;
-                    } else if (isdigit( cc) || isspace( cc) || ( cc == '-') || ( cc == '.') ) {            // If examined char is a digit, and not '$' or ';', append it to temporary string
+                    } else if (isNumericChar(cc)) {            // If examined char is a digit, and not '$' or ';', append it to temporary string
                         receivedData.append( cc);
                     }
                     break;

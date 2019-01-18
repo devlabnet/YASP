@@ -35,9 +35,9 @@
 #include <QToolBox>
 //#include "tabwidget.h"
 
-#define START_MSG       '$'
-#define PLOT_MSG       '@'
-#define END_MSG         ';'
+#define START_MSG      0x10
+#define PLOT_MSG       0X11
+#define END_MSG        0X12
 
 #define WAIT_START      1
 #define IN_MESSAGE      2
@@ -123,7 +123,8 @@ private:
     void closePort();                                                                  // Called when closing the port
     void setAutoYRange(double r);
     void addMessageText(QString data, QString color = "black");
-    bool checkEndMsgMissed(unsigned char cc);
+    bool checkEndMsgMissed(char cc);
+    bool isNumericChar(char cc);
 };
 
 
