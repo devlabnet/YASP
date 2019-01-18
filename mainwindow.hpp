@@ -44,8 +44,11 @@
 #define IN_PLOT_MSG     3
 #define UNDEFINED       4
 
-#define NUMBER_OF_POINTS_DEF 5000
+#define NUMBER_OF_POINTS_DEF 10000
 #define DEF_YAXIS_RANGE 1500
+#define SPIN_MIN_DEF 100
+#define SPIN_MAX_DEF 100000
+#define SPIN_STEP_DEF 1000
 
 namespace Ui {
 class MainWindow;

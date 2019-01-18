@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connected(false), plotting(false), dataPointNumber(0), numberOfAxes(1), STATE(WAIT_START), numberOfPoints(NUMBER_OF_POINTS_DEF)
 {
     ui->setupUi(this);
-    createUI();                                                                           // Create the UI
+    createUI();      // Create the UI
     QColor gridColor = QColor(170,170,170);
     //ui->bgColorButton.
     ui->bgColorButton->setAutoFillBackground(true);
@@ -107,6 +107,11 @@ MainWindow::MainWindow(QWidget *parent) :
         * */
     ui->splitter->setPalette(p);
     ui->tabWidget->setCurrentIndex(0);
+
+    ui->spinPoints->setMinimum(SPIN_MIN_DEF);
+    ui->spinPoints->setMaximum(SPIN_MAX_DEF);
+    ui->spinPoints->setSingleStep(SPIN_STEP_DEF);
+    ui->spinPoints->setValue(NUMBER_OF_POINTS_DEF);
 
     // Clear the terminal
     on_clearTermButton_clicked();
