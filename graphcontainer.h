@@ -17,14 +17,14 @@ public:
     void addData(double k, double v);
     void clearData();
     void clearLabels();
-    void updateGraph(int pCnt);
+    void updateGraph(int pCnt,  bool resetDeltaValue = false);
     QString getName() { return plotName; }
     void setColor(QColor color);
     void setName(QString name) { plotName = "Plot " + name; }
 private:
     QCPGraph* graph;
     // Number of points plotted
-    int NUMBER_OF_POINTS;
+    int numberOfPoints;
     QString plotName;
     int tabIndex;
     QFont font;
@@ -44,7 +44,7 @@ private:
     double dataMin = 0;
     double dataMax = 0;
     double dataAverage = 0;
-    void updateLabel(QString lStr);
+    void updateLabel();
 
 private slots:
    void handleColor();

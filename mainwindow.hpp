@@ -44,6 +44,9 @@
 #define IN_PLOT_MSG     3
 #define UNDEFINED       4
 
+#define NUMBER_OF_POINTS_DEF 5000
+#define DEF_YAXIS_RANGE 1500
+
 namespace Ui {
 class MainWindow;
 }
@@ -70,7 +73,6 @@ private slots:
     void on_comboPort_currentIndexChanged(const QString &arg1);                           // Slot displays message on status bar
     void on_connectButton_clicked();                                                      // Manages connect/disconnect
     void on_stopPlotButton_clicked();                                                     // Starts and stops plotting
-    void on_comboAxes_currentIndexChanged(int index);                                     // Display number of axes and colors in status bar
     void on_saveJPGButton_clicked();                                                      // Button for saving JPG
     void on_resetPlotButton_clicked();                                                    // Resets plot to initial zoom and coordinates
     void onMouseMoveInPlot(QMouseEvent *event);                                           // Displays coordinates of mouse pointer when clicked in plot in status bar
@@ -106,7 +108,7 @@ private:
     QString noMsgReceivedData;                                                                 // Used for reading from the port
     QByteArray data;
     int STATE;                                                                            // State of recieiving message from port
-    int NUMBER_OF_POINTS;                                                                 // Number of points plotted
+    int numberOfPoints;                                                                 // Number of points plotted
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
     QTabWidget* plotsToolBox = nullptr;
@@ -117,11 +119,11 @@ private:
     bool isColor(QString str);
     // Setup the QCustomPlot
     void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
-    void updateGraphs();
+    void updateGraphs(bool resetDelta = false);
     void openPort();
     void portOpenedSuccess();                                                             // Called when port opens OK
     void closePort();                                                                  // Called when closing the port
-    void setAutoYRange(double r);
+    void setAutoYRange(double r, bool resetDelta = false);
     void addMessageText(QString data, QString color = "black");
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);

@@ -328,24 +328,6 @@
                  <item>
                   <layout class="QVBoxLayout" name="plotControlsLayout">
                    <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_6">
-                     <item>
-                      <widget class="QLabel" name="labelAxes">
-                       <property name="text">
-                        <string>AXES</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QComboBox" name="comboAxes">
-                       <property name="currentIndex">
-                        <number>-1</number>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </item>
-                   <item>
                     <layout class="QHBoxLayout" name="horizontalLayout_10">
                      <item>
                       <widget class="QLabel" name="pointsLabel">
@@ -362,8 +344,11 @@
                        <property name="maximum">
                         <number>10000</number>
                        </property>
+                       <property name="singleStep">
+                        <number>100</number>
+                       </property>
                        <property name="value">
-                        <number>500</number>
+                        <number>5000</number>
                        </property>
                       </widget>
                      </item>

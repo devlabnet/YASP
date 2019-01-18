@@ -35,7 +35,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    connected(false), plotting(false), dataPointNumber(0), numberOfAxes(1), STATE(WAIT_START), NUMBER_OF_POINTS(500)
+    connected(false), plotting(false), dataPointNumber(0), numberOfAxes(1), STATE(WAIT_START), numberOfPoints(NUMBER_OF_POINTS_DEF)
 {
     ui->setupUi(this);
     createUI();                                                                           // Create the UI
@@ -171,13 +171,7 @@ void MainWindow::createUI()
 
     ui->comboStop->addItem("1 bit");                                                      // Populate stop bits combo box
     ui->comboStop->addItem("2 bits");
-
-    ui->comboAxes->addItem("1");                                                          // Populate axes combo box; 3 axes maximum allowed
-    ui->comboAxes->addItem("2");
-    ui->comboAxes->addItem("3");
 }
-/******************************************************************************************************************/
-
 
 /******************************************************************************************************************/
 /* Enable/disable controls */
@@ -189,8 +183,8 @@ void MainWindow::enableControls(bool enable)
     ui->comboParity->setEnabled(enable);
     ui->comboPort->setEnabled(enable);
     ui->comboStop->setEnabled(enable);
-    ui->comboAxes->setEnabled(enable);
 }
+
 /******************************************************************************************************************/
 
 /******************************************************************************************************************/
@@ -217,12 +211,12 @@ void MainWindow::cleanGraphs() {
 }
 
 /******************************************************************************************************************/
-void MainWindow::updateGraphs() {
+void MainWindow::updateGraphs(bool resetDelta) {
     ui->plot->clearItems();
     for (int i = plotsToolBox->count(); i >= 0; i--) {
         graphContainer* gc = dynamic_cast<graphContainer*>(plotsToolBox->widget(i));
         if (gc != nullptr) {
-            gc->updateGraph(NUMBER_OF_POINTS);
+            gc->updateGraph(numberOfPoints, resetDelta);
         }
     }
 }
@@ -247,11 +241,11 @@ void MainWindow::setupPlot()
 /******************************************************************************************************************/
 void MainWindow::addPlots() {
     for (int  tabInd = 0;  tabInd < 10; ++ tabInd) {
-        ui->plot->yAxis->setRange(-1000, 1000);       // Set lower and upper plot range
-        ui->plot->xAxis->setRange(0, NUMBER_OF_POINTS);                                      // Set x axis range for specified number of points
+        ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
+        ui->plot->xAxis->setRange(0, numberOfPoints);                                      // Set x axis range for specified number of points
         setAutoYRange(ui->plot->yAxis->range().size());
         QString plotStr = "Plot " + QString::number( tabInd);
-        graphContainer* gc = new graphContainer(ui->plot->addGraph(), NUMBER_OF_POINTS, plotStr, colours[ tabInd],  tabInd);
+        graphContainer* gc = new graphContainer(ui->plot->addGraph(), numberOfPoints, plotStr, colours[ tabInd],  tabInd);
         plotsToolBox->insertTab( tabInd, gc, plotStr);
         plotColorChanged( tabInd, colours[ tabInd]);
         connect(gc, SIGNAL(plotColorChanged(int, QColor)), this, SLOT(plotColorChanged(int, QColor)));
@@ -403,7 +397,7 @@ void MainWindow:: closePort() {
 void MainWindow::replot()
 {
     if(connected) {
-        ui->plot->xAxis->setRange(dataPointNumber - NUMBER_OF_POINTS, dataPointNumber);
+        ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
         ui->plot->replot();
     }
 }
@@ -652,7 +646,7 @@ void MainWindow::readData() {
 }
 /******************************************************************************************************************/
 
-void MainWindow::setAutoYRange(double r) {
+void MainWindow::setAutoYRange(double r, bool resetDelta) {
     int step = 10;
     if (r < step) {
 //        ui->spinYStep->setMinimum(1);
@@ -672,23 +666,9 @@ void MainWindow::setAutoYRange(double r) {
 //    ui->spinYStep->setMaximum(vMax);
 //    ui->spinYStep->setValue(vMin);
     ui->plot->yAxis->setTickStep(vMin);
+    updateGraphs(resetDelta);
 //    qDebug() <<  vMin << " -> " << vMax;
 }
-/******************************************************************************************************************/
-/* Number of axes combo; when changed, display axes colors in status bar */
-/******************************************************************************************************************/
-void MainWindow::on_comboAxes_currentIndexChanged(int index)
-{
-    if(index == 0) {
-        ui->statusBar->showMessage("Axis 1: Red");
-    } else if(index == 1) {
-        ui->statusBar->showMessage("Axis 1: Red; Axis 2: Yellow");
-    } else {
-        ui->statusBar->showMessage("Axis 1: Red; Axis 2: Yellow; Axis 3: Green");
-    }
-}
-/******************************************************************************************************************/
-
 
 /******************************************************************************************************************/
 /* Spin box for changing the Y Tick step */
@@ -714,21 +694,29 @@ void MainWindow::on_saveJPGButton_clicked()
 //    ui->plot->saveJpg(QString::number(dataPointNumber) + ".jpg");
     ui->plot->saveJpg(fileName);
 }
-/******************************************************************************************************************/
-
 
 /******************************************************************************************************************/
 /* Reset the zoom of the plot to the initial values */
 /******************************************************************************************************************/
-void MainWindow::on_resetPlotButton_clicked()
-{
-    ui->plot->yAxis->setRange(0, 4095);
-    ui->plot->xAxis->setRange(dataPointNumber - NUMBER_OF_POINTS, dataPointNumber);
-    ui->plot->yAxis->setTickStep(500);
+void MainWindow::on_resetPlotButton_clicked() {
+    numberOfPoints = NUMBER_OF_POINTS_DEF;
+    ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
+    //ui->plot->xAxis->setRange(0, numberOfPoints);                       // Set x axis range for specified number of points
+    qDebug() << "xAxis->setRange : " << dataPointNumber - numberOfPoints << " / " << dataPointNumber;
+
+    ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
+    setAutoYRange(ui->plot->yAxis->range().size(), true);
+    on_spinPoints_valueChanged(numberOfPoints);
+}
+
+/******************************************************************************************************************/
+/* Spin box controls how many data points are collected and displayed */
+/******************************************************************************************************************/
+void MainWindow::on_spinPoints_valueChanged(int arg1) {
+    numberOfPoints = arg1;
+    updateGraphs();
     ui->plot->replot();
 }
-/******************************************************************************************************************/
-
 
 /******************************************************************************************************************/
 /* Prints coordinates of mouse pointer in status bar on mouse release */
@@ -760,19 +748,6 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event)
     setAutoYRange(ui->plot->yAxis->range().size());
 }
 
-
-/******************************************************************************************************************/
-/* Spin box controls how many data points are collected and displayed */
-/******************************************************************************************************************/
-void MainWindow::on_spinPoints_valueChanged(int arg1)
-{
-    NUMBER_OF_POINTS = arg1;
-    updateGraphs();
-    ui->plot->replot();
-}
-/******************************************************************************************************************/
-
-
 /******************************************************************************************************************/
 /* Shows a window with instructions */
 /******************************************************************************************************************/
@@ -784,8 +759,8 @@ void MainWindow::on_actionHow_to_use_triggered()
         helpWindow->show();
     }
 }
-/******************************************************************************************************************/
 
+/******************************************************************************************************************/
 void MainWindow::on_sendLine_returnPressed()
 {
 

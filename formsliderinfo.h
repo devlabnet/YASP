@@ -2,6 +2,7 @@
 #define FORMSLIDERINFO_H
 
 #include <QWidget>
+#include <QIntValidator>
 
 namespace Ui {
 class FormSliderInfo;
@@ -18,10 +19,17 @@ public:
     void setSingleStep(int s);
     void setPageStep(int s);
     void setRange(int rMin, int rMax);
+    void extendRange(int rMin, int rMax);
+    void setMinimum(int rMin);
+    void extendMinimum(int rMin);
+    int minimum() const;
+    void setMaximum(int rMax);
+    void extendMaximum(int rMax);
+    int maximum() const;
 private:
     Ui::FormSliderInfo *ui;
     int value;
-
+    QIntValidator *validator;
 private slots:
     void handleValue(int i);
     void valueBoxEditingFinished();
