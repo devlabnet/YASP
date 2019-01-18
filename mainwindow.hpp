@@ -65,6 +65,7 @@ private slots:
     void onNewPlotDataArrived(QStringList newData);                                       // Slot for new data from serial port
     void readData();                                                                      // Slot for inside serial port
     void plotColorChanged(int tabInd, QColor color);
+    void dataTerminalReadyChanged(bool dtr);
 
     void on_comboPort_currentIndexChanged(const QString &arg1);                           // Slot displays message on status bar
     void on_connectButton_clicked();                                                      // Manages connect/disconnect

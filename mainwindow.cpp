@@ -305,14 +305,6 @@ void MainWindow::openPort() {
     if (serialPort->open(QIODevice::ReadWrite) ) {
         receivedData.clear();
         noMsgReceivedData.clear();
-        serialPort->clear(QSerialPort::AllDirections);
-        connect(serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
-//            while(serialPort->waitForReadyRead(0));
-//            {
-//                qDebug() << "t";
-//                serialPort->clear(QSerialPort::AllDirections);
-//            }
-
         portOpenedSuccess();
     } else {
         ui->statusBar->showMessage("Cannot open port!");
@@ -328,8 +320,6 @@ void MainWindow::on_comboPort_currentIndexChanged(const QString &arg1)
     QSerialPortInfo selectedPort(arg1);                                                   // Dislplay info for selected port
     ui->statusBar->showMessage(selectedPort.description());
 }
-/******************************************************************************************************************/
-
 
 /******************************************************************************************************************/
 /* Connect Button clicked slot; handles connect and disconnect */
@@ -346,12 +336,12 @@ void MainWindow::on_connectButton_clicked() {
 /* Slot for port opened successfully */
 /******************************************************************************************************************/
 void MainWindow::portOpenedSuccess() {
+    connect(serialPort, SIGNAL(dataTerminalReadyChanged(bool)), this, SLOT(dataTerminalReadyChanged(bool)));
     serialPort->setDataTerminalReady(false);
     ui->menuWidgets->menuAction()->setVisible(true);
     if ((widgets != nullptr)) {
         widgets->setSerialPort(serialPort);
     }
-    //qDebug() << "Port opened signal received!";
     ui->connectButton->setText("Disconnect");                                             // Change buttons
     ui->statusBar->showMessage("Connected!");
     enableControls(false);                                                                // Disable controls if port is open
@@ -363,11 +353,19 @@ void MainWindow::portOpenedSuccess() {
     connected = true;                                                                     // Set flags
     plotting = true;
     ui->tabWidget->setCurrentIndex(1);
+    // Reset the Device via DTR
     serialPort->setDataTerminalReady(true);
-
-    //connect(cmdSerial,SIGNAL(readyRead()),this,SLOT(onDataReadyRead()));
     connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
     connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
+}
+
+/******************************************************************************************************************/
+void MainWindow::dataTerminalReadyChanged(bool dtr) {
+    if (dtr) {
+        serialPort->clear(QSerialPort::AllDirections);
+        connect(serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
+    }
+    qDebug() << "DTR: " << dtr;
 }
 
 /******************************************************************************************************************/
@@ -570,6 +568,7 @@ bool MainWindow::checkEndMsgMissed(unsigned char cc) {
 /* Read data for inside serial port */
 /******************************************************************************************************************/
 void MainWindow::readData() {
+//    if (!serialPort->isDataTerminalReady()) return;
     if (serialPort->bytesAvailable()) {                                                    // If any bytes are available
         data = serialPort->readAll();         // Read all data in QByteArray
         if(!data.isEmpty()) {                                                             // If the byte array is not empty
@@ -593,14 +592,13 @@ void MainWindow::readData() {
                         if (checkEndMsgMissed(cc)) {
                             break;
                         } else if ( cc == '\n') {
-                            //                            qDebug() << " = " << cc << " / "  << temp[i];
                             if (!noMsgReceivedData.isEmpty()) {
                                 addMessageText(noMsgReceivedData, "orange");
-                                //                                qDebug() <<  noMsgReceivedData;
                             }
                             noMsgReceivedData.clear();
                         } else {
-                            if ( cc != '\r') {
+                            // Check if printable char
+                            if ( !(cc < 0x20 || cc > 127)) {
                                 noMsgReceivedData.append( cc);
                             }
                         }
