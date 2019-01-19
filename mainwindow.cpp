@@ -28,6 +28,7 @@
 #include "ui_mainwindow.h"
 #include <QSplitter>
 #include "graphcontainer.h"
+#include <QtGui>
 
 /******************************************************************************************************************/
 /* Constructor */
@@ -114,26 +115,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Clear the terminal
     on_clearTermButton_clicked();
-
 }
-/******************************************************************************************************************/
-
 
 /******************************************************************************************************************/
 /* Destructor */
 /******************************************************************************************************************/
-MainWindow::~MainWindow()
-{
-//    qDebug() << "MainWindows Destructor";
+MainWindow::~MainWindow() {
+    qDebug() << "MainWindows Destructor";
     if(serialPort != nullptr) delete serialPort;
-//    widgets.hide();
-//    widgets.deleteLater();
     delete ui;
 }
 /******************************************************************************************************************/
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-//    qDebug() << "MainWindows closeEvent";
+void MainWindow::closeEvent(QCloseEvent *event) {
+   qDebug() << "MainWindows closeEvent";
    // or event->accept(); but fine 'moments' are there
    QMainWindow::closeEvent(event);
 }
@@ -142,8 +136,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 /******************************************************************************************************************/
 /**Create the GUI */
 /******************************************************************************************************************/
-void MainWindow::createUI()
-{
+void MainWindow::createUI() {
     if(QSerialPortInfo::availablePorts().size() == 0) {                                   // Check if there are any ports at all; if not, disable controls and return
         enableControls(false);
         ui->connectButton->setEnabled(false);
@@ -151,11 +144,9 @@ void MainWindow::createUI()
         ui->saveJPGButton->setEnabled(false);
         return;
     }
-
     for(QSerialPortInfo port : QSerialPortInfo::availablePorts()) {                       // List all available serial ports and populate ports combo box
         ui->comboPort->addItem(port.portName());
     }
-
     ui->comboBaud->addItem("1200");                                                       // Populate baud rate combo box
     ui->comboBaud->addItem("2400");
     ui->comboBaud->addItem("4800");
@@ -165,14 +156,11 @@ void MainWindow::createUI()
     ui->comboBaud->addItem("57600");
     ui->comboBaud->addItem("115200");
     ui->comboBaud->setCurrentIndex(7);                                                    // Select 9600 bits by default
-
     ui->comboData->addItem("8 bits");                                                     // Populate data bits combo box
     ui->comboData->addItem("7 bits");
-
     ui->comboParity->addItem("none");                                                     // Populate parity combo box
     ui->comboParity->addItem("odd");
     ui->comboParity->addItem("even");
-
     ui->comboStop->addItem("1 bit");                                                      // Populate stop bits combo box
     ui->comboStop->addItem("2 bits");
 }
@@ -180,16 +168,13 @@ void MainWindow::createUI()
 /******************************************************************************************************************/
 /* Enable/disable controls */
 /******************************************************************************************************************/
-void MainWindow::enableControls(bool enable)
-{
+void MainWindow::enableControls(bool enable) {
     ui->comboBaud->setEnabled(enable);                                                    // Disable controls in the GUI
     ui->comboData->setEnabled(enable);
     ui->comboParity->setEnabled(enable);
     ui->comboPort->setEnabled(enable);
     ui->comboStop->setEnabled(enable);
 }
-
-/******************************************************************************************************************/
 
 /******************************************************************************************************************/
 void MainWindow::cleanGraphs() {
@@ -210,7 +195,6 @@ void MainWindow::cleanGraphs() {
         delete plotsToolBox;
         plotsToolBox = nullptr;
     }
-//    plotsToolBox->hide();
     ui->plot->hide();
 }
 
@@ -228,8 +212,7 @@ void MainWindow::updateGraphs(bool resetDelta) {
 /******************************************************************************************************************/
 /* Setup the plot area */
 /******************************************************************************************************************/
-void MainWindow::setupPlot()
-{
+void MainWindow::setupPlot() {
     //ui->verticalLayoutPlots->addWidget(new QPushButton("0"));
     cleanGraphs();
     plotsToolBox = new QTabWidget();
@@ -242,8 +225,6 @@ void MainWindow::setupPlot()
     QLabel* bottomWidget = new QLabel();
     bottomWidget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     bottomWidget->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png"));
-
-
     bottomWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
     ui->verticalLayoutPlots->addWidget(bottomWidget);
     //ui->verticalLayoutPlots->addWidget(new QPushButton("1"));
@@ -322,8 +303,7 @@ void MainWindow::openPort() {
 /******************************************************************************************************************/
 /* Port Combo Box index changed slot; displays info for selected port when combo box is changed */
 /******************************************************************************************************************/
-void MainWindow::on_comboPort_currentIndexChanged(const QString &arg1)
-{
+void MainWindow::on_comboPort_currentIndexChanged(const QString &arg1) {
     QSerialPortInfo selectedPort(arg1);                                                   // Dislplay info for selected port
     ui->statusBar->showMessage(selectedPort.description());
 }
@@ -343,6 +323,7 @@ void MainWindow::on_connectButton_clicked() {
 /* Slot for port opened successfully */
 /******************************************************************************************************************/
 void MainWindow::portOpenedSuccess() {
+
     connect(serialPort, SIGNAL(dataTerminalReadyChanged(bool)), this, SLOT(dataTerminalReadyChanged(bool)));
     serialPort->setDataTerminalReady(false);
     ui->menuWidgets->menuAction()->setVisible(true);
@@ -364,6 +345,10 @@ void MainWindow::portOpenedSuccess() {
     serialPort->setDataTerminalReady(true);
     connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
     connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
+    plotInfosW = new plotsInfoWidget(this);
+    plotInfosW->move(pos().x() + width() + 20, pos().y());
+    plotInfosW->setWindowTitle("Plots Info");
+    plotInfosW->setWindowFlag(Qt::WindowCloseButtonHint, false);
 }
 
 /******************************************************************************************************************/
@@ -407,8 +392,7 @@ void MainWindow:: closePort() {
 /******************************************************************************************************************/
 /* Replot */
 /******************************************************************************************************************/
-void MainWindow::replot()
-{
+void MainWindow::replot() {
     if(connected) {
         ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
         ui->plot->replot();
@@ -418,8 +402,7 @@ void MainWindow::replot()
 /******************************************************************************************************************/
 /* Stop Plot Button */
 /******************************************************************************************************************/
-void MainWindow::on_stopPlotButton_clicked()
-{
+void MainWindow::on_stopPlotButton_clicked() {
     if(plotting) {                                                                        // Stop plotting
         updateTimer.stop();                                                               // Stop updating plot timer
         plotting = false;
@@ -462,7 +445,6 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
         }
         graphContainer* plot = dynamic_cast<graphContainer*>(plotsToolBox->widget(plotId));
         Q_ASSERT(plot != nullptr);
-
 //        qDebug() << "Plot: " << newData;
         QString param1 = "";
         QString param2 = "";
@@ -482,7 +464,6 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
             if ((!param1.isEmpty()) && (plot->getName() != param1)) {
                 plot->setName(param1);
                 plotsToolBox->tabBar()->setTabText(plotId, param1);
-
             }
         }
         if (isColor(param2)) {
@@ -515,6 +496,9 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             graphContainer* plot = dynamic_cast<graphContainer*>(plotsToolBox->widget(plotId));
             if (plot != nullptr) {
                 plot->addData(dataPointNumber, val);
+//                qDebug() << plot->getDataStr();
+//                plotInfosW->updateDataInfo("000");
+                //plotInfosW->updateDataInfo(plot->getDataStr());
             }
         }
     }
@@ -548,12 +532,6 @@ bool MainWindow::checkEndMsgMissed( char cc) {
         addMessageText("-> DATA RECOVERED : " + recoverStr, "red");
         receivedData.clear();
         STATE = IN_MESSAGE;
-
-//        for (int var = 0; var < 4; ++var) {
-//            graphContainer* plot = dynamic_cast<graphContainer*>(plotsToolBox->widget(var));
-//            Q_ASSERT(plot != nullptr);
-//            plot->setColor(QColor("black"));
-//        }
         return true;
      } else if ( cc == PLOT_MSG) {
         // Houps, seems we missed the END_MSG (maybe an external reset of the device !)
@@ -657,14 +635,11 @@ void MainWindow::readData() {
         }
     }
 }
-/******************************************************************************************************************/
 
+/******************************************************************************************************************/
 void MainWindow::setAutoYRange(double r, bool resetDelta) {
     int step = 10;
     if (r < step) {
-//        ui->spinYStep->setMinimum(1);
-//        ui->spinYStep->setMaximum(50);
-//        ui->spinYStep->setValue(1);
         ui->plot->yAxis->setTickStep(1);
         return;
     }
@@ -674,25 +649,9 @@ void MainWindow::setAutoYRange(double r, bool resetDelta) {
     int x = m / mult;
 //    qDebug() <<  r << " -> " << m  << " -> " <<  v << " -> " << x;
     int vMin = qMax(x * mult, 5);
-//    int vMax = vMin * step;
-//    ui->spinYStep->setMinimum(vMin);
-//    ui->spinYStep->setMaximum(vMax);
-//    ui->spinYStep->setValue(vMin);
     ui->plot->yAxis->setTickStep(vMin);
     updateGraphs(resetDelta);
-//    qDebug() <<  vMin << " -> " << vMax;
 }
-
-/******************************************************************************************************************/
-/* Spin box for changing the Y Tick step */
-/******************************************************************************************************************/
-//void MainWindow::on_spinYStep_valueChanged(int arg1)
-//{
-//    ui->plot->yAxis->setTickStep(arg1);
-//    ui->plot->replot();
-//}
-/******************************************************************************************************************/
-
 
 /******************************************************************************************************************/
 /* Save a JPG image of the plot to current EXE directory */
@@ -714,8 +673,7 @@ void MainWindow::on_saveJPGButton_clicked()
 void MainWindow::on_resetPlotButton_clicked() {
     numberOfPoints = NUMBER_OF_POINTS_DEF;
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
-    //ui->plot->xAxis->setRange(0, numberOfPoints);                       // Set x axis range for specified number of points
-    qDebug() << "xAxis->setRange : " << dataPointNumber - numberOfPoints << " / " << dataPointNumber;
+//    qDebug() << "xAxis->setRange : " << dataPointNumber - numberOfPoints << " / " << dataPointNumber;
 
     ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
     setAutoYRange(ui->plot->yAxis->range().size(), true);
@@ -734,29 +692,21 @@ void MainWindow::on_spinPoints_valueChanged(int arg1) {
 /******************************************************************************************************************/
 /* Prints coordinates of mouse pointer in status bar on mouse release */
 /******************************************************************************************************************/
-void MainWindow::onMouseMoveInPlot(QMouseEvent *event)
-{
+void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     int xx = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->x()));
     int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
-    //int yy = ui->plot->yAxis->pixelToCoord(event->y());
     QString coordinates("X: %1 Y: %2");
     coordinates = coordinates.arg(xx).arg(yy);
     ui->statusBar->showMessage(coordinates);
 }
 /******************************************************************************************************************/
-void MainWindow::onMouseReleaseInPlot(QMouseEvent *event)
-{
+void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     Q_UNUSED(event)
-//    int xx = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->x()));
-//    int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
-//    //int yy = ui->plot->yAxis->pixelToCoord(event->y());
-//    QString coordinates("X: %1 Y: %2");
-//    coordinates = coordinates.arg(xx).arg(yy);
     ui->statusBar->showMessage("release");
 }
 
-void MainWindow::onMouseWheelInPlot(QWheelEvent *event)
-{
+/******************************************************************************************************************/
+void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     Q_UNUSED(event)
     setAutoYRange(ui->plot->yAxis->range().size());
 }
@@ -764,8 +714,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event)
 /******************************************************************************************************************/
 /* Shows a window with instructions */
 /******************************************************************************************************************/
-void MainWindow::on_actionHow_to_use_triggered()
-{
+void MainWindow::on_actionHow_to_use_triggered() {
     if (helpWindow == nullptr) {
         helpWindow = new HelpWindow(this);
         helpWindow->setWindowTitle("How to use this application");
@@ -774,9 +723,7 @@ void MainWindow::on_actionHow_to_use_triggered()
 }
 
 /******************************************************************************************************************/
-void MainWindow::on_sendLine_returnPressed()
-{
-
+void MainWindow::on_sendLine_returnPressed() {
     QString data = ui->sendLine->text();
     if (data.isEmpty()) return; // Nothing to send
     data += "\n";
@@ -787,15 +734,15 @@ void MainWindow::on_sendLine_returnPressed()
         addMessageText("&rarr;&nbsp;" + data + "\n", "lightblue");
         ui->sendLine->clear();
     }
-
 }
 
-void MainWindow::on_clearTermButton_clicked()
-{
+/******************************************************************************************************************/
+void MainWindow::on_clearTermButton_clicked() {
     ui->receiveTerminal->clear();
     ui->receiveTerminal->moveCursor (QTextCursor::End);
 }
 
+/******************************************************************************************************************/
 void MainWindow::on_actionShowWidgets_triggered()
 {
     if (widgets == nullptr) {
@@ -812,9 +759,18 @@ void MainWindow::on_actionShowWidgets_triggered()
     }
 }
 
-void MainWindow::on_bgColorButton_pressed()
-{
+/******************************************************************************************************************/
+void MainWindow::on_bgColorButton_pressed() {
     bgColor = QColorDialog::getColor(bgColor, this, "Select Background Color");
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
     ui->plot->setBackground(QBrush(bgColor));   // Background for the plot area
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_plotsInfoRadio_clicked(bool checked) {
+    if (checked) {
+        plotInfosW->show();
+    } else {
+        plotInfosW->hide();
+    }
 }

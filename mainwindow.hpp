@@ -34,6 +34,8 @@
 #include "dialogwidgets.h"
 #include <QToolBox>
 //#include "tabwidget.h"
+#include <QTextEdit>
+#include "plotsinfowidget.h"
 
 #define START_MSG      0x10
 #define PLOT_MSG       0X11
@@ -72,7 +74,6 @@ private slots:
     void readData();                                                                      // Slot for inside serial port
     void plotColorChanged(int tabInd, QColor color);
     void dataTerminalReadyChanged(bool dtr);
-
     void on_comboPort_currentIndexChanged(const QString &arg1);                           // Slot displays message on status bar
     void on_connectButton_clicked();                                                      // Manages connect/disconnect
     void on_stopPlotButton_clicked();                                                     // Starts and stops plotting
@@ -87,6 +88,8 @@ private slots:
     void on_clearTermButton_clicked();
     void on_actionShowWidgets_triggered();
     void on_bgColorButton_pressed();
+    void on_plotsInfoRadio_clicked(bool checked);
+
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
@@ -115,6 +118,7 @@ private:
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
     QTabWidget* plotsToolBox = nullptr;
+    plotsInfoWidget* plotInfosW;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();

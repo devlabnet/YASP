@@ -394,6 +394,16 @@
                        </property>
                       </widget>
                      </item>
+                     <item>
+                      <widget class="QRadioButton" name="plotsInfoRadio">
+                       <property name="layoutDirection">
+                        <enum>Qt::RightToLeft</enum>
+                       </property>
+                       <property name="text">
+                        <string>Shows Infos</string>
+                       </property>
+                      </widget>
+                     </item>
                     </layout>
                    </item>
                    <item>

@@ -21,11 +21,13 @@ public:
     QString getName() { return plotName; }
     void setColor(QColor color);
     void setName(QString name) { plotName = "Plot " + name; }
+    QString getDataStr() { return dataStr; }
 private:
     QCPGraph* graph;
     // Number of points plotted
     int numberOfPoints;
     QString plotName;
+    QString dataStr;
     int tabIndex;
     QFont font;
     QCPItemText *textLabel;

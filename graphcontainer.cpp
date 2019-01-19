@@ -4,6 +4,7 @@
 #include <QPalette>
 #include <QSpacerItem>
 
+/******************************************************************************************************************/
 graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color, int id, QWidget *parent)
     : QWidget(parent), graph(g), numberOfPoints(nop), plotName(pName), tabIndex(id), penColor(color) {
 
@@ -55,7 +56,6 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     slideDelta = new FormSliderInfo("Delta",
                                     graph->parentPlot()->yAxis->range().lower,
                                     graph->parentPlot()->yAxis->range().upper, 0);
-
     slideDelta->setValue(0);
     slideDelta->setSingleStep(10);
     slideDelta->setPageStep(100);
@@ -81,7 +81,7 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     font.setPointSize(8);
     font.setWeight(50);
     font.setFixedPitch(true);
-    QString lStr =  plotName;
+    dataStr =  plotName;
     textLabel = new QCPItemText(graph->parentPlot());
     textLabel->setColor(penColor);
     textLabel->setFont(font); // make font a bit larger
@@ -95,10 +95,12 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     graph->parentPlot()->clearMask();
 }
 
+/******************************************************************************************************************/
 graphContainer::~graphContainer() {
 //    qDebug() << "graphContainer Destructor";
 }
 
+/******************************************************************************************************************/
 void graphContainer::updateGraph(int pCnt, bool resetDeltaValue) {
     numberOfPoints = pCnt;
     if (resetDeltaValue) {
@@ -109,26 +111,28 @@ void graphContainer::updateGraph(int pCnt, bool resetDeltaValue) {
     }
 }
 
+/******************************************************************************************************************/
 void graphContainer::clearData() {
     graph->clearData();
     handleResetInfo();
 }
 
+/******************************************************************************************************************/
 void graphContainer::clearLabels() {
     delete textLabel;
 }
 
+/******************************************************************************************************************/
 void graphContainer::handleShowPlot(int state) {
-//    QString lStr;
     if (state == Qt::Unchecked) {
         graph->setVisible(false);
-//        lStr = "";
     } else {
         graph->setVisible(true);
     }
     updateLabel();
 }
 
+/******************************************************************************************************************/
 void graphContainer::setColor(QColor color) {
     qDebug() << "graphContainer setColor " << tabIndex << " color:" << color;
     penColor = color;
@@ -140,6 +144,7 @@ void graphContainer::setColor(QColor color) {
     emit plotColorChanged(tabIndex, penColor);
 }
 
+/******************************************************************************************************************/
 void graphContainer::addData(double k, double v) {
     if (tabIndex == 8) {
         qDebug() << "--> " << k << " / " << v;
@@ -158,28 +163,31 @@ void graphContainer::addData(double k, double v) {
     updateLabel();
 }
 
+/******************************************************************************************************************/
 void graphContainer::updateLabel() {
-    QString lStr = "";
+    dataStr = "";
     if (chkBox->isChecked()) {
-        lStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
+        dataStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
                 + " Min = " + QString::number(dataMin)
                 + " Max = " + QString::number(dataMax)
                 + " Val = " + QString::number(dataAverage );
 
     }
     QFontMetricsF fm(font);
-    qreal pixelsWide = fm.width(lStr);
+    qreal pixelsWide = fm.width(dataStr);
 //    qreal pixelsHigh = fm.height();
     labelPos.setX(pixelsWide + 100);
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
-    textLabel->setText(lStr);
+    textLabel->setText(dataStr);
 }
 
+/******************************************************************************************************************/
 void graphContainer::handleColor() {
     penColor = QColorDialog::getColor(penColor, this, "Select Plot Color");
     setColor(penColor);
 }
 
+/******************************************************************************************************************/
 void graphContainer::handleResetInfo() {
     dataMin = 0;
     dataMax = 0;
@@ -187,17 +195,20 @@ void graphContainer::handleResetInfo() {
     updateLabel();
 }
 
+/******************************************************************************************************************/
 void graphContainer::handleWidth(int i) {
     pen.setWidth(i);
     graph->setPen(pen);
 }
 
+/******************************************************************************************************************/
 void graphContainer::handleDelta(int i) {
 //    qDebug() << "Delta: " << i;
     delta = i;
     clearData();
 }
 
+/******************************************************************************************************************/
 void graphContainer::handleComboMult(const QString str) {
     qDebug() << "handleComboMult: " << str;
     mult = str.toInt();

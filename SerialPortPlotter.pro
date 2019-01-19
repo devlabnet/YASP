@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     customwidget.cpp \
     dialwidget.cpp \
     graphcontainer.cpp \
-    formsliderinfo.cpp
+    formsliderinfo.cpp \
+    plotsinfowidget.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
@@ -34,13 +35,15 @@ HEADERS  += mainwindow.hpp \
     dialwidget.h \
     graphcontainer.h \
     formsliderinfo.h \
-    tabwidget.h
+    tabwidget.h \
+    plotsinfowidget.h
 
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
     dialogwidgets.ui \
-    formsliderinfo.ui
+    formsliderinfo.ui \
+    plotsinfowidget.ui
 
 RC_FILE = myapp.rc
 
