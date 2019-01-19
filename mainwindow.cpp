@@ -107,7 +107,6 @@ MainWindow::MainWindow(QWidget *parent) :
         * */
     ui->splitter->setPalette(p);
     ui->tabWidget->setCurrentIndex(0);
-
     ui->spinPoints->setMinimum(SPIN_MIN_DEF);
     ui->spinPoints->setMaximum(SPIN_MAX_DEF);
     ui->spinPoints->setSingleStep(SPIN_STEP_DEF);
@@ -236,8 +235,17 @@ void MainWindow::setupPlot()
     plotsToolBox = new QTabWidget();
     plotsToolBox->setTabPosition(QTabWidget::North);
     ui->verticalLayoutPlots->addWidget(plotsToolBox);
-    plotsToolBox->setMinimumSize(400,200);
-    plotsToolBox->setMaximumWidth(400);
+//    plotsToolBox->setMinimumSize(400,200);
+//    plotsToolBox->setMaximumWidth(400);
+    plotsToolBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+//    plotsToolBox->setMaximumHeight(400);
+    QLabel* bottomWidget = new QLabel();
+    bottomWidget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    bottomWidget->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png"));
+
+
+    bottomWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+    ui->verticalLayoutPlots->addWidget(bottomWidget);
     //ui->verticalLayoutPlots->addWidget(new QPushButton("1"));
     ui->plot->show();
     addPlots();
