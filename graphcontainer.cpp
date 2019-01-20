@@ -41,10 +41,10 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     layout->addWidget(resetInfoButton, 0, 2, Qt::AlignTop);
     connect(resetInfoButton, SIGNAL (clicked()), this, SLOT (handleResetInfo()));
 
-    chkBox = new QCheckBox("show");
-    chkBox->setChecked(true);
-    layout->addWidget(chkBox, 0, 3, Qt::AlignTop);
-    connect(chkBox, SIGNAL(stateChanged(int)), this, SLOT (handleShowPlot(int)));
+    radioInfo = new QRadioButton("show");
+    radioInfo->setChecked(true);
+    layout->addWidget(radioInfo, 0, 3, Qt::AlignTop);
+    connect(radioInfo, SIGNAL(toggled(bool)), this, SLOT (handleShowPlot(bool)));
 
     QLabel* widthLabel = new QLabel("Width");
     widthLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
@@ -86,12 +86,12 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     textLabel->setColor(penColor);
     textLabel->setFont(font); // make font a bit larger
     textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
-     textLabel->position->setType(QCPItemPosition::ptAbsolute );
+    textLabel->position->setType(QCPItemPosition::ptAbsolute );
     QFontMetricsF fm(font);
-    qreal pixelsHigh = fm.height();
-    labelPos.setX(0);
-    labelPos.setY(10 + (tabIndex * pixelsHigh));
-    textLabel->position->setCoords(labelPos.x(), labelPos.y());
+    pixelsHigh = fm.height();
+//    labelPos.setX(0);
+//    labelPos.setY(10 + (tabIndex * pixelsHigh));
+//    textLabel->position->setCoords(labelPos.x(), labelPos.y());
     graph->parentPlot()->clearMask();
 }
 
@@ -123,33 +123,31 @@ void graphContainer::clearLabels() {
 }
 
 /******************************************************************************************************************/
-void graphContainer::handleShowPlot(int state) {
-    if (state == Qt::Unchecked) {
-        graph->setVisible(false);
-    } else {
-        graph->setVisible(true);
-    }
+void graphContainer::setRadioInfo(bool checked) {
+    radioInfo->setChecked(checked);
+}
+
+/******************************************************************************************************************/
+void graphContainer::handleShowPlot(bool state) {
+    graph->setVisible(state);
     updateLabel();
 }
 
 /******************************************************************************************************************/
 void graphContainer::setColor(QColor color) {
-    qDebug() << "graphContainer setColor " << tabIndex << " color:" << color;
+    qDebug() << "graphContainer setColor " << tabPos << " color:" << color;
     penColor = color;
     pen.setColor(penColor);
     axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
     graph->setPen(pen);
     colorButton->setStyleSheet("background-color:" + penColor.name() + "; color: rgb(0, 0, 0)");
     textLabel->setColor(penColor);
-    emit plotColorChanged(tabIndex, penColor);
+    emit plotColorChanged(tabPos, penColor);
 }
 
 /******************************************************************************************************************/
 void graphContainer::addData(double k, double v) {
-    if (tabIndex == 8) {
-        qDebug() << "--> " << k << " / " << v;
-    }
-    if (chkBox->isChecked()) {
+    if (radioInfo->isChecked()) {
         dataMin = qMin(dataMin, v);
         dataMax = qMax(dataMax, v);
     //    dataAverage = v;
@@ -166,7 +164,7 @@ void graphContainer::addData(double k, double v) {
 /******************************************************************************************************************/
 void graphContainer::updateLabel() {
     dataStr = "";
-    if (chkBox->isChecked()) {
+    if (radioInfo->isChecked()) {
         dataStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
                 + " Min = " + QString::number(dataMin)
                 + " Max = " + QString::number(dataMax)
@@ -177,6 +175,7 @@ void graphContainer::updateLabel() {
     qreal pixelsWide = fm.width(dataStr);
 //    qreal pixelsHigh = fm.height();
     labelPos.setX(pixelsWide + 100);
+    labelPos.setY(10 + (tabPos * pixelsHigh));
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
     textLabel->setText(dataStr);
 }

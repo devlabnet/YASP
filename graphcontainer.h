@@ -22,20 +22,29 @@ public:
     void setColor(QColor color);
     void setName(QString name) { plotName = "Plot " + name; }
     QString getDataStr() { return dataStr; }
+    bool isUsed() { return inUse; }
+    void setUsed(bool b) { inUse = b; }
+    int getTabPos() { return tabPos; }
+    void setTabPos(int p) { tabPos = p; }
+    void setRadioInfo(bool checked);
+
 private:
     QCPGraph* graph;
     // Number of points plotted
     int numberOfPoints;
+    bool inUse = false;
+    int tabPos = -1;
     QString plotName;
     QString dataStr;
     int tabIndex;
     QFont font;
     QCPItemText *textLabel;
+    qreal pixelsHigh;
     QPoint labelPos;
-
+    int viewIndex = 0;
     QGridLayout* layout;
     QPushButton *colorButton;
-    QCheckBox* chkBox;
+    QRadioButton* radioInfo;
     QPen pen;
     QColor penColor;
     QCPItemLine *axisLine;
@@ -55,11 +64,12 @@ private slots:
    void handleResetInfo();
 //   void handleMult(int i);
     void handleComboMult(const QString str);
-    void handleShowPlot(int state);
+    void handleShowPlot(bool state);
 
 signals:
     void plotColorChanged(int, QColor);
 public slots:
+
 };
 
 #endif // GRAPHCONTAINER_H

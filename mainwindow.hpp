@@ -35,7 +35,7 @@
 #include <QToolBox>
 //#include "tabwidget.h"
 #include <QTextEdit>
-#include "plotsinfowidget.h"
+#include "graphcontainer.h"
 
 #define START_MSG      0x10
 #define PLOT_MSG       0X11
@@ -118,7 +118,8 @@ private:
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
     QTabWidget* plotsToolBox = nullptr;
-    plotsInfoWidget* plotInfosW;
+    QVector<graphContainer*> plotsVector;
+    QLabel* bottomWidget;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();

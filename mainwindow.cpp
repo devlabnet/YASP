@@ -27,7 +27,6 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 #include <QSplitter>
-#include "graphcontainer.h"
 #include <QtGui>
 
 /******************************************************************************************************************/
@@ -140,6 +139,7 @@ void MainWindow::createUI() {
     if(QSerialPortInfo::availablePorts().size() == 0) {                                   // Check if there are any ports at all; if not, disable controls and return
         enableControls(false);
         ui->connectButton->setEnabled(false);
+        ui->statusBar->setStyleSheet("background-color: Tomato;");
         ui->statusBar->showMessage("No ports detected.");
         ui->saveJPGButton->setEnabled(false);
         return;
@@ -180,20 +180,23 @@ void MainWindow::enableControls(bool enable) {
 void MainWindow::cleanGraphs() {
     ui->plot->clearItems();
     if (plotsToolBox != nullptr) {
-        for (int i = plotsToolBox->count(); i >= 0; i--) {
-            graphContainer* gc = dynamic_cast<graphContainer*>(plotsToolBox->widget(i));
+        for (int i = plotsVector.size() - 1; i >= 0; i--) {
+            graphContainer* gc = plotsVector[i];
 //            qDebug() << "graphContainer: " << gc;
             if (gc != nullptr) {
                 gc->clearData();
                 gc->clearLabels();
+                gc->setUsed(false);
 //                qDebug() << "delete widget: " << gc;
                 delete gc;
             }
             // Remove everything from the plot
-            plotsToolBox->removeTab(i);
+            plotsToolBox->removeTab(gc->getTabPos());
         }
+        plotsVector.clear();
         delete plotsToolBox;
         plotsToolBox = nullptr;
+        delete bottomWidget;
     }
     ui->plot->hide();
 }
@@ -201,8 +204,8 @@ void MainWindow::cleanGraphs() {
 /******************************************************************************************************************/
 void MainWindow::updateGraphs(bool resetDelta) {
     ui->plot->clearItems();
-    for (int i = plotsToolBox->count(); i >= 0; i--) {
-        graphContainer* gc = dynamic_cast<graphContainer*>(plotsToolBox->widget(i));
+    for (int i = plotsVector.size() - 1; i >= 0; i--) {
+        graphContainer* gc = plotsVector[i];
         if (gc != nullptr) {
             gc->updateGraph(numberOfPoints, resetDelta);
         }
@@ -214,7 +217,7 @@ void MainWindow::updateGraphs(bool resetDelta) {
 /******************************************************************************************************************/
 void MainWindow::setupPlot() {
     //ui->verticalLayoutPlots->addWidget(new QPushButton("0"));
-    cleanGraphs();
+//    cleanGraphs();
     plotsToolBox = new QTabWidget();
     plotsToolBox->setTabPosition(QTabWidget::North);
     ui->verticalLayoutPlots->addWidget(plotsToolBox);
@@ -222,7 +225,7 @@ void MainWindow::setupPlot() {
 //    plotsToolBox->setMaximumWidth(400);
     plotsToolBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 //    plotsToolBox->setMaximumHeight(400);
-    QLabel* bottomWidget = new QLabel();
+    bottomWidget = new QLabel();
     bottomWidget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     bottomWidget->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png"));
     bottomWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
@@ -238,10 +241,10 @@ void MainWindow::addPlots() {
         ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
         ui->plot->xAxis->setRange(0, numberOfPoints);                                      // Set x axis range for specified number of points
         setAutoYRange(ui->plot->yAxis->range().size());
+
         QString plotStr = "Plot " + QString::number( tabInd);
         graphContainer* gc = new graphContainer(ui->plot->addGraph(), numberOfPoints, plotStr, colours[ tabInd],  tabInd);
-        plotsToolBox->insertTab( tabInd, gc, plotStr);
-        plotColorChanged( tabInd, colours[ tabInd]);
+        plotsVector.insert(tabInd, gc);
         connect(gc, SIGNAL(plotColorChanged(int, QColor)), this, SLOT(plotColorChanged(int, QColor)));
     }
 }
@@ -291,11 +294,14 @@ void MainWindow::openPort() {
     serialPort->setDataBits(dataBits);
     serialPort->setStopBits(stopBits);
     if (serialPort->open(QIODevice::ReadWrite) ) {
+        setupPlot();                                                                          // Create the QCustomPlot area
         receivedData.clear();
         noMsgReceivedData.clear();
         portOpenedSuccess();
     } else {
-        ui->statusBar->showMessage("Cannot open port!");
+        ui->statusBar->setStyleSheet("background-color: Tomato;");
+        ui->statusBar->showMessage("Cannot open port " + ui->comboPort->currentText() + " --> " + serialPort->errorString());
+        qDebug() << "Cannot open port " << ui->comboPort->currentText();
         qDebug() << serialPort->errorString();
     }
 }
@@ -305,6 +311,7 @@ void MainWindow::openPort() {
 /******************************************************************************************************************/
 void MainWindow::on_comboPort_currentIndexChanged(const QString &arg1) {
     QSerialPortInfo selectedPort(arg1);                                                   // Dislplay info for selected port
+    ui->statusBar->setStyleSheet("background-color: SkyBlue ;");
     ui->statusBar->showMessage(selectedPort.description());
 }
 
@@ -331,12 +338,13 @@ void MainWindow::portOpenedSuccess() {
         widgets->setSerialPort(serialPort);
     }
     ui->connectButton->setText("Disconnect");                                             // Change buttons
+    ui->statusBar->setStyleSheet("background-color: SpringGreen ;");
     ui->statusBar->showMessage("Connected!");
     enableControls(false);                                                                // Disable controls if port is open
     ui->stopPlotButton->setText("Stop Plot");                                             // Enable button for stopping plot
     ui->stopPlotButton->setEnabled(true);
     ui->saveJPGButton->setEnabled(true);                                                  // Enable button for saving plot
-    setupPlot();                                                                          // Create the QCustomPlot area
+//    setupPlot();                                                                          // Create the QCustomPlot area
     updateTimer.start(20);                                                                // Slot is refreshed 20 times per second
     connected = true;                                                                     // Set flags
     plotting = true;
@@ -345,10 +353,6 @@ void MainWindow::portOpenedSuccess() {
     serialPort->setDataTerminalReady(true);
     connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
     connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
-    plotInfosW = new plotsInfoWidget(this);
-    plotInfosW->move(pos().x() + width() + 20, pos().y());
-    plotInfosW->setWindowTitle("Plots Info");
-    plotInfosW->setWindowFlag(Qt::WindowCloseButtonHint, false);
 }
 
 /******************************************************************************************************************/
@@ -379,6 +383,7 @@ void MainWindow:: closePort() {
     delete serialPort;                                                                // Delete the pointer
     serialPort = nullptr;                                                                // Assign NULL to dangling pointer
     ui->connectButton->setText("Connect");                                            // Change Connect button text, to indicate disconnected
+    ui->statusBar->setStyleSheet("background-color: SkyBlue;");
     ui->statusBar->showMessage("Disconnected!");                                      // Show message in status bar
     connected = false;                                                                // Set connected status flag to false
     plotting = false;                                                                 // Not plotting anymore
@@ -443,9 +448,19 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
             qDebug() << "BAD PLOT ID : " << plotId << " --> " << newData;
             return;
         }
-        graphContainer* plot = dynamic_cast<graphContainer*>(plotsToolBox->widget(plotId));
+//        qDebug() << "PLOT DATA : " << plotId << " --> " << newData;
+        graphContainer* plot = plotsVector[plotId];
         Q_ASSERT(plot != nullptr);
-//        qDebug() << "Plot: " << newData;
+        int tabPos;
+        if (!plot->isUsed()) {
+            tabPos = plotsToolBox->addTab(plot, plot->getName());
+            plotsToolBox->setTabEnabled(tabPos, true);
+            plot->setColor(colours[plotId]);
+            plot->setUsed(true);
+            plot->setTabPos(tabPos);
+        } else {
+            tabPos = plot->getTabPos();
+        }
         QString param1 = "";
         QString param2 = "";
         QString id = newData.at(0);
@@ -463,7 +478,7 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
         } else {
             if ((!param1.isEmpty()) && (plot->getName() != param1)) {
                 plot->setName(param1);
-                plotsToolBox->tabBar()->setTabText(plotId, param1);
+                plotsToolBox->tabBar()->setTabText(tabPos, param1);
             }
         }
         if (isColor(param2)) {
@@ -471,7 +486,7 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
         } else {
             if ((!param2.isEmpty()) && (plot->getName() != param2)) {
                 plot->setName(param2);
-                plotsToolBox->tabBar()->setTabText(plotId, param2);
+                plotsToolBox->tabBar()->setTabText(tabPos, param2);
             }
         }
     }
@@ -493,13 +508,20 @@ void MainWindow::onNewDataArrived(QStringList newData) {
         if (dataListSize > 1) {
             double val = newData[1].toDouble();
             // Add data to graphs according plot Id
-            graphContainer* plot = dynamic_cast<graphContainer*>(plotsToolBox->widget(plotId));
-            if (plot != nullptr) {
-                plot->addData(dataPointNumber, val);
-//                qDebug() << plot->getDataStr();
-//                plotInfosW->updateDataInfo("000");
-                //plotInfosW->updateDataInfo(plot->getDataStr());
+
+            graphContainer* plot = plotsVector[plotId];
+            Q_ASSERT(plot != nullptr);
+            int tabPos;
+            if (!plot->isUsed()) {
+                tabPos = plotsToolBox->addTab(plot, plot->getName());
+                plotsToolBox->setTabEnabled(tabPos, true);
+                plot->setColor(colours[plotId]);
+                plot->setUsed(true);
+                plot->setTabPos(tabPos);
+            } else {
+                tabPos = plot->getTabPos();
             }
+            plot->addData(dataPointNumber, val);
         }
     }
 }
@@ -697,6 +719,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
     QString coordinates("X: %1 Y: %2");
     coordinates = coordinates.arg(xx).arg(yy);
+    ui->statusBar->setStyleSheet("background-color: SkyBlue;");
     ui->statusBar->showMessage(coordinates);
 }
 /******************************************************************************************************************/
@@ -768,9 +791,7 @@ void MainWindow::on_bgColorButton_pressed() {
 
 /******************************************************************************************************************/
 void MainWindow::on_plotsInfoRadio_clicked(bool checked) {
-    if (checked) {
-        plotInfosW->show();
-    } else {
-        plotInfosW->hide();
+    for (int var = 0; var < plotsVector.size(); ++var) {
+        plotsVector[var]->setRadioInfo(checked);
     }
 }
