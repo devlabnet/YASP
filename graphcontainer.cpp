@@ -135,7 +135,7 @@ void graphContainer::handleShowPlot(bool state) {
 
 /******************************************************************************************************************/
 void graphContainer::setColor(QColor color) {
-    qDebug() << "graphContainer setColor " << tabPos << " color:" << color;
+//    qDebug() << "graphContainer setColor " << tabPos << " color:" << color;
     penColor = color;
     pen.setColor(penColor);
     axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));

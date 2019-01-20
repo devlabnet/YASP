@@ -111,7 +111,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinPoints->setMaximum(SPIN_MAX_DEF);
     ui->spinPoints->setSingleStep(SPIN_STEP_DEF);
     ui->spinPoints->setValue(NUMBER_OF_POINTS_DEF);
-
+    ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
+    ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
     // Clear the terminal
     on_clearTermButton_clicked();
 }
@@ -361,7 +362,7 @@ void MainWindow::dataTerminalReadyChanged(bool dtr) {
         serialPort->clear(QSerialPort::AllDirections);
         connect(serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
     }
-    qDebug() << "DTR: " << dtr;
+//    qDebug() << "DTR: " << dtr;
 }
 
 /******************************************************************************************************************/
@@ -446,6 +447,7 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
         int plotId = newData.at(0).toInt();
         if ((plotId < 0) || (plotId > 9)) {
             qDebug() << "BAD PLOT ID : " << plotId << " --> " << newData;
+            addMessageText("BAD PLOT ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
             return;
         }
 //        qDebug() << "PLOT DATA : " << plotId << " --> " << newData;
@@ -500,6 +502,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
     int plotId = newData.at(0).toInt();
     if ((plotId < 0) || (plotId > 9)) {
         qDebug() << "BAD DATA ID : " << plotId << " --> " << newData;
+        addMessageText("BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
         return;
     }
     if(plotting) {
@@ -533,10 +536,29 @@ void MainWindow::addMessageText(QString data, QString color) {
     data = data.replace("\n", "");
     data = data.replace("\r", "\n");
     QString string = QUrl::fromPercentEncoding(data.toLatin1());
-    ui->receiveTerminal->moveCursor (QTextCursor::End);
     QString html = "<span style=\"color:"+color+";font-weight:bold\">"+string+"</span>";
-    ui->receiveTerminal->appendHtml(html);
-    ui->receiveTerminal->moveCursor (QTextCursor::End);
+    if (ui->scrollButton->isChecked()) {
+        ui->receiveTerminal->moveCursor (QTextCursor::End);
+        ui->receiveTerminal->appendHtml(html);
+        ui->receiveTerminal->moveCursor (QTextCursor::End);
+    } else {
+        const QTextCursor old_cursor = ui->receiveTerminal->textCursor();
+        const int old_scrollbar_value = ui->receiveTerminal->verticalScrollBar()->value();
+        const bool is_scrolled_down = old_scrollbar_value == ui->receiveTerminal->verticalScrollBar()->maximum();
+        // Move the cursor to the end of the document.
+        ui->receiveTerminal->moveCursor(QTextCursor::End);
+        // Insert the text at the position of the cursor (which is the end of the document).
+        ui->receiveTerminal->appendHtml(html);
+        if (old_cursor.hasSelection() || !is_scrolled_down) {
+            // The user has selected text or scrolled away from the bottom: maintain position.
+            ui->receiveTerminal->setTextCursor(old_cursor);
+            ui->receiveTerminal->verticalScrollBar()->setValue(old_scrollbar_value);
+        } else {
+            // The user hasn't selected any text and the scrollbar is at the bottom: scroll to the bottom.
+            ui->receiveTerminal->moveCursor(QTextCursor::End);
+            ui->receiveTerminal->verticalScrollBar()->setValue(ui->receiveTerminal->verticalScrollBar()->maximum());
+        }
+    }
 }
 
 /******************************************************************************************************************/
@@ -612,7 +634,7 @@ void MainWindow::readData() {
                             break;
                         } else if ( cc == '\n') {
                             if (!noMsgReceivedData.isEmpty()) {
-                                addMessageText(noMsgReceivedData, "orange");
+                                addMessageText(noMsgReceivedData, "blue");
                             }
                             noMsgReceivedData.clear();
                         } else {
@@ -793,5 +815,16 @@ void MainWindow::on_bgColorButton_pressed() {
 void MainWindow::on_plotsInfoRadio_clicked(bool checked) {
     for (int var = 0; var < plotsVector.size(); ++var) {
         plotsVector[var]->setRadioInfo(checked);
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_scrollButton_clicked(bool checked) {
+    if (checked) {
+        ui->autoScrollLabel->setStyleSheet("QLabel { color : DeepPink; }");
+        ui->autoScrollLabel->setText("Auto Scroll ON, To avoid autoscroll UNSELECT Button ---> ");
+    } else {
+        ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
+        ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
     }
 }

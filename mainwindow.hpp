@@ -90,6 +90,8 @@ private slots:
     void on_bgColorButton_pressed();
     void on_plotsInfoRadio_clicked(bool checked);
 
+    void on_scrollButton_clicked(bool checked);
+
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
