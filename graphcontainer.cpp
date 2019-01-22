@@ -31,27 +31,34 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     widthSpinBox->setValue(1);
 
     QLabel* colorLabel = new QLabel("Color");
-    colorLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-    colorButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    layout->addWidget(colorLabel, 0, 0, Qt::AlignTop);
-    layout->addWidget(colorButton, 0, 1, Qt::AlignTop);
+    colorLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+    colorButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    layout->addWidget(colorLabel, 0, 0, Qt::AlignCenter);
+    layout->addWidget(colorButton, 0, 1, Qt::AlignCenter);
     connect(colorButton, SIGNAL (clicked()), this, SLOT (handleColor()));
 
     QPushButton* resetInfoButton = new QPushButton("Clear Info");
-    layout->addWidget(resetInfoButton, 0, 2, Qt::AlignTop);
+    layout->addWidget(resetInfoButton, 0, 2, Qt::AlignCenter);
     connect(resetInfoButton, SIGNAL (clicked()), this, SLOT (handleResetInfo()));
 
     radioInfo = new QRadioButton("show");
     radioInfo->setChecked(true);
-    layout->addWidget(radioInfo, 0, 3, Qt::AlignTop);
+    radioInfo->setAutoExclusive(false);
+    layout->addWidget(radioInfo, 0, 3, Qt::AlignCenter);
     connect(radioInfo, SIGNAL(toggled(bool)), this, SLOT (handleShowPlot(bool)));
 
     QLabel* widthLabel = new QLabel("Width");
-    widthLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-    widthSpinBox->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    layout->addWidget(widthLabel, 1 , 0, Qt::AlignTop);
-    layout->addWidget(widthSpinBox, 1 , 1, Qt::AlignTop);
+    widthLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+    widthSpinBox->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    layout->addWidget(widthLabel, 1 , 0, Qt::AlignCenter);
+    layout->addWidget(widthSpinBox, 1 , 1, Qt::AlignCenter);
     connect(widthSpinBox, SIGNAL (valueChanged(int)), this, SLOT (handleWidth(int)));
+
+    logInfoBtn = new QPushButton("log Data");
+    logInfoBtn->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    layout->addWidget(logInfoBtn, 1, 2, Qt::AlignCenter);
+    connect(logInfoBtn, SIGNAL(clicked()), this, SLOT (logPlotButtonClicked()));
+
     delta = 0;
     slideDelta = new FormSliderInfo("Delta",
                                     graph->parentPlot()->yAxis->range().lower,
@@ -74,8 +81,8 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     comboMult->addItem("1000");
     comboMult->addItem("10000");
     connect(comboMult, SIGNAL (currentIndexChanged(const QString)), this, SLOT (handleComboMult(const QString)));
-    layout->addWidget(comboMultLabel, 3, 0, Qt::AlignTop);
-    layout->addWidget(comboMult, 3, 1, Qt::AlignTop);
+    layout->addWidget(comboMultLabel, 3, 0, Qt::AlignCenter);
+    layout->addWidget(comboMult, 3, 1, Qt::AlignCenter);
 
     //font.setFamily("time");
     font.setPointSize(8);
@@ -98,6 +105,13 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
 /******************************************************************************************************************/
 graphContainer::~graphContainer() {
 //    qDebug() << "graphContainer Destructor";
+    if (logFile != nullptr) {
+        if(logFile->isOpen()) {
+            logFile->close();
+            delete logFile;
+            logFile = nullptr;
+        }
+    }
 }
 
 /******************************************************************************************************************/
@@ -109,6 +123,11 @@ void graphContainer::updateGraph(int pCnt, bool resetDeltaValue) {
     } else {
         slideDelta->extendRange(graph->parentPlot()->yAxis->range().lower, graph->parentPlot()->yAxis->range().upper);
     }
+}
+
+/******************************************************************************************************************/
+bool graphContainer::isDisplayed() {
+    return radioInfo->isChecked();
 }
 
 /******************************************************************************************************************/
@@ -146,19 +165,62 @@ void graphContainer::setColor(QColor color) {
 }
 
 /******************************************************************************************************************/
-void graphContainer::addData(double k, double v) {
+void graphContainer::addData(double k, double v, int time) {
     if (radioInfo->isChecked()) {
         dataMin = qMin(dataMin, v);
         dataMax = qMax(dataMax, v);
     //    dataAverage = v;
         int avr = 5;
         dataAverage = ((dataAverage * avr) + v) / (avr + 1);
-        graph->addData(k, (v * mult) + delta);                 // Add data to Graph 0
+        double plotV = (v * mult) + delta;
+        graph->addData(k, plotV);                 // Add data to Graph 0
         graph->removeDataBefore(k - numberOfPoints);           // Remove data from graph 0
         axisLine->start->setCoords(k - numberOfPoints, delta);
         axisLine->end->setCoords(k, delta);
+        if (logFile != nullptr) {
+            if (isDisplayed()) {
+                streamLog << k << ";" << time << ";" << v << ";" << dataAverage << ";" << plotV
+                          << ";" << mult << ";" << delta << ";"
+                          << "\n";
+            }
+        }
     }
     updateLabel();
+}
+
+/******************************************************************************************************************/
+void graphContainer::logPlotButtonClicked() {
+    qDebug() << "logPlotButtonClicked ";
+    if (logFile == nullptr) {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Log Plot"),
+                                   plotName,
+                                   tr("Data (*.csv)"));
+        qDebug() << "Log Plot : " << fileName;
+        logFile = new QFile(fileName);
+        if (!logFile->open(QIODevice::WriteOnly)) {
+            QMessageBox::information(this, tr("Unable to open file"),
+                                     logFile->errorString());
+            logFile = nullptr;
+            return;
+        }
+        qDebug() << "Log Plot Opened : " << logFile->fileName();
+        streamLog.setDevice(logFile);
+        QLocale locale = QLocale("fr_FR");
+        //QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+        streamLog.setLocale(locale);
+        // Set Headers
+        streamLog << "POINT" << ";" << "TIME" << ";" << "VALUE" << ";" << "dataAverage" << ";" << "plotV"
+                  << ";" << "mult" << ";" << "delta"
+                  << "\n";
+
+        logInfoBtn->setText("Stop Logging");
+    } else {
+        qDebug() << "Log Plot Closed : " << logFile->fileName();
+        logInfoBtn->setText("log Data");
+        logFile->close();
+        delete logFile;
+        logFile = nullptr;
+    }
 }
 
 /******************************************************************************************************************/

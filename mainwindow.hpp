@@ -36,6 +36,7 @@
 //#include "tabwidget.h"
 #include <QTextEdit>
 #include "graphcontainer.h"
+#include <QTime>
 
 #define START_MSG      0x10
 #define PLOT_MSG       0X11
@@ -92,6 +93,8 @@ private slots:
 
     void on_scrollButton_clicked(bool checked);
 
+    void on_logPlotButton_clicked();
+
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
@@ -104,6 +107,7 @@ private:
                           QColor("#ffaa00"), QColor("#ffaaff"), QColor("#00ffff"),
                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                           QColor("#ff00aa")};
+    QTime plotTime;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
     int dataPointNumber;                                                                  // Keep track of data points
@@ -122,6 +126,9 @@ private:
     QTabWidget* plotsToolBox = nullptr;
     QVector<graphContainer*> plotsVector;
     QLabel* bottomWidget;
+    QFile* logFile = nullptr;
+    QTextStream streamLog;
+
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();

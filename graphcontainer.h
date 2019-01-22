@@ -14,7 +14,7 @@ public:
     ~graphContainer();
 
     QCPGraph* getGraph() { return graph; }
-    void addData(double k, double v);
+    void addData(double k, double v, int time);
     void clearData();
     void clearLabels();
     void updateGraph(int pCnt,  bool resetDeltaValue = false);
@@ -27,7 +27,7 @@ public:
     int getTabPos() { return tabPos; }
     void setTabPos(int p) { tabPos = p; }
     void setRadioInfo(bool checked);
-
+    bool isDisplayed();
 private:
     QCPGraph* graph;
     // Number of points plotted
@@ -36,6 +36,7 @@ private:
     int tabPos = -1;
     QString plotName;
     QString dataStr;
+    bool logData = false;
     int tabIndex;
     QFont font;
     QCPItemText *textLabel;
@@ -45,6 +46,7 @@ private:
     QGridLayout* layout;
     QPushButton *colorButton;
     QRadioButton* radioInfo;
+    QPushButton* logInfoBtn;
     QPen pen;
     QColor penColor;
     QCPItemLine *axisLine;
@@ -55,6 +57,11 @@ private:
     double dataMin = 0;
     double dataMax = 0;
     double dataAverage = 0;
+
+    QLocale locale;
+    QFile* logFile = nullptr;
+    QTextStream streamLog;
+
     void updateLabel();
 
 private slots:
@@ -65,7 +72,7 @@ private slots:
 //   void handleMult(int i);
     void handleComboMult(const QString str);
     void handleShowPlot(bool state);
-
+    void logPlotButtonClicked();
 signals:
     void plotColorChanged(int, QColor);
 public slots:

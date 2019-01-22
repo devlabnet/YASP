@@ -115,19 +115,27 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
     // Clear the terminal
     on_clearTermButton_clicked();
+    plotTime.start();
 }
 
 /******************************************************************************************************************/
 /* Destructor */
 /******************************************************************************************************************/
 MainWindow::~MainWindow() {
-    qDebug() << "MainWindows Destructor";
+    qDebug() << "MainWindow Destructor";
     if(serialPort != nullptr) delete serialPort;
     delete ui;
 }
 /******************************************************************************************************************/
 void MainWindow::closeEvent(QCloseEvent *event) {
-   qDebug() << "MainWindows closeEvent";
+   qDebug() << "MainWindow closeEvent";
+   if (logFile != nullptr) {
+       if(logFile->isOpen()) {
+           logFile->close();
+           delete logFile;
+           logFile = nullptr;
+       }
+   }
    // or event->accept(); but fine 'moments' are there
    QMainWindow::closeEvent(event);
 }
@@ -354,6 +362,7 @@ void MainWindow::portOpenedSuccess() {
     serialPort->setDataTerminalReady(true);
     connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
     connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
+    plotTime.restart();
 }
 
 /******************************************************************************************************************/
@@ -368,6 +377,13 @@ void MainWindow::dataTerminalReadyChanged(bool dtr) {
 /******************************************************************************************************************/
 void MainWindow:: closePort() {
     cleanGraphs();
+    if (logFile != nullptr) {
+        if(logFile->isOpen()) {
+            logFile->close();
+            delete logFile;
+            logFile = nullptr;
+        }
+    }
     // Clear the terminal
     on_clearTermButton_clicked();
     //qDebug() << "Port closed signal received!";
@@ -446,8 +462,8 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
     if (newData.size() > 1) {
         int plotId = newData.at(0).toInt();
         if ((plotId < 0) || (plotId > 9)) {
-            qDebug() << "BAD PLOT ID : " << plotId << " --> " << newData;
-            addMessageText("BAD PLOT ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
+            qDebug() << plotTime.elapsed() << " BAD PLOT ID : " << plotId << " --> " << newData;
+            addMessageText(QString::number(plotTime.elapsed()) + " BAD PLOT ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
             return;
         }
 //        qDebug() << "PLOT DATA : " << plotId << " --> " << newData;
@@ -501,8 +517,10 @@ void MainWindow::onNewDataArrived(QStringList newData) {
     Q_ASSERT(newData.size() > 0);
     int plotId = newData.at(0).toInt();
     if ((plotId < 0) || (plotId > 9)) {
-        qDebug() << "BAD DATA ID : " << plotId << " --> " << newData;
-        addMessageText("BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
+        qDebug() << plotTime.elapsed() << " BAD DATA ID : " << plotId << " --> " << newData;
+        addMessageText(QString::number(plotTime.elapsed()) + " BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
+//        qDebug() << "BAD DATA ID : " << plotId << " --> " << newData;
+//        addMessageText("BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
         return;
     }
     if(plotting) {
@@ -524,7 +542,14 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             } else {
                 tabPos = plot->getTabPos();
             }
-            plot->addData(dataPointNumber, val);
+            //qDebug() << plotTime.elapsed() << " " << dataPointNumber << " " << val;
+            int time = plotTime.elapsed();
+            plot->addData(dataPointNumber, val, time);
+            if (logFile != nullptr) {
+                if (plot->isDisplayed()) {
+                    streamLog << plot->getName() << ";" << dataPointNumber << ";" << val << ";" << time << "\n";
+                }
+            }
         }
     }
 }
@@ -700,8 +725,7 @@ void MainWindow::setAutoYRange(double r, bool resetDelta) {
 /******************************************************************************************************************/
 /* Save a JPG image of the plot to current EXE directory */
 /******************************************************************************************************************/
-void MainWindow::on_saveJPGButton_clicked()
-{
+void MainWindow::on_saveJPGButton_clicked() {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Plot"),
                                "",
                                tr("Images (*.jpg)"));
@@ -826,5 +850,34 @@ void MainWindow::on_scrollButton_clicked(bool checked) {
     } else {
         ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
         ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_logPlotButton_clicked() {
+    qDebug() << "on_logPlotButton_clicked ";
+    if (logFile == nullptr) {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Log Plot"),
+                                   "",
+                                   tr("Data (*.csv)"));
+        qDebug() << "Log Plot : " << fileName;
+        logFile = new QFile(fileName);
+        if (!logFile->open(QIODevice::WriteOnly)) {
+            QMessageBox::information(this, tr("Unable to open file"),
+                                     logFile->errorString());
+            logFile = nullptr;
+            return;
+        }
+        qDebug() << "Log Plot Opened : " << logFile->fileName();
+        streamLog.setDevice(logFile);
+        // Set Headers
+        streamLog << "NAME" << ";" << "POINT" << ";" << "VALUE" << ";" << "TIME" << "\n";
+        ui->logPlotButton->setText("Stop Logging");
+    } else {
+        qDebug() << "Log Plot Closed : " << logFile->fileName();
+        ui->logPlotButton->setText("Log Displayed Plots");
+        logFile->close();
+        delete logFile;
+        logFile = nullptr;
     }
 }

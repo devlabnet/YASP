@@ -460,6 +460,13 @@
                      </property>
                     </widget>
                    </item>
+                   <item>
+                    <widget class="QPushButton" name="logPlotButton">
+                     <property name="text">
+                      <string>Log Displayed Plots</string>
+                     </property>
+                    </widget>
+                   </item>
                   </layout>
                  </item>
                 </layout>
