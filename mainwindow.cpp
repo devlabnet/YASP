@@ -83,14 +83,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->yAxis->setSubTickPen(QPen(gridColor));
     ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
-    ui->plot->setInteraction(QCP::iRangeDrag, true);
-    ui->plot->setInteraction(QCP::iRangeZoom, true);
+//    ui->plot->setInteraction(QCP::iRangeDrag, true);
+//    ui->plot->setInteraction(QCP::iRangeZoom, true);
 
 
+    ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     // Slot for printing coordinates
+    connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePressInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
+
+    // setup policy and connect slot for context menu popup:
+    ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
 
     serialPort = nullptr;                                                                    // Set serial port pointer to NULL initially
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));                       // Connect update timer to replot slot
@@ -436,14 +442,17 @@ void MainWindow::replot() {
 /* Stop Plot Button */
 /******************************************************************************************************************/
 void MainWindow::on_stopPlotButton_clicked() {
-    if(plotting) {                                                                        // Stop plotting
+    if (plotting) {                                                                        // Stop plotting
         updateTimer.stop();                                                               // Stop updating plot timer
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectPlottables);
+        //ui->plot->setInteraction( QCP::iSelectItems, true);
     } else {                                                                              // Start plotting
         updateTimer.start();                                                              // Start updating plot timer
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     }
 }
 
@@ -528,7 +537,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
     Q_ASSERT(newData.size() > 0);
     int plotId = newData.at(0).toInt();
     if ((plotId < 0) || (plotId > 9)) {
-        qDebug() << plotTime.elapsed() << " BAD DATA ID : " << plotId << " --> " << newData;
+//        qDebug() << plotTime.elapsed() << " BAD DATA ID : " << plotId << " --> " << newData;
         addMessageText(QString::number(plotTime.elapsed()) + " BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
 //        qDebug() << "BAD DATA ID : " << plotId << " --> " << newData;
 //        addMessageText("BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
@@ -789,6 +798,52 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     Q_UNUSED(event)
     setAutoYRange(ui->plot->yAxis->range().size());
+}
+
+/******************************************************************************************************************/
+void MainWindow::mousePressInPlot(QMouseEvent *event) {
+    Q_UNUSED(event)
+
+    qDebug() << "mousePressInPlot --> ";
+    // if an axis is selected, only allow the direction of that axis to be dragged
+    // if no axis is selected, both directions may be dragged
+
+    if (ui->plot->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
+        qDebug() << "xAxis";
+        ui->plot->axisRect()->setRangeDrag(ui->plot->xAxis->orientation());
+    } else if (ui->plot->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
+        ui->plot->axisRect()->setRangeDrag(ui->plot->yAxis->orientation());
+        qDebug() << "yAxis";
+    } else {
+        qDebug() << "xAxis yAxis";
+        ui->plot->axisRect()->setRangeDrag(Qt::Horizontal|Qt::Vertical);
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::plotContextMenuRequest(QPoint pos) {
+  QMenu *menu = new QMenu(this);
+  menu->setAttribute(Qt::WA_DeleteOnClose);
+
+//  if (ui->plot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
+//  {
+//    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
+//    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
+//    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
+//    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
+//    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
+//  } else  // general context menu on graphs requested
+//  {
+//    menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
+    if (ui->plot->selectedGraphs().size() > 0) {
+      menu->addAction("Log graph", this, SLOT(removeSelectedGraph()));
+    }
+    if (ui->plot->graphCount() > 0) {
+      menu->addAction("Log all graphs", this, SLOT(removeAllGraphs()));
+    }
+//  }
+
+  menu->popup(ui->plot->mapToGlobal(pos));
 }
 
 /******************************************************************************************************************/

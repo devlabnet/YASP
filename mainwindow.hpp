@@ -83,6 +83,9 @@ private slots:
     void onMouseMoveInPlot(QMouseEvent *event);                                           // Displays coordinates of mouse pointer when clicked in plot in status bar
     void onMouseReleaseInPlot(QMouseEvent *event);
     void onMouseWheelInPlot(QWheelEvent *event);
+    void mousePressInPlot(QMouseEvent *event);
+    void plotContextMenuRequest(QPoint pos);
+
     void on_spinPoints_valueChanged(int arg1);                                            // Spin box controls how many data points are collected and displayed
     void on_actionHow_to_use_triggered();
     void on_sendLine_returnPressed();
