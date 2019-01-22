@@ -17,7 +17,8 @@ public:
     void addData(double k, double v, int time);
     void clearData();
     void clearLabels();
-    void updateGraph(int pCnt,  bool resetDeltaValue = false);
+    void updateGraphNop(int pCnt,  bool resetDeltaValue = false);
+    void updateGraphParams(QColor plotBgC);
     QString getName() { return plotName; }
     void setColor(QColor color);
     void setName(QString name) { plotName = "Plot " + name; }
@@ -30,9 +31,11 @@ public:
     bool isDisplayed();
 private:
     QCPGraph* graph;
+    QColor plotBgColor;
     // Number of points plotted
     int numberOfPoints;
     bool inUse = false;
+    bool logging = false;
     int tabPos = -1;
     QString plotName;
     QString dataStr;

@@ -211,12 +211,22 @@ void MainWindow::cleanGraphs() {
 }
 
 /******************************************************************************************************************/
-void MainWindow::updateGraphs(bool resetDelta) {
+void MainWindow::updateGraphNops(bool resetDelta) {
     ui->plot->clearItems();
     for (int i = plotsVector.size() - 1; i >= 0; i--) {
         graphContainer* gc = plotsVector[i];
         if (gc != nullptr) {
-            gc->updateGraph(numberOfPoints, resetDelta);
+            gc->updateGraphNop(numberOfPoints, resetDelta);
+        }
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::updateGraphParams(QColor plotBgColor) {
+    for (int i = plotsVector.size() - 1; i >= 0; i--) {
+        graphContainer* gc = plotsVector[i];
+        if (gc != nullptr) {
+            gc->updateGraphParams(plotBgColor);
         }
     }
 }
@@ -255,6 +265,7 @@ void MainWindow::addPlots() {
         graphContainer* gc = new graphContainer(ui->plot->addGraph(), numberOfPoints, plotStr, colours[ tabInd],  tabInd);
         plotsVector.insert(tabInd, gc);
         connect(gc, SIGNAL(plotColorChanged(int, QColor)), this, SLOT(plotColorChanged(int, QColor)));
+        gc->updateGraphParams(bgColor);
     }
 }
 
@@ -719,7 +730,7 @@ void MainWindow::setAutoYRange(double r, bool resetDelta) {
 //    qDebug() <<  r << " -> " << m  << " -> " <<  v << " -> " << x;
     int vMin = qMax(x * mult, 5);
     ui->plot->yAxis->setTickStep(vMin);
-    updateGraphs(resetDelta);
+    updateGraphNops(resetDelta);
 }
 
 /******************************************************************************************************************/
@@ -753,7 +764,7 @@ void MainWindow::on_resetPlotButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_spinPoints_valueChanged(int arg1) {
     numberOfPoints = arg1;
-    updateGraphs();
+    updateGraphNops();
     ui->plot->replot();
 }
 
@@ -833,6 +844,7 @@ void MainWindow::on_bgColorButton_pressed() {
     bgColor = QColorDialog::getColor(bgColor, this, "Select Background Color");
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
     ui->plot->setBackground(QBrush(bgColor));   // Background for the plot area
+    updateGraphParams(bgColor);
 }
 
 /******************************************************************************************************************/

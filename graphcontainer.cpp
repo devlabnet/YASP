@@ -84,10 +84,10 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     layout->addWidget(comboMultLabel, 3, 0, Qt::AlignCenter);
     layout->addWidget(comboMult, 3, 1, Qt::AlignCenter);
 
-    //font.setFamily("time");
+    font.setFamily("time");
     font.setPointSize(8);
     font.setWeight(50);
-    font.setFixedPitch(true);
+    //font.setFixedPitch(true);
     dataStr =  plotName;
     textLabel = new QCPItemText(graph->parentPlot());
     textLabel->setColor(penColor);
@@ -107,6 +107,7 @@ graphContainer::~graphContainer() {
 //    qDebug() << "graphContainer Destructor";
     if (logFile != nullptr) {
         if(logFile->isOpen()) {
+             qDebug() << "graphContainer Destructor Close Log File: " << logFile->fileName();
             logFile->close();
             delete logFile;
             logFile = nullptr;
@@ -115,13 +116,21 @@ graphContainer::~graphContainer() {
 }
 
 /******************************************************************************************************************/
-void graphContainer::updateGraph(int pCnt, bool resetDeltaValue) {
+void graphContainer::updateGraphNop(int pCnt, bool resetDeltaValue) {
     numberOfPoints = pCnt;
     if (resetDeltaValue) {
         slideDelta->setRange(graph->parentPlot()->yAxis->range().lower, graph->parentPlot()->yAxis->range().upper);
         slideDelta->setValue((graph->parentPlot()->yAxis->range().lower + graph->parentPlot()->yAxis->range().upper) / 2);
     } else {
         slideDelta->extendRange(graph->parentPlot()->yAxis->range().lower, graph->parentPlot()->yAxis->range().upper);
+    }
+}
+
+/******************************************************************************************************************/
+void graphContainer::updateGraphParams(QColor plotBgC) {
+    plotBgColor = plotBgC;
+    if (!logging) {
+        textLabel->setBrush(QBrush(plotBgColor));
     }
 }
 
@@ -206,13 +215,15 @@ void graphContainer::logPlotButtonClicked() {
         qDebug() << "Log Plot Opened : " << logFile->fileName();
         streamLog.setDevice(logFile);
         QLocale locale = QLocale("fr_FR");
+        locale.setNumberOptions(QLocale::OmitGroupSeparator);
         //QTextCodec *codec = QTextCodec::codecForName("UTF-8");
         streamLog.setLocale(locale);
         // Set Headers
         streamLog << "POINT" << ";" << "TIME" << ";" << "VALUE" << ";" << "dataAverage" << ";" << "plotV"
                   << ";" << "mult" << ";" << "delta"
                   << "\n";
-
+        logging = true;
+        textLabel->setBrush(QBrush(Qt::gray));
         logInfoBtn->setText("Stop Logging");
     } else {
         qDebug() << "Log Plot Closed : " << logFile->fileName();
@@ -220,6 +231,8 @@ void graphContainer::logPlotButtonClicked() {
         logFile->close();
         delete logFile;
         logFile = nullptr;
+        textLabel->setBrush(QBrush(plotBgColor));
+        logging = false;
     }
 }
 

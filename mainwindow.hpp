@@ -136,7 +136,9 @@ private:
     bool isColor(QString str);
     // Setup the QCustomPlot
     void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
-    void updateGraphs(bool resetDelta = false);
+    void updateGraphNops(bool resetDelta = false);
+    void updateGraphParams(QColor plotBgColor);
+
     void openPort();
     void portOpenedSuccess();                                                             // Called when port opens OK
     void closePort();                                                                  // Called when closing the port
