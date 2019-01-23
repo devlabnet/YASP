@@ -86,6 +86,7 @@ private slots:
     void mousePressInPlot(QMouseEvent *event);
     void plotContextMenuRequest(QPoint pos);
 
+    void doMeasure();
     void on_spinPoints_valueChanged(int arg1);                                            // Spin box controls how many data points are collected and displayed
     void on_actionHow_to_use_triggered();
     void on_sendLine_returnPressed();
@@ -131,6 +132,9 @@ private:
     QLabel* bottomWidget;
     QFile* logFile = nullptr;
     QTextStream streamLog;
+//    QRubberBand* rubberBand = nullptr;
+    QFrame* rubberBand = nullptr;
+    QPoint rubberOrigin;
 
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls

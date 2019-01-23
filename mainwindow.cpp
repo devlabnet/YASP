@@ -28,7 +28,7 @@
 #include "ui_mainwindow.h"
 #include <QSplitter>
 #include <QtGui>
-
+#include <QRubberBand>
 /******************************************************************************************************************/
 /* Constructor */
 /******************************************************************************************************************/
@@ -94,8 +94,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
 
-    // setup policy and connect slot for context menu popup:
-    ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
+//    // setup policy and connect slot for context menu popup:
+    ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     connect(ui->plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
 
     serialPort = nullptr;                                                                    // Set serial port pointer to NULL initially
@@ -122,6 +122,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Clear the terminal
     on_clearTermButton_clicked();
     plotTime.start();
+
 }
 
 /******************************************************************************************************************/
@@ -280,6 +281,7 @@ void MainWindow::plotColorChanged(int tabInd, QColor color) {
     QPixmap pixmap(16, 16);
     pixmap.fill(color);
     plotsToolBox->tabBar()->setTabIcon(tabInd, QIcon(pixmap));
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -447,12 +449,16 @@ void MainWindow::on_stopPlotButton_clicked() {
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectPlottables);
+        // setup policy and connect slot for context menu popup:
+        ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
+
         //ui->plot->setInteraction( QCP::iSelectItems, true);
     } else {                                                                              // Start plotting
         updateTimer.start();                                                              // Start updating plot timer
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+        ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     }
 }
 
@@ -778,20 +784,57 @@ void MainWindow::on_spinPoints_valueChanged(int arg1) {
 }
 
 /******************************************************************************************************************/
+void MainWindow::doMeasure() {
+//    rubberBand = new QRubberBand(QRubberBand::Line, ui->plot);
+    rubberBand = new QFrame(ui->plot);
+    rubberBand->setLineWidth(2);
+    rubberBand->setFrameStyle(QFrame::Box);
+    rubberBand->setStyleSheet("color:red");
+    ui->plot->setCursor(Qt::CrossCursor);
+    ui->plot->setInteraction(QCP::iRangeDrag, false);
+    ui->plot->setInteraction(QCP::iRangeZoom, false);
+    ui->plot->setInteraction(QCP::iSelectAxes, false);
+    ui->plot->setInteraction(QCP::iSelectPlottables, false);
+}
+
+/******************************************************************************************************************/
 /* Prints coordinates of mouse pointer in status bar on mouse release */
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
+//    qDebug() << "onMouseMoveInPlot " << event->button();
+    if (rubberBand) {
+        rubberBand->setGeometry(QRect(rubberOrigin, event->pos()).normalized());
+    }
+//        qDebug() << "rubberBand Move " << event->pos();
     int xx = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->x()));
     int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
     QString coordinates("X: %1 Y: %2");
     coordinates = coordinates.arg(xx).arg(yy);
     ui->statusBar->setStyleSheet("background-color: SkyBlue;");
     ui->statusBar->showMessage(coordinates);
+
 }
 /******************************************************************************************************************/
 void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     Q_UNUSED(event)
     ui->statusBar->showMessage("release");
+    if (rubberBand) {
+        int xx = rubberBand->width();
+        int yy = rubberBand->height();
+        QString coordinates("Delta X: %1 Delta Y: %2");
+        coordinates = coordinates.arg(xx).arg(yy);
+        ui->statusBar->setStyleSheet("background-color: white;");
+        ui->statusBar->showMessage(coordinates);
+
+        delete rubberBand;
+        rubberBand = nullptr;
+        ui->plot->setCursor(Qt::ArrowCursor);
+        if (plotting) {
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+        } else {
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectPlottables);
+        }
+    }
 }
 
 /******************************************************************************************************************/
@@ -802,48 +845,56 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 
 /******************************************************************************************************************/
 void MainWindow::mousePressInPlot(QMouseEvent *event) {
-    Q_UNUSED(event)
+    qDebug() << "mousePressInPlot --> " << event->button();
 
-    qDebug() << "mousePressInPlot --> ";
-    // if an axis is selected, only allow the direction of that axis to be dragged
-    // if no axis is selected, both directions may be dragged
-
-    if (ui->plot->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
-        qDebug() << "xAxis";
-        ui->plot->axisRect()->setRangeDrag(ui->plot->xAxis->orientation());
-    } else if (ui->plot->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
-        ui->plot->axisRect()->setRangeDrag(ui->plot->yAxis->orientation());
-        qDebug() << "yAxis";
-    } else {
-        qDebug() << "xAxis yAxis";
-        ui->plot->axisRect()->setRangeDrag(Qt::Horizontal|Qt::Vertical);
+    rubberOrigin = event->pos();
+    if (event->button() == Qt::LeftButton) {
+        if (rubberBand) {
+            rubberBand->setGeometry(QRect(rubberOrigin, QSize()));
+            qDebug() << "rubberBand Start " << rubberOrigin;
+            rubberBand->show();
+        } else {
+            // if an axis is selected, only allow the direction of that axis to be dragged
+            // if no axis is selected, both directions may be dragged
+            if (ui->plot->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
+                qDebug() << "xAxis";
+                ui->plot->axisRect()->setRangeDrag(ui->plot->xAxis->orientation());
+            } else if (ui->plot->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
+                ui->plot->axisRect()->setRangeDrag(ui->plot->yAxis->orientation());
+                qDebug() << "yAxis";
+            } else {
+                qDebug() << "xAxis yAxis";
+                ui->plot->axisRect()->setRangeDrag(Qt::Horizontal|Qt::Vertical);
+            }
+        }
     }
 }
 
 /******************************************************************************************************************/
 void MainWindow::plotContextMenuRequest(QPoint pos) {
-  QMenu *menu = new QMenu(this);
-  menu->setAttribute(Qt::WA_DeleteOnClose);
+    QMenu *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
 
-//  if (ui->plot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
-//  {
-//    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
-//    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
-//    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
-//    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
-//    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
-//  } else  // general context menu on graphs requested
-//  {
-//    menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
+    //  if (ui->plot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
+    //  {
+    //    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
+    //    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
+    //    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
+    //    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
+    //    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
+    //  } else  // general context menu on graphs requested
+    //  {
+    //    menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
     if (ui->plot->selectedGraphs().size() > 0) {
-      menu->addAction("Log graph", this, SLOT(removeSelectedGraph()));
+        menu->addAction("Save Graph Data", this, SLOT(saveSelectedGraph()));
     }
     if (ui->plot->graphCount() > 0) {
-      menu->addAction("Log all graphs", this, SLOT(removeAllGraphs()));
+        menu->addAction("Measure", this, SLOT(doMeasure()));
+        menu->addAction("Save All Graphs Data", this, SLOT(saveAllGraphs()));
     }
-//  }
+    //  }
 
-  menu->popup(ui->plot->mapToGlobal(pos));
+    menu->popup(ui->plot->mapToGlobal(pos));
 }
 
 /******************************************************************************************************************/
@@ -900,6 +951,7 @@ void MainWindow::on_bgColorButton_pressed() {
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
     ui->plot->setBackground(QBrush(bgColor));   // Background for the plot area
     updateGraphParams(bgColor);
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -907,6 +959,7 @@ void MainWindow::on_plotsInfoRadio_clicked(bool checked) {
     for (int var = 0; var < plotsVector.size(); ++var) {
         plotsVector[var]->setRadioInfo(checked);
     }
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/

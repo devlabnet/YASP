@@ -159,6 +159,7 @@ void graphContainer::setRadioInfo(bool checked) {
 void graphContainer::handleShowPlot(bool state) {
     graph->setVisible(state);
     updateLabel();
+    graph->parentPlot()->replot();
 }
 
 /******************************************************************************************************************/
@@ -259,6 +260,7 @@ void graphContainer::updateLabel() {
 void graphContainer::handleColor() {
     penColor = QColorDialog::getColor(penColor, this, "Select Plot Color");
     setColor(penColor);
+    updateLabel();
 }
 
 /******************************************************************************************************************/
@@ -273,6 +275,7 @@ void graphContainer::handleResetInfo() {
 void graphContainer::handleWidth(int i) {
     pen.setWidth(i);
     graph->setPen(pen);
+    updateLabel();
 }
 
 /******************************************************************************************************************/
@@ -280,12 +283,13 @@ void graphContainer::handleDelta(int i) {
 //    qDebug() << "Delta: " << i;
     delta = i;
     clearData();
+    updateLabel();
 }
 
 /******************************************************************************************************************/
 void graphContainer::handleComboMult(const QString str) {
     qDebug() << "handleComboMult: " << str;
     mult = str.toInt();
-    updateLabel();
     clearData();
+    updateLabel();
 }
