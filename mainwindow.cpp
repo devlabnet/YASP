@@ -89,7 +89,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     // Slot for printing coordinates
-    connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePressInPlot(QMouseEvent*)));
+    connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
+    connect(ui->plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(onMouseDoubleClickInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
@@ -804,11 +805,12 @@ void MainWindow::on_spinPoints_valueChanged(int arg1) {
 
 /******************************************************************************************************************/
 void MainWindow::doMeasure() {
+    tracerFirstPos = true;
     ui->plot->setCursor(Qt::CrossCursor);
     ui->plot->setInteraction(QCP::iSelectAxes, false);
     ui->plot->setInteraction(QCP::iSelectPlottables, false);
     tracer = new QCPItemTracer(ui->plot);
-    tracer->setSize(2);
+    tracer->setSize(4);
     if (bgColor.lightness() > 128) {
         tracer->setPen(QPen(Qt::black));
     } else {
@@ -837,8 +839,10 @@ void MainWindow::cancelMeasure() {
 /* Prints coordinates of mouse pointer in status bar on mouse release */
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
+//    int xx = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->x()));
+//    int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
     double xx = ui->plot->xAxis->pixelToCoord(event->x());
-    double yy = ui->plot->xAxis->pixelToCoord(event->y());
+    double yy = ui->plot->yAxis->pixelToCoord(event->y());
     QString coordinates("X: %1 Y: %2");
     coordinates = coordinates.arg(xx).arg(yy);
     ui->statusBar->setStyleSheet("background-color: SkyBlue;");
@@ -855,6 +859,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
 /******************************************************************************************************************/
 void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     Q_UNUSED(event)
+    qDebug() << "onMouseReleaseInPlot";
     ui->statusBar->showMessage("release");
     if (plotting) {
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
@@ -879,14 +884,45 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::mousePressInPlot(QMouseEvent *event) {
-//    qDebug() << "mousePressInPlot --> " << event->button();
+void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
+    qDebug() << "onMouseDoubleClickInPlot --> " << event->button();
     if (tracer) {
         double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
         tracer->setGraphKey(coordX);
         qDebug() << "TRACER --> x: " + QString::number(tracer->position->key()) +
                     " y: " + QString::number(tracer->position->value());
+        if (tracerFirstPos) {
+            tracerFirstX = tracer->position->key();
+            tracerFirstY = tracer->position->value();
+            tracerFirstPos = false;
+        } else {
+            double x = tracer->position->key();
+            double y = tracer->position->value();
+            // add the arrow:
+            QCPItemLine *arrow = new QCPItemLine(ui->plot);
+//            arrow->start->setParentAnchor(textLabel->bottom);
+            arrow->start->setCoords(tracerFirstX, tracerFirstY);
+            arrow->end->setCoords(x, y);
+            arrow->setTail(QCPLineEnding::esSpikeArrow);
+            arrow->setHead(QCPLineEnding::esSpikeArrow);
+            QPen arrowPen;
+            if (bgColor.lightness() > 128) {
+                arrowPen = QPen(Qt::black);
+            } else {
+                arrowPen = QPen(Qt::white);
+            }
+            arrowPen.setWidth(5);
+            arrow->setPen(arrowPen);
+
+            tracerFirstX = x;
+            tracerFirstY = y;
+        }
     }
+}
+
+/******************************************************************************************************************/
+void MainWindow::onMousePressInPlot(QMouseEvent *event) {
+    qDebug() << "onMousePressInPlot --> " << event->button();
     // if an axis is selected, only allow the direction of that axis to be dragged
     // if no axis is selected, both directions may be dragged
     if (ui->plot->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {

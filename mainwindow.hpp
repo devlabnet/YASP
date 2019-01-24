@@ -83,7 +83,8 @@ private slots:
     void onMouseMoveInPlot(QMouseEvent *event);                                           // Displays coordinates of mouse pointer when clicked in plot in status bar
     void onMouseReleaseInPlot(QMouseEvent *event);
     void onMouseWheelInPlot(QWheelEvent *event);
-    void mousePressInPlot(QMouseEvent *event);
+    void onMousePressInPlot(QMouseEvent *event);
+    void onMouseDoubleClickInPlot(QMouseEvent* event);
     void plotContextMenuRequest(QPoint pos);
     void selectionChangedByUserInPlot();
 
@@ -140,6 +141,9 @@ private:
 
 //    QCPCurve *verticalLine;
     QCPItemTracer *tracer = nullptr;
+    double tracerFirstX;
+    double tracerFirstY;
+    bool tracerFirstPos = true;
 
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
