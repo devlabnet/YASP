@@ -53,6 +53,8 @@ private:
     QPen pen;
     QColor penColor;
     QCPItemLine *axisLine;
+    QAction doMeasureAction;
+    QAction cancelMeasureAction;
     int delta;
     int mult;
     FormSliderInfo* slideDelta;

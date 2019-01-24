@@ -93,6 +93,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
+    connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChangedByUserInPlot()));
 
 //    // setup policy and connect slot for context menu popup:
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
@@ -119,6 +120,23 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinPoints->setValue(NUMBER_OF_POINTS_DEF);
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
+
+
+//    verticalLine = new QCPCurve(ui->plot->xAxis, ui->plot->yAxis);
+//    QPen vPen;
+//    vPen.setWidth(3);
+//    vPen.setColor(Qt::yellow);
+//    verticalLine->setPen(vPen);
+////    QVector<double> x(2) , y(2);
+////        x[0] = 0;
+////        y[0] = -50;
+////        x[1] = 0;
+////        y[1] = 50;
+
+//    ui->plot->addPlottable(verticalLine);
+//    verticalLine->setName("Vertical");
+////    verticalLine->setData(x, y);
+
     // Clear the terminal
     on_clearTermButton_clicked();
     plotTime.start();
@@ -459,6 +477,7 @@ void MainWindow::on_stopPlotButton_clicked() {
         ui->stopPlotButton->setText("Stop Plot");
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
         ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
+        cancelMeasure();
     }
 }
 
@@ -785,56 +804,72 @@ void MainWindow::on_spinPoints_valueChanged(int arg1) {
 
 /******************************************************************************************************************/
 void MainWindow::doMeasure() {
-//    rubberBand = new QRubberBand(QRubberBand::Line, ui->plot);
-    rubberBand = new QFrame(ui->plot);
-    rubberBand->setLineWidth(2);
-    rubberBand->setFrameStyle(QFrame::Box);
-    rubberBand->setStyleSheet("color:red");
     ui->plot->setCursor(Qt::CrossCursor);
-    ui->plot->setInteraction(QCP::iRangeDrag, false);
-    ui->plot->setInteraction(QCP::iRangeZoom, false);
     ui->plot->setInteraction(QCP::iSelectAxes, false);
     ui->plot->setInteraction(QCP::iSelectPlottables, false);
+    tracer = new QCPItemTracer(ui->plot);
+    tracer->setSize(2);
+    if (bgColor.lightness() > 128) {
+        tracer->setPen(QPen(Qt::black));
+    } else {
+        tracer->setPen(QPen(Qt::white));
+    }
+
+    if (ui->plot->selectedGraphs().size() > 0) {
+        qDebug() << "selected graph count: " << ui->plot->selectedGraphs().size();
+        qDebug() << "selected graph : " << ui->plot->selectedGraphs().at(0);
+        tracer->setGraph(plotsVector[0]->getGraph());
+        //plotsVector.indexOf(ui->plot->selectedGraphs().at(0));
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::cancelMeasure() {
+    if (tracer) {
+        delete tracer;
+        tracer = nullptr;
+    }
+    ui->plot->setCursor(Qt::ArrowCursor);
+    ui->plot->deselectAll();
 }
 
 /******************************************************************************************************************/
 /* Prints coordinates of mouse pointer in status bar on mouse release */
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
-//    qDebug() << "onMouseMoveInPlot " << event->button();
-    if (rubberBand) {
-        rubberBand->setGeometry(QRect(rubberOrigin, event->pos()).normalized());
-    }
-//        qDebug() << "rubberBand Move " << event->pos();
-    int xx = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->x()));
-    int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
+    double xx = ui->plot->xAxis->pixelToCoord(event->x());
+    double yy = ui->plot->xAxis->pixelToCoord(event->y());
     QString coordinates("X: %1 Y: %2");
     coordinates = coordinates.arg(xx).arg(yy);
     ui->statusBar->setStyleSheet("background-color: SkyBlue;");
     ui->statusBar->showMessage(coordinates);
 
+    if (tracer) {
+//        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
+        tracer->setGraphKey(xx);
+//        qDebug() << "x: " + QString::number(tracer->position->key()) +
+//                    " y: " + QString::number(tracer->position->value());
+    }
 }
+
 /******************************************************************************************************************/
 void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     Q_UNUSED(event)
     ui->statusBar->showMessage("release");
-    if (rubberBand) {
-        int xx = rubberBand->width();
-        int yy = rubberBand->height();
-        QString coordinates("Delta X: %1 Delta Y: %2");
-        coordinates = coordinates.arg(xx).arg(yy);
-        ui->statusBar->setStyleSheet("background-color: white;");
-        ui->statusBar->showMessage(coordinates);
-
-        delete rubberBand;
-        rubberBand = nullptr;
-        ui->plot->setCursor(Qt::ArrowCursor);
-        if (plotting) {
+    if (plotting) {
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    } else {
+        if (tracer) {
             ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
         } else {
             ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectPlottables);
         }
     }
+}
+
+/******************************************************************************************************************/
+void MainWindow::selectionChangedByUserInPlot() {
+    qDebug() << "selectionChangedByUserInPlot";
 }
 
 /******************************************************************************************************************/
@@ -845,56 +880,45 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 
 /******************************************************************************************************************/
 void MainWindow::mousePressInPlot(QMouseEvent *event) {
-    qDebug() << "mousePressInPlot --> " << event->button();
-
-    rubberOrigin = event->pos();
-    if (event->button() == Qt::LeftButton) {
-        if (rubberBand) {
-            rubberBand->setGeometry(QRect(rubberOrigin, QSize()));
-            qDebug() << "rubberBand Start " << rubberOrigin;
-            rubberBand->show();
-        } else {
-            // if an axis is selected, only allow the direction of that axis to be dragged
-            // if no axis is selected, both directions may be dragged
-            if (ui->plot->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
-                qDebug() << "xAxis";
-                ui->plot->axisRect()->setRangeDrag(ui->plot->xAxis->orientation());
-            } else if (ui->plot->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
-                ui->plot->axisRect()->setRangeDrag(ui->plot->yAxis->orientation());
-                qDebug() << "yAxis";
-            } else {
-                qDebug() << "xAxis yAxis";
-                ui->plot->axisRect()->setRangeDrag(Qt::Horizontal|Qt::Vertical);
-            }
-        }
+//    qDebug() << "mousePressInPlot --> " << event->button();
+    if (tracer) {
+        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
+        tracer->setGraphKey(coordX);
+        qDebug() << "TRACER --> x: " + QString::number(tracer->position->key()) +
+                    " y: " + QString::number(tracer->position->value());
+    }
+    // if an axis is selected, only allow the direction of that axis to be dragged
+    // if no axis is selected, both directions may be dragged
+    if (ui->plot->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
+        qDebug() << "xAxis";
+        ui->plot->axisRect()->setRangeDrag(ui->plot->xAxis->orientation());
+    } else if (ui->plot->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
+        ui->plot->axisRect()->setRangeDrag(ui->plot->yAxis->orientation());
+        qDebug() << "yAxis";
+    } else {
+        qDebug() << "xAxis yAxis";
+        ui->plot->axisRect()->setRangeDrag(Qt::Horizontal|Qt::Vertical);
     }
 }
 
 /******************************************************************************************************************/
 void MainWindow::plotContextMenuRequest(QPoint pos) {
-    QMenu *menu = new QMenu(this);
-    menu->setAttribute(Qt::WA_DeleteOnClose);
+    QMenu* contextMenu = new QMenu(this);
+    contextMenu->setAttribute(Qt::WA_DeleteOnClose);
 
-    //  if (ui->plot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
-    //  {
-    //    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
-    //    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
-    //    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
-    //    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
-    //    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
-    //  } else  // general context menu on graphs requested
-    //  {
-    //    menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
     if (ui->plot->selectedGraphs().size() > 0) {
-        menu->addAction("Save Graph Data", this, SLOT(saveSelectedGraph()));
+        if (tracer) {
+            contextMenu->addAction("Stop Measure", this, SLOT(cancelMeasure()));
+        } else {
+            contextMenu->addAction("Save Graph Data", this, SLOT(saveSelectedGraph()));
+            contextMenu->addAction("Start Measure", this, SLOT(doMeasure()));
+        }
+    } else {
+        if (ui->plot->graphCount() > 0) {
+            contextMenu->addAction("Save All Graphs Data", this, SLOT(saveAllGraphs()));
+        }
     }
-    if (ui->plot->graphCount() > 0) {
-        menu->addAction("Measure", this, SLOT(doMeasure()));
-        menu->addAction("Save All Graphs Data", this, SLOT(saveAllGraphs()));
-    }
-    //  }
-
-    menu->popup(ui->plot->mapToGlobal(pos));
+    contextMenu->popup(ui->plot->mapToGlobal(pos));
 }
 
 /******************************************************************************************************************/
