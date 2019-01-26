@@ -142,7 +142,7 @@ private:
     QTextStream streamLog;
     QRubberBand* rubberBand = nullptr;
 //    QFrame* rubberBand = nullptr;
-    QPoint rubberOrigin;
+    QPointF rubberOrigin;
 
 //    QCPCurve *verticalLine;
     QCPItemTracer *tracer = nullptr;
