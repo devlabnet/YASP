@@ -778,7 +778,6 @@ void MainWindow::setAutoYRange(double r, bool resetDelta) {
     int v = qMax((int)(log10(m)), 1);
     int mult =  pow(10, v);
     int x = m / mult;
-//    qDebug() <<  r << " -> " << m  << " -> " <<  v << " -> " << x;
     int vMin = qMax(x * mult, 5);
     ui->plot->yAxis->setTickStep(vMin);
     updateGraphNops(resetDelta);
@@ -794,7 +793,6 @@ void MainWindow::on_saveJPGButton_clicked() {
                                tr("Images (*.jpg)"));
 
     qDebug() << "Save JPEG : " << fileName;
-//    ui->plot->saveJpg(QString::number(dataPointNumber) + ".jpg");
     ui->plot->saveJpg(fileName);
 }
 
@@ -822,8 +820,9 @@ void MainWindow::on_spinPoints_valueChanged(int arg1) {
 
 /******************************************************************************************************************/
 void MainWindow::doMeasure() {
+    Q_ASSERT(ui->plot->selectedGraphs().size());
+    cleanTracer();
     measureInProgress = true;
-    clearAllMesures();
     ui->plot->setCursor(Qt::CrossCursor);
     ui->plot->setInteraction(QCP::iSelectAxes, false);
     ui->plot->setInteraction(QCP::iSelectPlottables, false);
@@ -834,31 +833,16 @@ void MainWindow::doMeasure() {
     } else {
         tracer->setPen(QPen(Qt::white));
     }
-
-//    if (ui->plot->selectedGraphs().size() > 0) {
-        qDebug() << "selected graph count: " << ui->plot->selectedGraphs().size();
-        qDebug() << "selected graph : " << ui->plot->selectedGraphs().at(0);
-//        int id = getIdOfQCPGraph(ui->plot->selectedGraphs().at(0));
-//        Q_ASSERT(id >= 0);
         QCPGraph* gr = ui->plot->selectedGraphs().at(0);
+        int measureGraphId = getIdOfQCPGraph(gr);
+        Q_ASSERT(measureGraphId > 0);
+        measureMult = plotsVector[measureGraphId]->getMult();
         tracer->setGraph(gr);
         ui->plot->deselectAll();
-//        tracer->setGraphKey(0);
-//        tracer->updatePosition();
-//        qDebug() << "do measure --> "  << " tracer key: " << tracer->position->key()
-//                 << " Val: " << tracer->position->value();
-
-//        traceArrowStartKey = tracer->position->key();
-//        ui->plot->replot();
-
-//        arrowMeasureColor = gr->pen().color();
-        //plotsVector.indexOf(ui->plot->selectedGraphs().at(0));
-//    }
-
 }
 
 /******************************************************************************************************************/
-void MainWindow::cancelMeasure() {
+void MainWindow::cleanTracer() {
     measureInProgress = false;
     if (tracer) {
         delete tracer;
@@ -868,7 +852,11 @@ void MainWindow::cancelMeasure() {
         delete rubberBand;
         rubberBand = nullptr;
     }
+}
 
+/******************************************************************************************************************/
+void MainWindow::cancelMeasure() {
+    cleanTracer();
     ui->plot->setCursor(Qt::ArrowCursor);
     ui->plot->deselectAll();
     ui->plot->replot();
@@ -885,27 +873,16 @@ void MainWindow::saveAllGraphs() {
 }
 
 /******************************************************************************************************************/
-void MainWindow::clearAllMesures() {
-//    qDebug() << "clearAllMesures : " << tracerArrowsList.size();
-//    for (int var = 0; var < tracerArrowsList.size(); ++var) {
-//        QCPItemLine* arrow = tracerArrowsList.at(var);
-//        qDebug() << "Remove arrow : " << arrow;
-//        ui->plot->removeItem(arrow);
-//    }
-//    tracerArrowsList.clear();
-////    tracerArrow = nullptr;
-//    traceArrowInConstruction = false;
-////    ui->plot->replot();
-}
-
-/******************************************************************************************************************/
 void MainWindow::updateTracer(int pX) {
     if (tracer) {
         double coordX = ui->plot->xAxis->pixelToCoord(pX);
         // get tracer origin
-        tracer->setGraphKey(traceArrowStartKey);
+        tracer->setGraphKey(traceerStartKey);
         tracer->updatePosition();
         rubberOrigin = tracer->position->pixelPoint();
+        double startX = tracer->position->key();
+        double startY = tracer->position->value() / measureMult;
+
         tracer->setGraphKey(coordX);
         tracer->updatePosition();
         if (rubberBand) {
@@ -913,6 +890,16 @@ void MainWindow::updateTracer(int pX) {
             rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
             rubberBand->repaint();
         }
+//        double xx = ui->plot->xAxis->pixelToCoord(event->x());
+//        double yy = ui->plot->yAxis->pixelToCoord(event->y());
+        double endX = tracer->position->key();
+        double endY = tracer->position->value() / measureMult;
+//                 << " Val: " << tracer->position->value();
+        QString coordinates("X: %1 Y: %2 DELTAX: %3 ms --> DELTAY: %4 (Mult: %5 )");
+        coordinates = coordinates.arg(startX).arg(startY).arg(endX - startX).arg(endY - startY).arg(measureMult);
+        ui->statusBar->setStyleSheet("background-color: lightgreen;");
+        ui->statusBar->showMessage(coordinates);
+
         ui->plot->replot();
     }
 }
@@ -921,47 +908,16 @@ void MainWindow::updateTracer(int pX) {
 /* Prints coordinates of mouse pointer in status bar on mouse release */
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
-//    int xx = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->x()));
-//    int yy = static_cast<int>(ui->plot->xAxis->pixelToCoord(event->y()));
-    double xx = ui->plot->xAxis->pixelToCoord(event->x());
-    double yy = ui->plot->yAxis->pixelToCoord(event->y());
-    QString coordinates("X: %1 Y: %2");
-    coordinates = coordinates.arg(xx).arg(yy);
-    ui->statusBar->setStyleSheet("background-color: SkyBlue;");
-    ui->statusBar->showMessage(coordinates);
-    updateTracer(event->pos().x());
-
-//    if (tracer) {
-//        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
-//        //        updateTracer(coordX);
-//        updateTracer(coordX);
-////        if (mousePressed) {
-////            // get tracer origin
-////            tracer->setGraphKey(traceArrowStartKey);
-////            tracer->updatePosition();
-////            rubberOrigin = tracer->position->pixelPoint();
-////            tracer->setGraphKey(coordX);
-////            tracer->updatePosition();
-////            if (rubberBand) {
-////                QPointF pp = tracer->position->pixelPoint();
-////                rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
-////                rubberBand->repaint();
-////            }
-////        } else {
-////            // get tracer origin
-////            tracer->setGraphKey(traceArrowStartKey);
-////            tracer->updatePosition();
-////            rubberOrigin = tracer->position->pixelPoint();
-////            tracer->setGraphKey(coordX);
-////            tracer->updatePosition();
-////            if (rubberBand) {
-////                QPointF pp = tracer->position->pixelPoint();
-////                rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
-////                rubberBand->repaint();
-////            }
-////        }
-////        ui->plot->replot();
-//    }
+    if (measureInProgress == false) {
+        double xx = ui->plot->xAxis->pixelToCoord(event->x());
+        double yy = ui->plot->yAxis->pixelToCoord(event->y());
+        QString coordinates("X: %1 Y: %2");
+        coordinates = coordinates.arg(xx).arg(yy);
+        ui->statusBar->setStyleSheet("background-color: SkyBlue;");
+        ui->statusBar->showMessage(coordinates);
+    } else {
+        updateTracer(event->pos().x());
+    }
 }
 
 /******************************************************************************************************************/
@@ -992,22 +948,6 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     Q_UNUSED(event)
     setAutoYRange(ui->plot->yAxis->range().size());
     updateTracer(event->pos().x());
-//    if (tracer) {
-//        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
-//        if (rubberBand) {
-//            // get new tracer origin
-//            tracer->setGraphKey(traceArrowStartKey);
-//            tracer->updatePosition();
-//            rubberOrigin = tracer->position->pixelPoint();
-//            tracer->setGraphKey(coordX);
-//            tracer->updatePosition();
-//            QPointF pp = tracer->position->pixelPoint();
-//            rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
-//            qDebug() << "update rubberBand --> " << rubberBand->geometry();
-//             rubberBand->repaint();
-//        }
-//        ui->plot->replot();
-//    }
 }
 
 /******************************************************************************************************************/
@@ -1019,23 +959,15 @@ void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
         tracer->updatePosition();
         qDebug() << "dbl click --> " << coordX << " tracer key: " << tracer->position->key()
                  << " Val: " << tracer->position->value();
-
         rubberOrigin = tracer->position->pixelPoint().toPoint();
         if (rubberBand) {
             delete rubberBand;
         }
-        traceArrowStartKey = tracer->position->key();
-//        traceArrowStartVal = tracer->position->value();
+        traceerStartKey = tracer->position->key();
         rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->plot);
-//        rubberBand = new QFrame(ui->plot);
-//        rubberBand->setMouseTracking(true);
-//        rubberBand->setFrameStyle(QFrame::Box);
-//        rubberBand->setLineWidth(2);
-//        rubberBand->setStyleSheet("color:red");
         rubberBand->setGeometry(QRectF(rubberOrigin, QSize()).toRect());
         rubberBand->show();
         ui->plot->replot();
-        qDebug() << "Start rubberBand --> " << rubberBand->geometry() << " traceArrowStartKey: " << traceArrowStartKey;
     }
 }
 
@@ -1079,9 +1011,6 @@ void MainWindow::plotContextMenuRequest(QPoint pos) {
             contextMenu->addAction("Save All Graphs Data", this, SLOT(saveAllGraphs()));
         }
     }
-//    if (tracerArrowsList.size()) {
-//        contextMenu->addAction("Clear All Measures", this, SLOT(clearAllMesures()));
-//    }
     contextMenu->popup(ui->plot->mapToGlobal(pos));
 }
 

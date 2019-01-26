@@ -22,6 +22,7 @@ public:
     QString getName() { return plotName; }
     void setColor(QColor color);
     void setName(QString name) { plotName = "Plot " + name; }
+    int getMult() { return mult; }
     QString getDataStr() { return dataStr; }
     bool isUsed() { return inUse; }
     void setUsed(bool b) { inUse = b; }

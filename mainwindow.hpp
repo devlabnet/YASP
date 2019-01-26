@@ -91,8 +91,8 @@ private slots:
 
     void saveSelectedGraph();
     void saveAllGraphs();
-    void clearAllMesures();
     void doMeasure();
+    void cleanTracer();
     void cancelMeasure();
     void on_spinPoints_valueChanged(int arg1);                                            // Spin box controls how many data points are collected and displayed
     void on_actionHow_to_use_triggered();
@@ -141,20 +141,11 @@ private:
     QFile* logFile = nullptr;
     QTextStream streamLog;
     QRubberBand* rubberBand = nullptr;
-//    QFrame* rubberBand = nullptr;
     QPointF rubberOrigin;
-
-//    QCPCurve *verticalLine;
     QCPItemTracer *tracer = nullptr;
     bool measureInProgress = false;
-//    double tracerFirstX;
-//    double tracerFirstY;
-    QCPItemLine* tracerArrow = nullptr;
-    double traceArrowStartVal;
-    double traceArrowStartKey;
-//    QList<QCPItemLine*> tracerArrowsList;
-//    QColor arrowMeasureColor;
-//    bool traceArrowInConstruction = false;
+    int measureMult;
+    double traceerStartKey;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();

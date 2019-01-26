@@ -84,9 +84,12 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     layout->addWidget(comboMultLabel, 3, 0, Qt::AlignCenter);
     layout->addWidget(comboMult, 3, 1, Qt::AlignCenter);
 
-    font.setFamily("time");
+//    font.setFamily("Comic Sans MS");
+//    font.setFamily("Time");
     font.setPointSize(8);
-    font.setWeight(50);
+    font.setStyleHint(QFont::Monospace);
+    font.setWeight(QFont::Bold);
+    font.setStyle(QFont::StyleItalic);
     //font.setFixedPitch(true);
     dataStr =  plotName;
     textLabel = new QCPItemText(graph->parentPlot());
