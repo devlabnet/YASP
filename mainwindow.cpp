@@ -1070,6 +1070,13 @@ void MainWindow::on_bgColorButton_pressed() {
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
     ui->plot->setBackground(QBrush(bgColor));   // Background for the plot area
     updateGraphParams(bgColor);
+    if (tracer) {
+        if (bgColor.lightness() > 128) {
+            tracer->setPen(QPen(Qt::black));
+        } else {
+            tracer->setPen(QPen(Qt::white));
+        }
+    }
     ui->plot->replot();
 }
 
