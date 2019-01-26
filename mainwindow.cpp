@@ -782,6 +782,7 @@ void MainWindow::setAutoYRange(double r, bool resetDelta) {
     int vMin = qMax(x * mult, 5);
     ui->plot->yAxis->setTickStep(vMin);
     updateGraphNops(resetDelta);
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -842,9 +843,18 @@ void MainWindow::doMeasure() {
         QCPGraph* gr = ui->plot->selectedGraphs().at(0);
         tracer->setGraph(gr);
         ui->plot->deselectAll();
+//        tracer->setGraphKey(0);
+//        tracer->updatePosition();
+//        qDebug() << "do measure --> "  << " tracer key: " << tracer->position->key()
+//                 << " Val: " << tracer->position->value();
+
+//        traceArrowStartKey = tracer->position->key();
+//        ui->plot->replot();
+
 //        arrowMeasureColor = gr->pen().color();
         //plotsVector.indexOf(ui->plot->selectedGraphs().at(0));
 //    }
+
 }
 
 /******************************************************************************************************************/
@@ -889,6 +899,25 @@ void MainWindow::clearAllMesures() {
 }
 
 /******************************************************************************************************************/
+void MainWindow::updateTracer(int pX) {
+    if (tracer) {
+        double coordX = ui->plot->xAxis->pixelToCoord(pX);
+        // get tracer origin
+        tracer->setGraphKey(traceArrowStartKey);
+        tracer->updatePosition();
+        rubberOrigin = tracer->position->pixelPoint();
+        tracer->setGraphKey(coordX);
+        tracer->updatePosition();
+        if (rubberBand) {
+            QPointF pp = tracer->position->pixelPoint();
+            rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
+            rubberBand->repaint();
+        }
+        ui->plot->replot();
+    }
+}
+
+/******************************************************************************************************************/
 /* Prints coordinates of mouse pointer in status bar on mouse release */
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
@@ -900,38 +929,39 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     coordinates = coordinates.arg(xx).arg(yy);
     ui->statusBar->setStyleSheet("background-color: SkyBlue;");
     ui->statusBar->showMessage(coordinates);
-    if (tracer) {
-        if (mousePressed) {
-            double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
-            if (rubberBand) {
-                // get new tracer origin
-                tracer->setGraphKey(traceArrowStartKey);
-                tracer->updatePosition();
-                rubberOrigin = tracer->position->pixelPoint();
-                tracer->setGraphKey(coordX);
-                tracer->updatePosition();
-                QPointF pp = tracer->position->pixelPoint();
-                rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
-//                qDebug() << "update rubberBand --> " << rubberBand->geometry() << " traceArrowStartKey: " << traceArrowStartKey;
-                rubberBand->update();
-            }
-        } else {
-            double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
-            //        double coordY = ui->plot->yAxis->pixelToCoord(event->pos().y());
-            //        qDebug() << "xxxxx --> " << coordX << " / " << coordY;
-            tracer->setGraphKey(coordX);
-            double x = tracer->position->key();
-            double y = tracer->position->value();
-//            qDebug() << "Tracer --> " << tracer->position->key() << " / " << tracer->position->value();
-            if (rubberBand) {
-                QPointF pp = tracer->position->pixelPoint();
-                rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
-                //qDebug() << "Move rubberBand --> " << rubberBand->geometry();
-                rubberBand->update();
-            }
-        }
-        ui->plot->replot();
-    }
+    updateTracer(event->pos().x());
+
+//    if (tracer) {
+//        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
+//        //        updateTracer(coordX);
+//        updateTracer(coordX);
+////        if (mousePressed) {
+////            // get tracer origin
+////            tracer->setGraphKey(traceArrowStartKey);
+////            tracer->updatePosition();
+////            rubberOrigin = tracer->position->pixelPoint();
+////            tracer->setGraphKey(coordX);
+////            tracer->updatePosition();
+////            if (rubberBand) {
+////                QPointF pp = tracer->position->pixelPoint();
+////                rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
+////                rubberBand->repaint();
+////            }
+////        } else {
+////            // get tracer origin
+////            tracer->setGraphKey(traceArrowStartKey);
+////            tracer->updatePosition();
+////            rubberOrigin = tracer->position->pixelPoint();
+////            tracer->setGraphKey(coordX);
+////            tracer->updatePosition();
+////            if (rubberBand) {
+////                QPointF pp = tracer->position->pixelPoint();
+////                rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
+////                rubberBand->repaint();
+////            }
+////        }
+////        ui->plot->replot();
+//    }
 }
 
 /******************************************************************************************************************/
@@ -961,21 +991,23 @@ void MainWindow::selectionChangedByUserInPlot() {
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     Q_UNUSED(event)
     setAutoYRange(ui->plot->yAxis->range().size());
-    if (tracer) {
-        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
-        if (rubberBand) {
-            // get new tracer origin
-            tracer->setGraphKey(traceArrowStartKey);
-            tracer->updatePosition();
-            rubberOrigin = tracer->position->pixelPoint();
-            tracer->setGraphKey(coordX);
-            tracer->updatePosition();
-            QPointF pp = tracer->position->pixelPoint();
-            rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
+    updateTracer(event->pos().x());
+//    if (tracer) {
+//        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
+//        if (rubberBand) {
+//            // get new tracer origin
+//            tracer->setGraphKey(traceArrowStartKey);
+//            tracer->updatePosition();
+//            rubberOrigin = tracer->position->pixelPoint();
+//            tracer->setGraphKey(coordX);
+//            tracer->updatePosition();
+//            QPointF pp = tracer->position->pixelPoint();
+//            rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
 //            qDebug() << "update rubberBand --> " << rubberBand->geometry();
-            rubberBand->update();
-        }
-    }
+//             rubberBand->repaint();
+//        }
+//        ui->plot->replot();
+//    }
 }
 
 /******************************************************************************************************************/
@@ -984,6 +1016,7 @@ void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
     if (tracer) {
         double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
         tracer->setGraphKey(coordX);
+        tracer->updatePosition();
         qDebug() << "dbl click --> " << coordX << " tracer key: " << tracer->position->key()
                  << " Val: " << tracer->position->value();
 
@@ -992,10 +1025,16 @@ void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
             delete rubberBand;
         }
         traceArrowStartKey = tracer->position->key();
-        traceArrowStartVal = tracer->position->value();
+//        traceArrowStartVal = tracer->position->value();
         rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->plot);
+//        rubberBand = new QFrame(ui->plot);
+//        rubberBand->setMouseTracking(true);
+//        rubberBand->setFrameStyle(QFrame::Box);
+//        rubberBand->setLineWidth(2);
+//        rubberBand->setStyleSheet("color:red");
         rubberBand->setGeometry(QRectF(rubberOrigin, QSize()).toRect());
         rubberBand->show();
+        ui->plot->replot();
         qDebug() << "Start rubberBand --> " << rubberBand->geometry() << " traceArrowStartKey: " << traceArrowStartKey;
     }
 }

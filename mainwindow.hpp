@@ -172,6 +172,8 @@ private:
     void addMessageText(QString data, QString color = "black");
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
+    void updateTracer(int pX);
+
 };
 
 
