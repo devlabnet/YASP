@@ -37,6 +37,7 @@
 #include <QTextEdit>
 #include "graphcontainer.h"
 #include <QTime>
+#include <QRubberBand>
 
 #define START_MSG      0x10
 #define PLOT_MSG       0X11
@@ -88,6 +89,9 @@ private slots:
     void plotContextMenuRequest(QPoint pos);
     void selectionChangedByUserInPlot();
 
+    void saveSelectedGraph();
+    void saveAllGraphs();
+    void clearAllMesures();
     void doMeasure();
     void cancelMeasure();
     void on_spinPoints_valueChanged(int arg1);                                            // Spin box controls how many data points are collected and displayed
@@ -117,6 +121,7 @@ private:
     QTime plotTime;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
+    bool mousePressed = false;
     int dataPointNumber;                                                                  // Keep track of data points
     QTimer updateTimer;                                                                   // Timer used for replotting the plot
     int numberOfAxes;                                                                     // Number of axes for the plot
@@ -135,16 +140,21 @@ private:
     QLabel* bottomWidget;
     QFile* logFile = nullptr;
     QTextStream streamLog;
-//    QRubberBand* rubberBand = nullptr;
+    QRubberBand* rubberBand = nullptr;
 //    QFrame* rubberBand = nullptr;
-//    QPoint rubberOrigin;
+    QPoint rubberOrigin;
 
 //    QCPCurve *verticalLine;
     QCPItemTracer *tracer = nullptr;
-    double tracerFirstX;
-    double tracerFirstY;
-    bool tracerFirstPos = true;
-
+    bool measureInProgress = false;
+//    double tracerFirstX;
+//    double tracerFirstY;
+    QCPItemLine* tracerArrow = nullptr;
+    double traceArrowStartVal;
+    double traceArrowStartKey;
+//    QList<QCPItemLine*> tracerArrowsList;
+//    QColor arrowMeasureColor;
+//    bool traceArrowInConstruction = false;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();
@@ -154,7 +164,7 @@ private:
     void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
     void updateGraphNops(bool resetDelta = false);
     void updateGraphParams(QColor plotBgColor);
-
+    int getIdOfQCPGraph(QCPGraph* g);
     void openPort();
     void portOpenedSuccess();                                                             // Called when port opens OK
     void closePort();                                                                  // Called when closing the port
