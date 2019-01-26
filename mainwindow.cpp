@@ -835,7 +835,9 @@ void MainWindow::doMeasure() {
     }
         QCPGraph* gr = ui->plot->selectedGraphs().at(0);
         int measureGraphId = getIdOfQCPGraph(gr);
-        Q_ASSERT(measureGraphId > 0);
+        Q_ASSERT(measureGraphId >= 0);
+        Q_ASSERT(measureGraphId < 9);
+        qDebug() << "GRAPH ID ---> " << measureGraphId;
         measureMult = plotsVector[measureGraphId]->getMult();
         tracer->setGraph(gr);
         ui->plot->deselectAll();
