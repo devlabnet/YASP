@@ -3,12 +3,14 @@
 # Project created by QtCreator 2014-12-22T14:53:33
 #
 #-------------------------------------------------
+include (C:\Qwt-6.1.4\features\qwt.prf)
 
 QT       += core gui
 QT       += serialport
 QT += xml
 
 CONFIG += c++11
+CONFIG += QwtWidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -24,7 +26,8 @@ SOURCES += main.cpp\
     customwidget.cpp \
     dialwidget.cpp \
     graphcontainer.cpp \
-    formsliderinfo.cpp
+    formsliderinfo.cpp \
+    knob.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
@@ -35,7 +38,8 @@ HEADERS  += mainwindow.hpp \
     dialwidget.h \
     graphcontainer.h \
     formsliderinfo.h \
-    tabwidget.h
+    tabwidget.h \
+    knob.h
 
 
 FORMS    += mainwindow.ui \

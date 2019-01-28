@@ -45,6 +45,7 @@ private:
     QDomDocument xmlWidgets;
 
 signals:
+    void messageSent(QString msg);
 
 };
 

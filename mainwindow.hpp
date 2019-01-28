@@ -76,6 +76,7 @@ private slots:
     void readData();                                                                      // Slot for inside serial port
     void plotColorChanged(int tabInd, QColor color);
     void dataTerminalReadyChanged(bool dtr);
+    void messageSent(QString str);
     void on_comboPort_currentIndexChanged(const QString &arg1);                           // Slot displays message on status bar
     void on_connectButton_clicked();                                                      // Manages connect/disconnect
     void on_stopPlotButton_clicked();                                                     // Starts and stops plotting

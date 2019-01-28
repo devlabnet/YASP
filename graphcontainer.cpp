@@ -86,9 +86,9 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
 
 //    font.setFamily("Comic Sans MS");
 //    font.setFamily("Time");
-    font.setPointSize(8);
+    font.setPointSize(7);
     font.setStyleHint(QFont::Monospace);
-    font.setWeight(QFont::Bold);
+    font.setWeight(QFont::Medium);
     font.setStyle(QFont::StyleItalic);
     //font.setFixedPitch(true);
     dataStr =  plotName;

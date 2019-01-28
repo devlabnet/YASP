@@ -74,6 +74,7 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
     controlsLayout->addWidget(maximumSpinBox, 2, 1);
     controlsLayout->addWidget(tickIntervalLabel, 3, 0);
     controlsLayout->addWidget(ticksIntervalSpinBox, 3, 1);
+    QLabel* dividerLabel = new QLabel("Divider");
 
     connect(slide, SIGNAL(valueChanged(int)), this, SLOT(slideValue(int)));
     connect(minimumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMinimumSlide(int)));

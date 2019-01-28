@@ -39,13 +39,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     createUI();      // Create the UI
     QColor gridColor = QColor(170,170,170);
-    //ui->bgColorButton.
     ui->bgColorButton->setAutoFillBackground(true);
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
 
     QColor subGridColor = QColor(80,80,80);
     ui->plot->setBackground(QBrush(bgColor));                                    // Background for the plot area
-//    plotsToolBox->removeItem(0);
     ui->plot->hide();
     ui->stopPlotButton->setEnabled(false);                                                // Plot button is disabled initially
 
@@ -82,8 +80,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->yAxis->setSubTickPen(QPen(gridColor));
     ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
-//    ui->plot->setInteraction(QCP::iRangeDrag, true);
-//    ui->plot->setInteraction(QCP::iRangeZoom, true);
 
 
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
@@ -102,16 +98,12 @@ MainWindow::MainWindow(QWidget *parent) :
     serialPort = nullptr;                                                                    // Set serial port pointer to NULL initially
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));                       // Connect update timer to replot slot
     ui->menuWidgets->menuAction()->setVisible(false);
-//    ui->splitter->setStretchFactor(0,1);
-//    ui->splitter->setStretchFactor(1,0);
 
     /* Also, just I want to show you how to choose the color separator.
         * To do this we need to use a class QPallete, for which you choose the background color.
         * */
     QPalette p;
     p.setColor(QPalette::Background, QColor(144, 238, 144));
-    /* And sets the palette QSplitter
-        * */
     ui->splitter->setPalette(p);
     ui->tabWidget->setCurrentIndex(0);
     ui->spinPoints->setMinimum(SPIN_MIN_DEF);
@@ -121,39 +113,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
 
-
-//    verticalLine = new QCPCurve(ui->plot->xAxis, ui->plot->yAxis);
-//    QPen vPen;
-//    vPen.setWidth(3);
-//    vPen.setColor(Qt::yellow);
-//    verticalLine->setPen(vPen);
-////    QVector<double> x(2) , y(2);
-////        x[0] = 0;
-////        y[0] = -50;
-////        x[1] = 0;
-////        y[1] = 50;
-
-//    ui->plot->addPlottable(verticalLine);
-//    verticalLine->setName("Vertical");
-////    verticalLine->setData(x, y);
-
     // Clear the terminal
     on_clearTermButton_clicked();
     plotTime.start();
-
 }
 
 /******************************************************************************************************************/
 /* Destructor */
 /******************************************************************************************************************/
 MainWindow::~MainWindow() {
-    qDebug() << "MainWindow Destructor";
+//    qDebug() << "MainWindow Destructor";
     if(serialPort != nullptr) delete serialPort;
     delete ui;
 }
 /******************************************************************************************************************/
 void MainWindow::closeEvent(QCloseEvent *event) {
-   qDebug() << "MainWindow closeEvent";
+//   qDebug() << "MainWindow closeEvent";
    if (logFile != nullptr) {
        if(logFile->isOpen()) {
            logFile->close();
@@ -216,12 +191,10 @@ void MainWindow::cleanGraphs() {
     if (plotsToolBox != nullptr) {
         for (int i = plotsVector.size() - 1; i >= 0; i--) {
             graphContainer* gc = plotsVector[i];
-//            qDebug() << "graphContainer: " << gc;
             if (gc != nullptr) {
                 gc->clearData();
                 gc->clearLabels();
                 gc->setUsed(false);
-//                qDebug() << "delete widget: " << gc;
                 delete gc;
             }
             // Remove everything from the plot
@@ -273,21 +246,15 @@ void MainWindow::updateGraphParams(QColor plotBgColor) {
 /* Setup the plot area */
 /******************************************************************************************************************/
 void MainWindow::setupPlot() {
-    //ui->verticalLayoutPlots->addWidget(new QPushButton("0"));
-//    cleanGraphs();
     plotsToolBox = new QTabWidget();
     plotsToolBox->setTabPosition(QTabWidget::North);
     ui->verticalLayoutPlots->addWidget(plotsToolBox);
-//    plotsToolBox->setMinimumSize(400,200);
-//    plotsToolBox->setMaximumWidth(400);
     plotsToolBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-//    plotsToolBox->setMaximumHeight(400);
     bottomWidget = new QLabel();
     bottomWidget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     bottomWidget->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png"));
     bottomWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
     ui->verticalLayoutPlots->addWidget(bottomWidget);
-    //ui->verticalLayoutPlots->addWidget(new QPushButton("1"));
     ui->plot->show();
     addPlots();
 }
@@ -298,7 +265,6 @@ void MainWindow::addPlots() {
         ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
         ui->plot->xAxis->setRange(0, numberOfPoints);                                      // Set x axis range for specified number of points
         setAutoYRange(ui->plot->yAxis->range().size());
-
         QString plotStr = "Plot " + QString::number( tabInd);
         graphContainer* gc = new graphContainer(ui->plot->addGraph(), numberOfPoints, plotStr, colours[ tabInd],  tabInd);
         plotsVector.insert(tabInd, gc);
@@ -403,7 +369,6 @@ void MainWindow::portOpenedSuccess() {
     ui->stopPlotButton->setText("Stop Plot");                                             // Enable button for stopping plot
     ui->stopPlotButton->setEnabled(true);
     ui->saveJPGButton->setEnabled(true);                                                  // Enable button for saving plot
-//    setupPlot();                                                                          // Create the QCustomPlot area
     updateTimer.start(20);                                                                // Slot is refreshed 20 times per second
     connected = true;                                                                     // Set flags
     plotting = true;
@@ -421,7 +386,6 @@ void MainWindow::dataTerminalReadyChanged(bool dtr) {
         serialPort->clear(QSerialPort::AllDirections);
         connect(serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
     }
-//    qDebug() << "DTR: " << dtr;
 }
 
 /******************************************************************************************************************/
@@ -436,7 +400,6 @@ void MainWindow:: closePort() {
     }
     // Clear the terminal
     on_clearTermButton_clicked();
-    //qDebug() << "Port closed signal received!";
     ui->menuWidgets->menuAction()->setVisible(false);
     if ((widgets != nullptr) && widgets->isVisible()) {
             widgets->hide();
@@ -482,8 +445,6 @@ void MainWindow::on_stopPlotButton_clicked() {
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectPlottables);
         // setup policy and connect slot for context menu popup:
         ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
-
-        //ui->plot->setInteraction( QCP::iSelectItems, true);
     } else {                                                                              // Start plotting
         updateTimer.start();                                                              // Start updating plot timer
         plotting = true;
@@ -496,18 +457,15 @@ void MainWindow::on_stopPlotButton_clicked() {
 
 /******************************************************************************************************************/
 bool MainWindow::isColor(QString str) {
-//    qDebug() << "isColor: " << str;
     if (!str.isEmpty()) {
         // check if start with #, if yes --> color
         if (str.at(0) == "#") {
             str = str.remove(0, 1);
-//            qDebug() << " --> isColor: " << str;
             QRegularExpression hexMatcher("^[0-9A-F]{6}$",
                                           QRegularExpression::CaseInsensitiveOption);
             QRegularExpressionMatch match = hexMatcher.match(str);
             if (match.hasMatch()) {
                 // Found hex string of length 6.
-//                qDebug() << " --> isColor OK ";
                 return true;
             }
         }
@@ -546,9 +504,6 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
             }
             param1 = newData.at(1);
         }
-//        qDebug() << "Plot Id : " << id;
-//        qDebug() << "Param1 : " << param1;
-//        qDebug() << "Param2 : " << param2;
         if (isColor(param1)) {
                 plot->setColor(QColor(param1));
         } else {
@@ -575,10 +530,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
     Q_ASSERT(newData.size() > 0);
     int plotId = newData.at(0).toInt();
     if ((plotId < 0) || (plotId > 9)) {
-//        qDebug() << plotTime.elapsed() << " BAD DATA ID : " << plotId << " --> " << newData;
         addMessageText(QString::number(plotTime.elapsed()) + " BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
-//        qDebug() << "BAD DATA ID : " << plotId << " --> " << newData;
-//        addMessageText("BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
         return;
     }
     if(plotting) {
@@ -587,7 +539,6 @@ void MainWindow::onNewDataArrived(QStringList newData) {
         if (dataListSize > 1) {
             double val = newData[1].toDouble();
             // Add data to graphs according plot Id
-
             graphContainer* plot = plotsVector[plotId];
             Q_ASSERT(plot != nullptr);
             int tabPos;
@@ -600,11 +551,8 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             } else {
                 tabPos = plot->getTabPos();
             }
-            //qDebug() << plotTime.elapsed() << " " << dataPointNumber << " " << val;
             int time = plotTime.elapsed();
             plot->addData(dataPointNumber, val, time);
-//            replot();
-//            ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
             if (logFile != nullptr) {
                 if (plot->isDisplayed()) {
                     streamLog << plot->getName() << ";" << dataPointNumber << ";" << val << ";" << time << "\n";
@@ -693,12 +641,9 @@ bool MainWindow::isNumericChar(char cc) {
 /* Read data for inside serial port */
 /******************************************************************************************************************/
 void MainWindow::readData() {
-//    if (!serialPort->isDataTerminalReady()) return;
     if (serialPort->bytesAvailable()) {                                                    // If any bytes are available
         data = serialPort->readAll();         // Read all data in QByteArray
-//        if (measureInProgress) return;
         if (!updateTimer.isActive()) return;
-//        qDebug() << ">> " << data;
         if(!data.isEmpty()) {                                                             // If the byte array is not empty
             char *temp = data.data();
             // Get a '\0'-terminated char* to the data
@@ -802,8 +747,6 @@ void MainWindow::on_saveJPGButton_clicked() {
 void MainWindow::on_resetPlotButton_clicked() {
     numberOfPoints = NUMBER_OF_POINTS_DEF;
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
-//    qDebug() << "xAxis->setRange : " << dataPointNumber - numberOfPoints << " / " << dataPointNumber;
-
     ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
     setAutoYRange(ui->plot->yAxis->range().size(), true);
     on_spinPoints_valueChanged(numberOfPoints);
@@ -875,6 +818,11 @@ void MainWindow::saveAllGraphs() {
 }
 
 /******************************************************************************************************************/
+void MainWindow::messageSent(QString str) {
+    addMessageText("--> " + str, "gray");
+}
+
+/******************************************************************************************************************/
 void MainWindow::updateTracer(int pX) {
     if (tracer) {
         double coordX = ui->plot->xAxis->pixelToCoord(pX);
@@ -884,7 +832,6 @@ void MainWindow::updateTracer(int pX) {
         rubberOrigin = tracer->position->pixelPoint();
         double startX = tracer->position->key();
         double startY = tracer->position->value() / measureMult;
-
         tracer->setGraphKey(coordX);
         tracer->updatePosition();
         if (rubberBand) {
@@ -892,16 +839,12 @@ void MainWindow::updateTracer(int pX) {
             rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
             rubberBand->repaint();
         }
-//        double xx = ui->plot->xAxis->pixelToCoord(event->x());
-//        double yy = ui->plot->yAxis->pixelToCoord(event->y());
         double endX = tracer->position->key();
         double endY = tracer->position->value() / measureMult;
-//                 << " Val: " << tracer->position->value();
         QString coordinates("X: %1 Y: %2 DELTAX: %3 ms --> DELTAY: %4 (Mult: %5 )");
         coordinates = coordinates.arg(startX).arg(startY).arg(endX - startX).arg(endY - startY).arg(measureMult);
         ui->statusBar->setStyleSheet("background-color: lightgreen;");
         ui->statusBar->showMessage(coordinates);
-
         ui->plot->replot();
     }
 }
@@ -925,7 +868,6 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
 /******************************************************************************************************************/
 void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     Q_UNUSED(event)
-    qDebug() << "onMouseReleaseInPlot";
     mousePressed = false;
     ui->statusBar->showMessage("release");
     if (plotting) {
@@ -954,13 +896,10 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 
 /******************************************************************************************************************/
 void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
-    qDebug() << "onMouseDoubleClickInPlot --> " << event->button();
     if (tracer) {
         double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
         tracer->setGraphKey(coordX);
         tracer->updatePosition();
-        qDebug() << "dbl click --> " << coordX << " tracer key: " << tracer->position->key()
-                 << " Val: " << tracer->position->value();
         rubberOrigin = tracer->position->pixelPoint().toPoint();
         if (rubberBand) {
             delete rubberBand;
@@ -975,7 +914,6 @@ void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
 
 /******************************************************************************************************************/
 void MainWindow::onMousePressInPlot(QMouseEvent *event) {
-    qDebug() << "onMousePressInPlot --> " << event->button();
     mousePressed = true;
     if (tracer) {
         tracer->blockSignals(true);
@@ -1052,6 +990,7 @@ void MainWindow::on_actionShowWidgets_triggered()
 {
     if (widgets == nullptr) {
         widgets = new DialogWidgets(serialPort, this);
+        connect(widgets, SIGNAL( messageSent(QString)), this, SLOT(messageSent(QString)));
         widgets->setWindowTitle("Widgets");
         widgets->show();
     }
@@ -1101,7 +1040,6 @@ void MainWindow::on_scrollButton_clicked(bool checked) {
 
 /******************************************************************************************************************/
 void MainWindow::on_logPlotButton_clicked() {
-    qDebug() << "on_logPlotButton_clicked ";
     if (logFile == nullptr) {
         QString fileName = QFileDialog::getSaveFileName(this, tr("Log Plot"),
                                    "",
