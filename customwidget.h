@@ -38,7 +38,7 @@ protected:
     QGridLayout *controlsLayout;
     QTextEdit *help;
     QLineEdit* cmdLabelLine;
-    void sendToPort(int v);
+    void sendToPort(double v);
 
 signals:
 

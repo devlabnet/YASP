@@ -4,8 +4,10 @@
 #include <QWidget>
 #include <QLabel>
 #include <QSlider>
-#include <QSpinBox>
+#include <QDoubleSpinBox>
 #include "customwidget.h"
+
+#define sliderDivider 1000.0
 
 class sliderWidget : public customWidget
 {
@@ -15,14 +17,14 @@ public:
     void buildXml(QDomDocument& doc);
 
 private:
-    int maxValRange = 1000;
-    int minValRange = -1000;
-    int tickInterval = 10;
+    double maxValRange = 1000;
+    double minValRange = -1000;
+    double tickInterval = 10 * sliderDivider;
     QLabel* valLabelBox1;
     QLineEdit* valueBox;
     QSlider *slide;
-    QSpinBox* minimumSpinBox;
-    QSpinBox* maximumSpinBox;
+    QDoubleSpinBox* minimumSpinBox;
+    QDoubleSpinBox* maximumSpinBox;
     QLabel* minLabelBox1;
     QLabel* maxLabelBox1;
     QLabel* minValLabelBox1;
@@ -34,9 +36,9 @@ public slots:
 
 private slots:
     void slideValue(int value);
-    void setMinimumSlide(int v);
-    void setMaximumSlide(int v);
-    void setSingleStepSlide(int v);
+    void setMinimumSlide(double v);
+    void setMaximumSlide(double v);
+    void setSingleStepSlide(double v);
     void valueBoxEditingFinished();
 };
 

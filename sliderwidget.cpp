@@ -7,7 +7,7 @@
 #include <QSlider>
 #include <QTextEdit>
 #include <QDebug>
-#include <QSpinBox>
+#include <QDoubleSpinBox>
 
 sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget (parent, domElt)
 {
@@ -35,13 +35,13 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
     slide = new QSlider(Qt::Horizontal);
     slide->setTickPosition(QSlider::TicksBelow);
     slide->setValue(0);
-    slide->setRange(minValRange, maxValRange);
+    slide->setRange(minValRange * sliderDivider, maxValRange * sliderDivider);
     slide->setTickInterval(tickInterval);
     slide->setSingleStep(tickInterval);
     valLabelBox1 = new QLabel("VALUE : ");
 //    valLabelBox1->setStyleSheet("font-weight: bold; border: 1px solid blue; margin: 2px;");
     valLabelBox1->setAlignment(Qt::AlignHCenter);
-    valueBox = new QLineEdit( QString::number(slide->value()));
+    valueBox = new QLineEdit( QString::number(slide->value() / sliderDivider));
 
     hBoxInfos->addWidget(minLabelBox1);
     hBoxInfos->addWidget(minValLabelBox1);
@@ -54,61 +54,71 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
 
     // Settings Page
     QLabel* minimumLabel = new QLabel("Minimum");
-    minimumSpinBox = new QSpinBox();
+    minimumSpinBox = new QDoubleSpinBox();
     minimumSpinBox->setRange(minValRange, maxValRange);
     minimumSpinBox->setValue(minValRange);
-    minimumSpinBox->setSingleStep(100);
+    minimumSpinBox->setSingleStep(sliderDivider / 10);
     QLabel* maximumLabel = new QLabel("Maximum");
-    maximumSpinBox = new QSpinBox();
+    maximumSpinBox = new QDoubleSpinBox();
     maximumSpinBox->setRange(minValRange, maxValRange);
     maximumSpinBox->setValue(maxValRange);
-    maximumSpinBox->setSingleStep(100);
+    maximumSpinBox->setSingleStep(sliderDivider / 10);
     QLabel* tickIntervalLabel = new QLabel("Ticks Interval");
-    QSpinBox* ticksIntervalSpinBox = new QSpinBox();
-    ticksIntervalSpinBox->setRange(0, maxValRange);
-    ticksIntervalSpinBox->setValue(tickInterval);
-    ticksIntervalSpinBox->setSingleStep(tickInterval);
+    QDoubleSpinBox* ticksIntervalSpinBox = new QDoubleSpinBox();
+    ticksIntervalSpinBox->setRange(0.01, sliderDivider / 10);
+    ticksIntervalSpinBox->setDecimals(4);
+    ticksIntervalSpinBox->setValue(tickInterval / sliderDivider);
+    ticksIntervalSpinBox->setSingleStep(tickInterval / sliderDivider);
     controlsLayout->addWidget(minimumLabel, 1, 0);
     controlsLayout->addWidget(minimumSpinBox, 1, 1);
     controlsLayout->addWidget(maximumLabel, 2, 0);
     controlsLayout->addWidget(maximumSpinBox, 2, 1);
     controlsLayout->addWidget(tickIntervalLabel, 3, 0);
     controlsLayout->addWidget(ticksIntervalSpinBox, 3, 1);
-    QLabel* dividerLabel = new QLabel("Divider");
+//    QLabel* dividerLabel = new QLabel("Divider");
 
     connect(slide, SIGNAL(valueChanged(int)), this, SLOT(slideValue(int)));
-    connect(minimumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMinimumSlide(int)));
-    connect(maximumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMaximumSlide(int)));
-    connect(ticksIntervalSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setSingleStepSlide(int)));
+    connect(minimumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setMinimumSlide(double)));
+    connect(maximumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setMaximumSlide(double)));
+    connect(ticksIntervalSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSingleStepSlide(double)));
     connect(valueBox, SIGNAL(editingFinished()), this, SLOT(valueBoxEditingFinished()));
 }
 
 void sliderWidget::slideValue(int value) {
-    valueBox->setText(QString::number(value));
-    sendToPort(value);
+    valueBox->setText(QString::number(value / sliderDivider));
+    sendToPort(value / sliderDivider);
 }
 
-void sliderWidget::setMinimumSlide(int v) {
+void sliderWidget::setMinimumSlide(double v) {
+    qDebug() << "setMinimumSlide: " << v;
+    v = v * sliderDivider;
+    qDebug() << "slideMinVal: " << v;
     if (v > slide->maximum()) {
-        minimumSpinBox->setValue(slide->maximum());
+        minimumSpinBox->setValue(slide->maximum() / sliderDivider);
         v = slide->maximum();
     }
+    qDebug() << "slide->setMinimum: " << v;
     slide->setMinimum(v);
-    minValLabelBox1->setText(QString::number(v));
+    minValLabelBox1->setText(QString::number(v / sliderDivider));
     slide->setValue((slide->maximum() + slide->minimum()) / 2);
 }
 
-void sliderWidget::setMaximumSlide(int v) {
+void sliderWidget::setMaximumSlide(double v) {
+    qDebug() << "setMaximumSlide: " << v;
+    v = v * sliderDivider;
+    qDebug() << "slideMaxVal: " << v;
     if (v < slide->minimum()) {
-        maximumSpinBox->setValue(slide->maximum());
+        maximumSpinBox->setValue(slide->maximum() / sliderDivider);
         v = slide->minimum();
     }
+    qDebug() << "slide->setMaximum: " << v;
     slide->setMaximum(v);
-    maxValLabelBox1->setText(QString::number(v));
+    maxValLabelBox1->setText(QString::number(v / sliderDivider));
     slide->setValue((slide->maximum() + slide->minimum()) / 2);
 }
 
-void sliderWidget::setSingleStepSlide(int v) {
+void sliderWidget::setSingleStepSlide(double v) {
+    v = v * sliderDivider;
     slide->setTickInterval(v);
     slide->setSingleStep(v);
     if (v == 0) {
@@ -119,7 +129,7 @@ void sliderWidget::setSingleStepSlide(int v) {
 }
 
 void sliderWidget::valueBoxEditingFinished() {
-    slide->setValue(valueBox->text().toInt());
+    slide->setValue(valueBox->text().toDouble() * sliderDivider);
 }
 
 void sliderWidget::buildXml(QDomDocument& doc) {

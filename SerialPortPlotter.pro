@@ -3,7 +3,7 @@
 # Project created by QtCreator 2014-12-22T14:53:33
 #
 #-------------------------------------------------
-include (C:\Qwt-6.1.4\features\qwt.prf)
+#include (C:\Qwt-6.1.4\features\qwt.prf)
 
 QT       += core gui
 QT       += serialport
@@ -26,8 +26,7 @@ SOURCES += main.cpp\
     customwidget.cpp \
     dialwidget.cpp \
     graphcontainer.cpp \
-    formsliderinfo.cpp \
-    knob.cpp
+    formsliderinfo.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
@@ -38,8 +37,7 @@ HEADERS  += mainwindow.hpp \
     dialwidget.h \
     graphcontainer.h \
     formsliderinfo.h \
-    tabwidget.h \
-    knob.h
+    tabwidget.h
 
 
 FORMS    += mainwindow.ui \
