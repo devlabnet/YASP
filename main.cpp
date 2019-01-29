@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 //    }
 
     MainWindow w;
-    QIcon appIcon(":/Icons/Icons/serial_port_icon.icns");                       // Get the icon for the right corner
+    QIcon appIcon(":/Icons/Icons/Oscilloscope-128.png");                       // Get the icon for the right corner
     w.setWindowIcon(appIcon);
     w.setWindowTitle("Serial Port Plotter");
     w.show();

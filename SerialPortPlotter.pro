@@ -45,8 +45,6 @@ FORMS    += mainwindow.ui \
     dialogwidgets.ui \
     formsliderinfo.ui
 
-RC_FILE = myapp.rc
-
 RESOURCES += \
     appresources.qrc
 
