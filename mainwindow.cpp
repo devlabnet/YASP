@@ -37,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connected(false), plotting(false), dataPointNumber(0), numberOfAxes(1), STATE(WAIT_START), numberOfPoints(NUMBER_OF_POINTS_DEF)
 {
     ui->setupUi(this);
+
+    QLocale::setDefault(QLocale::C);
+
     createUI();      // Create the UI
     QColor gridColor = QColor(170,170,170);
     ui->bgColorButton->setAutoFillBackground(true);
@@ -113,6 +116,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
 
+
+    //qDebug() << "QLocale::system() --> " << QLocale::system().;
     // Clear the terminal
     on_clearTermButton_clicked();
     plotTime.start();

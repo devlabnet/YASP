@@ -20,6 +20,7 @@ private:
     double maxValRange = 1000;
     double minValRange = -1000;
     double tickInterval = 10 * sliderDivider;
+    bool tracking = false;
     QLabel* valLabelBox1;
     QLineEdit* valueBox;
     QSlider *slide;
@@ -36,6 +37,8 @@ public slots:
 
 private slots:
     void slideValue(int value);
+    void trackingToggle(bool t);
+
     void setMinimumSlide(double v);
     void setMaximumSlide(double v);
     void setSingleStepSlide(double v);

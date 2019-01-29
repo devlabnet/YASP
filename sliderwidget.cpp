@@ -8,6 +8,7 @@
 #include <QTextEdit>
 #include <QDebug>
 #include <QDoubleSpinBox>
+#include <QRadioButton>
 
 sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget (parent, domElt)
 {
@@ -21,6 +22,7 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
             if (Child.tagName() == "VALUE_MIN") minValRange = Child.firstChild().toText().data().toInt();
             if (Child.tagName() == "VALUE_MAX") maxValRange = Child.firstChild().toText().data().toInt();
             if (Child.tagName() == "VALUE_TICK") tickInterval = Child.firstChild().toText().data().toInt();
+            if (Child.tagName() == "TRACKING") tracking = Child.firstChild().toText().data().toInt();
             // Next child
             Child = Child.nextSibling().toElement();
         }
@@ -33,6 +35,7 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
     minValLabelBox1 = new QLabel(QString::number(minValRange));
     maxValLabelBox1 = new QLabel(QString::number((maxValRange)));
     slide = new QSlider(Qt::Horizontal);
+    slide->setTracking(tracking);
     slide->setTickPosition(QSlider::TicksBelow);
     slide->setValue(0);
     slide->setRange(minValRange * sliderDivider, maxValRange * sliderDivider);
@@ -76,12 +79,20 @@ sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget 
     controlsLayout->addWidget(tickIntervalLabel, 3, 0);
     controlsLayout->addWidget(ticksIntervalSpinBox, 3, 1);
 //    QLabel* dividerLabel = new QLabel("Divider");
-
+    QRadioButton* trackingBtn = new QRadioButton("Tracking");
+    controlsLayout->addWidget(trackingBtn, 4, 1);
+    trackingBtn->setChecked(tracking);
+    connect(trackingBtn, SIGNAL(toggled(bool)), this, SLOT(trackingToggle(bool)));
     connect(slide, SIGNAL(valueChanged(int)), this, SLOT(slideValue(int)));
     connect(minimumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setMinimumSlide(double)));
     connect(maximumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setMaximumSlide(double)));
     connect(ticksIntervalSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSingleStepSlide(double)));
     connect(valueBox, SIGNAL(editingFinished()), this, SLOT(valueBoxEditingFinished()));
+}
+
+void sliderWidget::trackingToggle(bool t) {
+    tracking = t;
+    slide->setTracking(t);
 }
 
 void sliderWidget::slideValue(int value) {
@@ -156,6 +167,10 @@ void sliderWidget::buildXml(QDomDocument& doc) {
     tag = doc.createElement("VALUE_TICK");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(slide->tickInterval())));
+    tag = doc.createElement("TRACKING");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(tracking)));
+
     root.appendChild(widget);
 }
 
