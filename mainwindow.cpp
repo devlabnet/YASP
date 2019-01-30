@@ -153,7 +153,7 @@ void MainWindow::createUI() {
     if(QSerialPortInfo::availablePorts().size() == 0) {                                   // Check if there are any ports at all; if not, disable controls and return
         enableControls(false);
         ui->connectButton->setEnabled(false);
-        ui->statusBar->setStyleSheet("background-color: Tomato;");
+        ui->statusBar->setStyleSheet("color: Black; background-color: Tomato;");
         ui->statusBar->showMessage("No ports detected.");
         ui->saveJPGButton->setEnabled(false);
         return;

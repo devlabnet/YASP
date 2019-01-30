@@ -26,6 +26,7 @@
 
 #include "mainwindow.hpp"
 #include <QApplication>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -35,6 +36,15 @@ int main(int argc, char *argv[])
 //    if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 //        a.setStyleSheet(file.readAll());
 //        file.close();
+//    }
+
+//    QFile f(":qdarkstyle/style.qss");
+//    if (!f.exists()) {
+//        qDebug() << "Unable to set stylesheet, file not found.";
+//    } else {
+//        f.open(QFile::ReadOnly | QFile::Text);
+//        QTextStream ts(&f);
+//        a.setStyleSheet(ts.readAll());
 //    }
 
     MainWindow w;
