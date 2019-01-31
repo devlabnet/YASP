@@ -141,12 +141,15 @@ private:
     QLabel* bottomWidget;
     QFile* logFile = nullptr;
     QTextStream streamLog;
+    QFile* logData = nullptr;
+    QTextStream streamData;
     QRubberBand* rubberBand = nullptr;
     QPointF rubberOrigin;
     QCPItemTracer *tracer = nullptr;
     bool measureInProgress = false;
     int measureMult;
     double traceerStartKey;
+
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();
@@ -165,6 +168,7 @@ private:
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
     void updateTracer(int pX);
+    void saveDataPlot(QCPGraph* g);
 
 };
 

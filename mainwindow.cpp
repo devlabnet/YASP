@@ -28,6 +28,7 @@
 #include "ui_mainwindow.h"
 #include <QSplitter>
 #include <QtGui>
+
 /******************************************************************************************************************/
 /* Constructor */
 /******************************************************************************************************************/
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->hide();
     ui->stopPlotButton->setEnabled(false);                                                // Plot button is disabled initially
 
+    ui->logPlotButton->setVisible(false);
 //    // Legend
 //    ui->plot->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
 //    ui->plot->legend->setVisible(true);
@@ -813,13 +815,64 @@ void MainWindow::cancelMeasure() {
 }
 
 /******************************************************************************************************************/
-void MainWindow::saveSelectedGraph() {
+void MainWindow::saveDataPlot(QCPGraph* g) {
+    qDebug() << "Graph Data: " << g->data();
+    QCPDataMap* map = g->data();
+    // Iterate over Plot Data
+    if (map->size()) {
+        int measureGraphId = getIdOfQCPGraph(g);
+        Q_ASSERT(measureGraphId >= 0);
+        Q_ASSERT(measureGraphId < 9);
+        qDebug() << "GRAPH ID ---> " << measureGraphId;
+        QString plotName = plotsVector[measureGraphId]->getName();
+        if (logData == nullptr) {
+            QString fileName = QFileDialog::getSaveFileName(this, tr("Log Plot"),
+                                       plotName,
+                                       tr("Data (*.csv)"));
+            qDebug() << "Log DATA : " << fileName;
+            logData = new QFile(fileName);
+            if (!logData->open(QIODevice::WriteOnly)) {
+                QMessageBox::information(this, tr("Unable to open file"),
+                                         logData->errorString());
+                logData = nullptr;
+                return;
+            }
+            qDebug() << "Log DATA Opened : " << logData->fileName();
+            streamData.setDevice(logData);
+            QLocale locale = QLocale("fr_FR");
+            locale.setNumberOptions(QLocale::OmitGroupSeparator);
+            //QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+            streamData.setLocale(locale);
 
+            // Set Headers
+//            streamData << "NAME" << ";" << "TIME" << ";" << "VALUE" << "\n";
+            streamData << "TIME" << ";" << "VALUE" << "\n";
+            QCPDataMap::const_iterator it = map->constBegin();
+            while (it != map->constEnd()) {
+                QCPData data =  it.value();
+//                streamData << plotName << ";" << data.key << ";" << data.value  << "\n";
+                streamData << data.key << ";" << data.value  << "\n";
+                ++it;
+            }
+        }
+       qDebug() << "Close Log DATA : " << logData->fileName();
+       logData->close();
+       delete logData;
+       logData = nullptr;
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::saveSelectedGraph() {
+    QList<QCPGraph*> sg = ui->plot->selectedGraphs();
+    qDebug() << "Selected Graph: " << sg;
+    QCPGraph* g = sg.at(0);
+    if (!g->visible()) return;
+    saveDataPlot(g);
 }
 
 /******************************************************************************************************************/
 void MainWindow::saveAllGraphs() {
-
 }
 
 /******************************************************************************************************************/
@@ -953,7 +1006,7 @@ void MainWindow::plotContextMenuRequest(QPoint pos) {
         }
     } else {
         if (ui->plot->graphCount() > 0) {
-            contextMenu->addAction("Save All Graphs Data", this, SLOT(saveAllGraphs()));
+            //contextMenu->addAction("Save All Graphs Data", this, SLOT(saveAllGraphs()));
         }
     }
     contextMenu->popup(ui->plot->mapToGlobal(pos));
