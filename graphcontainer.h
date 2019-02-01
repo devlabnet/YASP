@@ -57,12 +57,13 @@ private:
     QAction doMeasureAction;
     QAction cancelMeasureAction;
     int delta;
-    int mult;
+    double mult;
     FormSliderInfo* slideDelta;
     FormSliderInfo* slideMult;
     double dataMin = 0;
     double dataMax = 0;
-    double dataAverage = 0;
+    double dataValue = 0;
+//    double dataAverage = 0;
 
     QLocale locale;
     QFile* logFile = nullptr;

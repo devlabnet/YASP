@@ -42,6 +42,7 @@
 #define START_MSG      0x10
 #define PLOT_MSG       0X11
 #define END_MSG        0X12
+#define SPACE_MSG      0X13
 
 #define WAIT_START      1
 #define IN_MESSAGE      2

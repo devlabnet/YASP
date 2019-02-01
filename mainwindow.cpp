@@ -527,6 +527,8 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
                 plotsToolBox->tabBar()->setTabText(tabPos, param2);
             }
         }
+//        qDebug() << "param1 : " << param1;
+//        qDebug() << "param2 : " << param2;
     }
 }
 
@@ -540,6 +542,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
         addMessageText(QString::number(plotTime.elapsed()) + " BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
         return;
     }
+//    qDebug() << "NEW DATA : " << plotId << " --> " << newData;
     if(plotting) {
         int dataListSize = newData.size();                                                    // Get size of received list
         dataPointNumber++;
@@ -641,7 +644,7 @@ bool MainWindow::isNumericChar(char cc) {
 //    value is neither representable as unsigned char nor equal to EOF. To use these functions safely with
 //    plain chars (or signed chars), the argument should first be converted to unsigned char:
     unsigned char ucc = static_cast<unsigned char>(cc);
-    return isdigit( ucc) || isspace( ucc) || ( ucc == '-') || ( ucc == '.');
+    return isdigit( ucc) || isspace( ucc) || ( ucc == '-') || ( ucc == '.') || (cc == SPACE_MSG);
 }
 
 /******************************************************************************************************************/
@@ -689,19 +692,23 @@ void MainWindow::readData() {
                 case IN_MESSAGE:                                                          // If state is IN_MESSAGE
                     if( cc == END_MSG) {                                              // If char examined is ;, switch state to END_MSG
                         STATE = WAIT_START;
-                        QStringList incomingData = receivedData.split(' ');               // Split string received from port and put it into list
+//                        qDebug() << "receivedData: " << receivedData;
+                        QStringList incomingData = receivedData.split(SPACE_MSG);               // Split string received from port and put it into list
                         emit newData(incomingData);                                       // Emit signal for data received with the list
                         break;
                     } else if (checkEndMsgMissed(cc)) {
                         break;
-                    } else if (isNumericChar(cc)) {            // If examined char is a digit, and not '$' or ';', append it to temporary string
-                        receivedData.append( cc);
+                    } else {
+                        if (isNumericChar(cc)) {            // If examined char is a digit, and not '$' or ';', append it to temporary string
+                            receivedData.append( cc);
+                        }
                     }
                     break;
                 case IN_PLOT_MSG:                                                          // If state is IN_MESSAGE
                     if( cc == END_MSG) {                                              // If char examined is ;, switch state to END_MSG
                         STATE = WAIT_START;
-                        QStringList incomingData = receivedData.split(' ');               // Split string received from port and put it into list
+//                        qDebug() << "receivedPlot: " << receivedData;
+                        QStringList incomingData = receivedData.split(SPACE_MSG);               // Split string received from port and put it into list
                         emit newPlotData(incomingData);                                       // Emit signal for data received with the list
                         break;
                     } else if (checkEndMsgMissed(cc)) {

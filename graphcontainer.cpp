@@ -72,6 +72,12 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     mult = 1;
     QLabel* comboMultLabel = new QLabel("Mult");
     QComboBox* comboMult = new QComboBox();
+    comboMult->addItem("0.0001");
+    comboMult->addItem("0.001");
+    comboMult->addItem("0.01");
+    comboMult->addItem("0.1");
+    comboMult->addItem("0.2");
+    comboMult->addItem("0.5");
     comboMult->addItem("1");
     comboMult->addItem("2");
     comboMult->addItem("5");
@@ -80,6 +86,7 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     comboMult->addItem("100");
     comboMult->addItem("1000");
     comboMult->addItem("10000");
+    comboMult->setCurrentIndex(6);
     connect(comboMult, SIGNAL (currentIndexChanged(const QString)), this, SLOT (handleComboMult(const QString)));
     layout->addWidget(comboMultLabel, 3, 0, Qt::AlignCenter);
     layout->addWidget(comboMult, 3, 1, Qt::AlignCenter);
@@ -102,7 +109,7 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
 //    labelPos.setX(0);
 //    labelPos.setY(10 + (tabIndex * pixelsHigh));
 //    textLabel->position->setCoords(labelPos.x(), labelPos.y());
-    graph->parentPlot()->clearMask();
+//    graph->parentPlot()->clearMask();
 }
 
 /******************************************************************************************************************/
@@ -182,9 +189,10 @@ void graphContainer::addData(double k, double v, int time) {
     if (radioInfo->isChecked()) {
         dataMin = qMin(dataMin, v);
         dataMax = qMax(dataMax, v);
+        dataValue = v;
     //    dataAverage = v;
         int avr = 5;
-        dataAverage = ((dataAverage * avr) + v) / (avr + 1);
+//        dataAverage = ((dataAverage * avr) + v) / (avr + 1);
         double plotV = (v * mult) + delta;
         graph->addData(k, plotV);                 // Add data to Graph 0
         graph->removeDataBefore(k - numberOfPoints);           // Remove data from graph 0
@@ -192,8 +200,13 @@ void graphContainer::addData(double k, double v, int time) {
         axisLine->end->setCoords(k, delta);
         if (logFile != nullptr) {
             if (isDisplayed()) {
-                streamLog << k << ";" << time << ";" << v << ";" << dataAverage << ";" << plotV
-                          << ";" << mult << ";" << delta << ";"
+                streamLog << k << ";"
+                          << time << ";"
+                          << v << ";"
+//                          << dataAverage << ";"
+                          << plotV  << ";"
+                          << mult << ";"
+                          << delta << ";"
                           << "\n";
             }
         }
@@ -223,8 +236,13 @@ void graphContainer::logPlotButtonClicked() {
         //QTextCodec *codec = QTextCodec::codecForName("UTF-8");
         streamLog.setLocale(locale);
         // Set Headers
-        streamLog << "POINT" << ";" << "TIME" << ";" << "VALUE" << ";" << "dataAverage" << ";" << "plotV"
-                  << ";" << "mult" << ";" << "delta"
+        streamLog << "POINT" << ";"
+                  << "TIME" << ";"
+                  << "VALUE" << ";"
+//                  << "dataAverage" << ";"
+                  << "plotV" << ";"
+                  << "mult" << ";"
+                  << "delta"
                   << "\n";
         logging = true;
         textLabel->setBrush(QBrush(Qt::gray));
@@ -247,8 +265,8 @@ void graphContainer::updateLabel() {
         dataStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
                 + " Min = " + QString::number(dataMin)
                 + " Max = " + QString::number(dataMax)
-                + " Val = " + QString::number(dataAverage );
-
+                + " Val = " + QString::number(dataValue );
+//                + " Val = " + QString::number(dataAverage );
     }
     QFontMetricsF fm(font);
     qreal pixelsWide = fm.width(dataStr);
@@ -256,6 +274,7 @@ void graphContainer::updateLabel() {
     labelPos.setX(pixelsWide + 100);
     labelPos.setY(10 + (tabPos * pixelsHigh));
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
+//    qDebug() << "textLabel: " << dataStr;
     textLabel->setText(dataStr);
 }
 
@@ -270,7 +289,8 @@ void graphContainer::handleColor() {
 void graphContainer::handleResetInfo() {
     dataMin = 0;
     dataMax = 0;
-    dataAverage = 0;
+//    dataAverage = 0;
+    dataValue = 0;
     updateLabel();
 }
 
@@ -292,7 +312,7 @@ void graphContainer::handleDelta(int i) {
 /******************************************************************************************************************/
 void graphContainer::handleComboMult(const QString str) {
     qDebug() << "handleComboMult: " << str;
-    mult = str.toInt();
+    mult = str.toDouble();
     clearData();
     updateLabel();
 }
