@@ -90,10 +90,11 @@ private slots:
     void onMouseDoubleClickInPlot(QMouseEvent* event);
     void plotContextMenuRequest(QPoint pos);
     void selectionChangedByUserInPlot();
-
+    void legendSelectionChanged(QCPLegend::SelectableParts l);
     void saveSelectedGraph();
     void saveAllGraphs();
     void doMeasure();
+    void doShift();
     void cleanTracer();
     void cancelMeasure();
     void on_spinPoints_valueChanged(int arg1);                                            // Spin box controls how many data points are collected and displayed
@@ -120,6 +121,15 @@ private:
                           QColor("#ffaa00"), QColor("#ffaaff"), QColor("#00ffff"),
                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                           QColor("#ff00aa")};
+
+    enum WheelAction { wheelZoom   = 0x01,
+                       wheelShift   = 0x02
+                     };
+    WheelAction wheelState = wheelZoom;
+    enum mouseAction { mouseMove   = 0x01,
+                       mouseShift   = 0x02
+                     };
+    mouseAction mouseState = mouseMove;
     QTime plotTime;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
@@ -150,7 +160,7 @@ private:
     bool measureInProgress = false;
     int measureMult;
     double traceerStartKey;
-
+    graphContainer* selectedPlotContainer = nullptr;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();
@@ -170,6 +180,9 @@ private:
     bool isNumericChar(char cc);
     void updateTracer(int pX);
     void saveDataPlot(QCPGraph* g);
+    void shiftPlot(double posY);
+    bool startShiftPlot = false;
+    double lastPosY = 0;
 
 };
 
