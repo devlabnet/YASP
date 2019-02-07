@@ -22218,7 +22218,7 @@ QCPItemText::QCPItemText(QCustomPlot *parentPlot) :
   setRotation(0);
   setTextAlignment(Qt::AlignTop|Qt::AlignHCenter);
   setPositionAlignment(Qt::AlignCenter);
-  setText(QLatin1String("text"));
+  setText(QLatin1String(""));
   
   setPen(Qt::NoPen);
   setSelectedPen(Qt::NoPen);

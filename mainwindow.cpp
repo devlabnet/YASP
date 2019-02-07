@@ -95,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
-//    connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChangedByUserInPlot()));
+    connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChangedByUserInPlot()));
 //    connect(ui->plot->legend, SIGNAL(selectionChanged(QCPLegend::SelectableParts)),
 //            this, SLOT(legendSelectionChanged(QCPLegend::SelectableParts)));
 
@@ -562,6 +562,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
                 plot->setColor(colours[plotId]);
                 plot->setUsed(true);
                 plot->setTabPos(tabPos);
+                plotColorChanged(tabPos, colours[tabPos]);
             } else {
                 tabPos = plot->getTabPos();
             }
