@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
 
 
-    ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(onMouseDoubleClickInPlot(QMouseEvent*)));
@@ -276,7 +276,9 @@ void MainWindow::addPlots() {
         ui->plot->xAxis->setRange(0, numberOfPoints);                                      // Set x axis range for specified number of points
         setAutoYRange(ui->plot->yAxis->range().size());
         QString plotStr = "Plot " + QString::number( tabInd);
-        graphContainer* gc = new graphContainer(ui->plot->addGraph(), numberOfPoints, plotStr, colours[ tabInd],  tabInd);
+
+        QCPGraph* g = ui->plot->addGraph();
+        graphContainer* gc = new graphContainer(g, numberOfPoints, plotStr, colours[ tabInd],  tabInd, this);
         plotsVector.insert(tabInd, gc);
         connect(gc, SIGNAL(plotColorChanged(int, QColor)), this, SLOT(plotColorChanged(int, QColor)));
         gc->updateGraphParams(bgColor);
@@ -452,14 +454,14 @@ void MainWindow::on_stopPlotButton_clicked() {
         updateTimer.stop();                                                               // Stop updating plot timer
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom  | QCP::iSelectAxes | QCP::iSelectPlottables);
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
         // setup policy and connect slot for context menu popup:
         ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     } else {                                                                              // Start plotting
         updateTimer.start();                                                              // Start updating plot timer
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
         ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
         cancelMeasure();
     }
@@ -562,7 +564,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
                 plot->setColor(colours[plotId]);
                 plot->setUsed(true);
                 plot->setTabPos(tabPos);
-                plotColorChanged(tabPos, colours[tabPos]);
+                plotColorChanged(tabPos, colours[plotId]);
             } else {
                 tabPos = plot->getTabPos();
             }
@@ -955,7 +957,7 @@ void MainWindow::updateTracer(int pX) {
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     if (mouseState == mouseMove) {
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
         if (measureInProgress == false) {
             double xx = ui->plot->xAxis->pixelToCoord(event->x());
             double yy = ui->plot->yAxis->pixelToCoord(event->y());
@@ -967,7 +969,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
             updateTracer(event->pos().x());
         }
     } else {
-        ui->plot->setInteractions(QCP::iRangeZoom );
+        ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
         shiftPlot( ui->plot->yAxis->pixelToCoord(event->y()));
     }
 }
@@ -978,13 +980,13 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     mousePressed = false;
     ui->statusBar->showMessage("release");
     if (plotting) {
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     } else {
         if (tracer) {
-            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
             tracer->blockSignals(false);
         } else {
-            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom  | QCP::iSelectAxes | QCP::iSelectPlottables);
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
         }
     }
 }
@@ -998,11 +1000,14 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
 /******************************************************************************************************************/
 void MainWindow::selectionChangedByUserInPlot() {
     qDebug() << "selectionChangedByUserInPlot";
+    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedGraphs().size() : " << ui->plot->selectedGraphs().size();
+    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedItems().size() : " << ui->plot->selectedItems().size();
+    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedPlottables().size() : " << ui->plot->selectedPlottables().size();
     if (ui->plot->selectedGraphs().size() == 0) {
         if (mouseState == mouseShift) {
             mouseState = mouseMove;
             startShiftPlot = false;
-            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
             selectedPlotContainer = nullptr;
         }
     }
@@ -1188,5 +1193,17 @@ void MainWindow::on_logPlotButton_clicked() {
         logFile->close();
         delete logFile;
         logFile = nullptr;
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::plotLabelSelected(bool b) {
+    qDebug() << "plotLabelSelected : " << b;
+    if (b) {
+        //Q_ASSERT(ui->plot->selectedItems().size() == 1);
+        qDebug() << "plotLabelSelected : " << ui->plot->selectedItems().size();
+        QCPAbstractItem* item = ui->plot->selectedItems().at(0);
+        qDebug() << "plotLabelSelected : " << item;
+
     }
 }

@@ -43,7 +43,7 @@ private:
     bool logData = false;
     int tabIndex;
     QFont font;
-    QCPItemText *textLabel;
+    QCPItemText* textLabel;
     qreal pixelsHigh;
     QPoint labelPos;
     int viewIndex = 0;
@@ -80,6 +80,7 @@ private slots:
     void handleComboMult(const QString str);
     void handleShowPlot(bool state);
     void logPlotButtonClicked();
+    void plotLabelSelected(bool b);
 signals:
     void plotColorChanged(int, QColor);
 public slots:

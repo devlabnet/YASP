@@ -99,11 +99,13 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     font.setStyle(QFont::StyleItalic);
     //font.setFixedPitch(true);
     dataStr =  plotName;
-    textLabel = new QCPItemText(graph->parentPlot());
+    textLabel = new QCPItemText(g->parentPlot());
     textLabel->setColor(penColor);
     textLabel->setFont(font); // make font a bit larger
     textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
     textLabel->position->setType(QCPItemPosition::ptAbsolute );
+    textLabel->setSelectable(true);
+//    connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
     QFontMetricsF fm(font);
     pixelsHigh = fm.height();
 //    labelPos.setX(0);
@@ -315,4 +317,9 @@ void graphContainer::handleComboMult(const QString str) {
     mult = str.toDouble();
     clearData();
     updateLabel();
+}
+
+/******************************************************************************************************************/
+void graphContainer::plotLabelSelected(bool b) {
+    qDebug() << "graphContainer::plotLabelSelected : " << b;
 }

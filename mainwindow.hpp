@@ -108,7 +108,7 @@ private slots:
     void on_scrollButton_clicked(bool checked);
 
     void on_logPlotButton_clicked();
-
+    void plotLabelSelected(bool b);
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
