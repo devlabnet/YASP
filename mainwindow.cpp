@@ -53,21 +53,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->logPlotButton->setVisible(false);
     // Legend
-    ui->plot->setAutoAddPlottableToLegend(false);
+//    ui->plot->setAutoAddPlottableToLegend(false);
     ui->plot->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
-    ui->plot->legend->setVisible(true);
-    QFont legendFont = font();  // start out with MainWindow's font..
-    legendFont.setPointSize(9); // and make a bit smaller for legend
-    ui->plot->legend->setFont(legendFont);
-    ui->plot->legend->setBrush(QBrush(QColor(255,255,255,230)));
+//    ui->plot->legend->setVisible(true);
+//    QFont legendFont = font();  // start out with MainWindow's font..
+//    legendFont.setPointSize(9); // and make a bit smaller for legend
+//    ui->plot->legend->setFont(legendFont);
+//    ui->plot->legend->setBrush(QBrush(QColor(255,255,255,230)));
 
     ui->plot->setNotAntialiasedElements(QCP::aeAll);                                      // used for higher performance (see QCustomPlot real time example)
     QFont font;
     font.setStyleStrategy(QFont::NoAntialias);
     ui->plot->xAxis->setTickLabelFont(font);
     ui->plot->yAxis->setTickLabelFont(font);
-    ui->plot->legend->setFont(font);
-    ui->plot->legend->setSelectableParts(QCPLegend::spItems);
+//    ui->plot->legend->setFont(font);
+//    ui->plot->legend->setSelectableParts(QCPLegend::spItems);
     ui->plot->yAxis->setAutoTickStep(false);                                              // User can change tick step with a spin box
     ui->plot->yAxis->setTickStep(500);                                                    // Set initial tick step
     ui->plot->xAxis->setTickLabelColor(gridColor);                              // Tick labels color
@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
 
 
-    ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectLegend);
+    ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(onMouseDoubleClickInPlot(QMouseEvent*)));
@@ -96,8 +96,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
 //    connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChangedByUserInPlot()));
-    connect(ui->plot->legend, SIGNAL(selectionChanged(QCPLegend::SelectableParts)),
-            this, SLOT(legendSelectionChanged(QCPLegend::SelectableParts)));
+//    connect(ui->plot->legend, SIGNAL(selectionChanged(QCPLegend::SelectableParts)),
+//            this, SLOT(legendSelectionChanged(QCPLegend::SelectableParts)));
 
 //    // setup policy and connect slot for context menu popup:
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
@@ -452,14 +452,14 @@ void MainWindow::on_stopPlotButton_clicked() {
         updateTimer.stop();                                                               // Stop updating plot timer
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectLegend | QCP::iSelectAxes | QCP::iSelectPlottables);
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom  | QCP::iSelectAxes | QCP::iSelectPlottables);
         // setup policy and connect slot for context menu popup:
         ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     } else {                                                                              // Start plotting
         updateTimer.start();                                                              // Start updating plot timer
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectLegend);
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
         ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
         cancelMeasure();
     }
@@ -502,7 +502,7 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
             plot->setColor(colours[plotId]);
             plot->setUsed(true);
             plot->setTabPos(tabPos);
-            plot->getGraph()->addToLegend();
+//            plot->getGraph()->addToLegend();
         } else {
             tabPos = plot->getTabPos();
         }
@@ -954,7 +954,7 @@ void MainWindow::updateTracer(int pX) {
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     if (mouseState == mouseMove) {
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectLegend);
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
         if (measureInProgress == false) {
             double xx = ui->plot->xAxis->pixelToCoord(event->x());
             double yy = ui->plot->yAxis->pixelToCoord(event->y());
@@ -966,7 +966,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
             updateTracer(event->pos().x());
         }
     } else {
-        ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectLegend);
+        ui->plot->setInteractions(QCP::iRangeZoom );
         shiftPlot( ui->plot->yAxis->pixelToCoord(event->y()));
     }
 }
@@ -977,22 +977,22 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     mousePressed = false;
     ui->statusBar->showMessage("release");
     if (plotting) {
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectLegend);
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
     } else {
         if (tracer) {
-            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectLegend);
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
             tracer->blockSignals(false);
         } else {
-            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectLegend | QCP::iSelectAxes | QCP::iSelectPlottables);
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom  | QCP::iSelectAxes | QCP::iSelectPlottables);
         }
     }
 }
 
-/******************************************************************************************************************/
-void MainWindow::legendSelectionChanged(QCPLegend::SelectableParts l) {
-    qDebug() << "legendSelectionChanged: " << l;
+///******************************************************************************************************************/
+//void MainWindow::legendSelectionChanged(QCPLegend::SelectableParts l) {
+//    qDebug() << "legendSelectionChanged: " << l;
 
-}
+//}
 
 /******************************************************************************************************************/
 void MainWindow::selectionChangedByUserInPlot() {
@@ -1001,7 +1001,7 @@ void MainWindow::selectionChangedByUserInPlot() {
         if (mouseState == mouseShift) {
             mouseState = mouseMove;
             startShiftPlot = false;
-            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectLegend);
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom );
             selectedPlotContainer = nullptr;
         }
     }
