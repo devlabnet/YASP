@@ -10,10 +10,10 @@ class graphContainer : public QWidget
 {
     Q_OBJECT
 public:
-    explicit graphContainer(QCPGraph* g, int nop, QString pName, QColor color, int id, QWidget *parent = nullptr);
+    explicit graphContainer(QSharedPointer<QCPGraph> g, int nop, QString pName, QColor color, int id, QWidget *parent = nullptr);
     ~graphContainer();
 
-    QCPGraph* getGraph() { return graph; }
+    QSharedPointer<QCPGraph> getGraph() { return graph; }
     void addData(double k, double v, int time);
     void clearData();
     void clearLabels();
@@ -31,7 +31,7 @@ public:
     void setRadioInfo(bool checked);
     bool isDisplayed();
 private:
-    QCPGraph* graph;
+    QSharedPointer<QCPGraph> graph;
     QColor plotBgColor;
     // Number of points plotted
     int numberOfPoints;
@@ -53,7 +53,7 @@ private:
     QPushButton* logInfoBtn;
     QPen pen;
     QColor penColor;
-    QCPItemLine *axisLine;
+//    QCPItemLine *axisLine;
     QAction doMeasureAction;
     QAction cancelMeasureAction;
     int delta;

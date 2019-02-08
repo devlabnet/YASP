@@ -5,15 +5,15 @@
 #include <QSpacerItem>
 
 /******************************************************************************************************************/
-graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color, int id, QWidget *parent)
+graphContainer::graphContainer(QSharedPointer<QCPGraph> g, int nop, QString pName, QColor color, int id, QWidget *parent)
     : QWidget(parent), graph(g), numberOfPoints(nop), plotName(pName), tabIndex(id), penColor(color) {
 
     pen = QPen(penColor);
     graph->setPen(pen);
-    axisLine = new QCPItemLine(graph->parentPlot());
-    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
-    axisLine->start->setCoords(0,0);
-    axisLine->end->setCoords(numberOfPoints,0);
+//    axisLine = new QCPItemLine(graph->parentPlot());
+//    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+//    axisLine->start->setCoords(0,0);
+//    axisLine->end->setCoords(numberOfPoints,0);
 //    qDebug() << "lr:" << graph->parentPlot()->yAxis->range().lower
 //             <<" ur:" << graph->parentPlot()->yAxis->range().upper
 //             <<" minr:" << graph->parentPlot()->yAxis->range().minRange
@@ -104,13 +104,14 @@ graphContainer::graphContainer(QCPGraph *g, int nop, QString pName, QColor color
     textLabel->setFont(font); // make font a bit larger
     textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
     textLabel->position->setType(QCPItemPosition::ptAbsolute );
-    textLabel->setSelectable(true);
+    textLabel->setText("00000000");
+//    textLabel->setSelectable(true);
 //    connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
     QFontMetricsF fm(font);
     pixelsHigh = fm.height();
-//    labelPos.setX(0);
-//    labelPos.setY(10 + (tabIndex * pixelsHigh));
-//    textLabel->position->setCoords(labelPos.x(), labelPos.y());
+    labelPos.setX(0);
+    labelPos.setY(10 + (tabIndex * pixelsHigh));
+    textLabel->position->setCoords(labelPos.x(), labelPos.y());
 //    graph->parentPlot()->clearMask();
 }
 
@@ -142,7 +143,7 @@ void graphContainer::updateGraphNop(int pCnt, bool resetDeltaValue) {
 void graphContainer::updateGraphParams(QColor plotBgC) {
     plotBgColor = plotBgC;
     if (!logging) {
-        textLabel->setBrush(QBrush(plotBgColor));
+//        textLabel->setBrush(QBrush(plotBgColor));
     }
 }
 
@@ -153,13 +154,13 @@ bool graphContainer::isDisplayed() {
 
 /******************************************************************************************************************/
 void graphContainer::clearData() {
-    graph->clearData();
+    graph->data()->clear();
     handleResetInfo();
 }
 
 /******************************************************************************************************************/
 void graphContainer::clearLabels() {
-    delete textLabel;
+//    delete textLabel;
 }
 
 /******************************************************************************************************************/
@@ -179,10 +180,10 @@ void graphContainer::setColor(QColor color) {
 //    qDebug() << "graphContainer setColor " << tabPos << " color:" << color;
     penColor = color;
     pen.setColor(penColor);
-    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+//    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
     graph->setPen(pen);
     colorButton->setStyleSheet("background-color:" + penColor.name() + "; color: rgb(0, 0, 0)");
-    textLabel->setColor(penColor);
+//    textLabel->setColor(penColor);
     emit plotColorChanged(tabPos, penColor);
 }
 
@@ -197,9 +198,9 @@ void graphContainer::addData(double k, double v, int time) {
 //        dataAverage = ((dataAverage * avr) + v) / (avr + 1);
         double plotV = (v * mult) + delta;
         graph->addData(k, plotV);                 // Add data to Graph 0
-        graph->removeDataBefore(k - numberOfPoints);           // Remove data from graph 0
-        axisLine->start->setCoords(k - numberOfPoints, delta);
-        axisLine->end->setCoords(k, delta);
+        //graph->removeDataBefore(k - numberOfPoints);           // Remove data from graph 0
+//        axisLine->start->setCoords(k - numberOfPoints, delta);
+//        axisLine->end->setCoords(k, delta);
         if (logFile != nullptr) {
             if (isDisplayed()) {
                 streamLog << k << ";"
@@ -247,7 +248,7 @@ void graphContainer::logPlotButtonClicked() {
                   << "delta"
                   << "\n";
         logging = true;
-        textLabel->setBrush(QBrush(Qt::gray));
+//        textLabel->setBrush(QBrush(Qt::gray));
         logInfoBtn->setText("Stop Logging");
     } else {
         qDebug() << "Log Plot Closed : " << logFile->fileName();
@@ -255,7 +256,7 @@ void graphContainer::logPlotButtonClicked() {
         logFile->close();
         delete logFile;
         logFile = nullptr;
-        textLabel->setBrush(QBrush(plotBgColor));
+//        textLabel->setBrush(QBrush(plotBgColor));
         logging = false;
     }
 }
@@ -275,8 +276,8 @@ void graphContainer::updateLabel() {
 //    qreal pixelsHigh = fm.height();
     labelPos.setX(pixelsWide + 100);
     labelPos.setY(10 + (tabPos * pixelsHigh));
-    textLabel->position->setCoords(labelPos.x(), labelPos.y());
-//    qDebug() << "textLabel: " << dataStr;
+//    textLabel->position->setCoords(labelPos.x(), labelPos.y());
+////    qDebug() << "textLabel: " << dataStr;
     textLabel->setText(dataStr);
 }
 

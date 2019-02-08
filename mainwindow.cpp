@@ -68,8 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->yAxis->setTickLabelFont(font);
 //    ui->plot->legend->setFont(font);
 //    ui->plot->legend->setSelectableParts(QCPLegend::spItems);
-    ui->plot->yAxis->setAutoTickStep(false);                                              // User can change tick step with a spin box
-    ui->plot->yAxis->setTickStep(500);                                                    // Set initial tick step
+//    ui->plot->yAxis->setAutoTickStep(false);                                              // User can change tick step with a spin box
+//    ui->plot->yAxis->setTickStep(500);                                                    // Set initial tick step
     ui->plot->xAxis->setTickLabelColor(gridColor);                              // Tick labels color
     ui->plot->yAxis->setTickLabelColor(gridColor);                              // See QCustomPlot examples / styled demo
     ui->plot->xAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
@@ -276,8 +276,8 @@ void MainWindow::addPlots() {
         ui->plot->xAxis->setRange(0, numberOfPoints);                                      // Set x axis range for specified number of points
         setAutoYRange(ui->plot->yAxis->range().size());
         QString plotStr = "Plot " + QString::number( tabInd);
-
-        QCPGraph* g = ui->plot->addGraph();
+        QCPGraph* x = ui->plot->addGraph();
+        QSharedPointer<QCPGraph> g(x);
         graphContainer* gc = new graphContainer(g, numberOfPoints, plotStr, colours[ tabInd],  tabInd, this);
         plotsVector.insert(tabInd, gc);
         connect(gc, SIGNAL(plotColorChanged(int, QColor)), this, SLOT(plotColorChanged(int, QColor)));
@@ -737,7 +737,7 @@ void MainWindow::readData() {
 void MainWindow::setAutoYRange(double r, bool resetDelta) {
     int step = 10;
     if (r < step) {
-        ui->plot->yAxis->setTickStep(1);
+//        ui->plot->yAxis->setTickStep(1);
         return;
     }
     int m = r / step;
@@ -745,7 +745,7 @@ void MainWindow::setAutoYRange(double r, bool resetDelta) {
     int mult =  pow(10, v);
     int x = m / mult;
     int vMin = qMax(x * mult, 5);
-    ui->plot->yAxis->setTickStep(vMin);
+//    ui->plot->yAxis->setTickStep(vMin);
     updateGraphNops(resetDelta);
     ui->plot->replot();
 }
@@ -816,10 +816,10 @@ void MainWindow::shiftPlot(double posY) {
         startShiftPlot = false;
     } else {
         double offset = posY - lastPosY;
-        QCPDataMap *dataMap = selectedPlotContainer->getGraph()->data();
-        for (QMap<double,QCPData>::iterator it = dataMap->begin(); it != dataMap->end(); ++it){
-            it.value().value += offset;
-        }
+//        QCPDataMap *dataMap = selectedPlotContainer->getGraph()->data();
+//        for (QMap<double,QCPData>::iterator it = dataMap->begin(); it != dataMap->end(); ++it){
+//            it.value().value += offset;
+//        }
         ui->plot->replot();
         lastPosY = posY;
     }
@@ -862,49 +862,49 @@ void MainWindow::cancelMeasure() {
 /******************************************************************************************************************/
 void MainWindow::saveDataPlot(QCPGraph* g) {
     qDebug() << "Graph Data: " << g->data();
-    QCPDataMap* map = g->data();
-    // Iterate over Plot Data
-    if (map->size()) {
-        int measureGraphId = getIdOfQCPGraph(g);
-        Q_ASSERT(measureGraphId >= 0);
-        Q_ASSERT(measureGraphId < 9);
-        qDebug() << "GRAPH ID ---> " << measureGraphId;
-        QString plotName = plotsVector[measureGraphId]->getName();
-        if (logData == nullptr) {
-            QString fileName = QFileDialog::getSaveFileName(this, tr("Log Plot"),
-                                       plotName,
-                                       tr("Data (*.csv)"));
-            qDebug() << "Log DATA : " << fileName;
-            logData = new QFile(fileName);
-            if (!logData->open(QIODevice::WriteOnly)) {
-                QMessageBox::information(this, tr("Unable to open file"),
-                                         logData->errorString());
-                logData = nullptr;
-                return;
-            }
-            qDebug() << "Log DATA Opened : " << logData->fileName();
-            streamData.setDevice(logData);
-            QLocale locale = QLocale("fr_FR");
-            locale.setNumberOptions(QLocale::OmitGroupSeparator);
-            //QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-            streamData.setLocale(locale);
+//    QCPDataMap* map = g->data();
+//    // Iterate over Plot Data
+//    if (map->size()) {
+//        int measureGraphId = getIdOfQCPGraph(g);
+//        Q_ASSERT(measureGraphId >= 0);
+//        Q_ASSERT(measureGraphId < 9);
+//        qDebug() << "GRAPH ID ---> " << measureGraphId;
+//        QString plotName = plotsVector[measureGraphId]->getName();
+//        if (logData == nullptr) {
+//            QString fileName = QFileDialog::getSaveFileName(this, tr("Log Plot"),
+//                                       plotName,
+//                                       tr("Data (*.csv)"));
+//            qDebug() << "Log DATA : " << fileName;
+//            logData = new QFile(fileName);
+//            if (!logData->open(QIODevice::WriteOnly)) {
+//                QMessageBox::information(this, tr("Unable to open file"),
+//                                         logData->errorString());
+//                logData = nullptr;
+//                return;
+//            }
+//            qDebug() << "Log DATA Opened : " << logData->fileName();
+//            streamData.setDevice(logData);
+//            QLocale locale = QLocale("fr_FR");
+//            locale.setNumberOptions(QLocale::OmitGroupSeparator);
+//            //QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+//            streamData.setLocale(locale);
 
-            // Set Headers
-//            streamData << "NAME" << ";" << "TIME" << ";" << "VALUE" << "\n";
-            streamData << "TIME" << ";" << "VALUE" << "\n";
-            QCPDataMap::const_iterator it = map->constBegin();
-            while (it != map->constEnd()) {
-                QCPData data =  it.value();
-//                streamData << plotName << ";" << data.key << ";" << data.value  << "\n";
-                streamData << data.key << ";" << data.value  << "\n";
-                ++it;
-            }
-        }
-       qDebug() << "Close Log DATA : " << logData->fileName();
-       logData->close();
-       delete logData;
-       logData = nullptr;
-    }
+//            // Set Headers
+////            streamData << "NAME" << ";" << "TIME" << ";" << "VALUE" << "\n";
+//            streamData << "TIME" << ";" << "VALUE" << "\n";
+//            QCPDataMap::const_iterator it = map->constBegin();
+//            while (it != map->constEnd()) {
+//                QCPData data =  it.value();
+////                streamData << plotName << ";" << data.key << ";" << data.value  << "\n";
+//                streamData << data.key << ";" << data.value  << "\n";
+//                ++it;
+//            }
+//        }
+//       qDebug() << "Close Log DATA : " << logData->fileName();
+//       logData->close();
+//       delete logData;
+//       logData = nullptr;
+//    }
 }
 
 /******************************************************************************************************************/
@@ -928,27 +928,27 @@ void MainWindow::messageSent(QString str) {
 /******************************************************************************************************************/
 void MainWindow::updateTracer(int pX) {
     if (tracer) {
-        double coordX = ui->plot->xAxis->pixelToCoord(pX);
-        // get tracer origin
-        tracer->setGraphKey(traceerStartKey);
-        tracer->updatePosition();
-        rubberOrigin = tracer->position->pixelPoint();
-        double startX = tracer->position->key();
-        double startY = tracer->position->value() / measureMult;
-        tracer->setGraphKey(coordX);
-        tracer->updatePosition();
-        if (rubberBand) {
-            QPointF pp = tracer->position->pixelPoint();
-            rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
-            rubberBand->repaint();
-        }
-        double endX = tracer->position->key();
-        double endY = tracer->position->value() / measureMult;
-        QString coordinates("X: %1 Y: %2 DELTAX: %3 ms --> DELTAY: %4 (Mult: %5 )");
-        coordinates = coordinates.arg(startX).arg(startY).arg(endX - startX).arg(endY - startY).arg(measureMult);
-        ui->statusBar->setStyleSheet("background-color: lightgreen;");
-        ui->statusBar->showMessage(coordinates);
-        ui->plot->replot();
+//        double coordX = ui->plot->xAxis->pixelToCoord(pX);
+//        // get tracer origin
+//        tracer->setGraphKey(traceerStartKey);
+//        tracer->updatePosition();
+//        rubberOrigin = tracer->position->pixelPoint();
+//        double startX = tracer->position->key();
+//        double startY = tracer->position->value() / measureMult;
+//        tracer->setGraphKey(coordX);
+//        tracer->updatePosition();
+//        if (rubberBand) {
+//            QPointF pp = tracer->position->pixelPoint();
+//            rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
+//            rubberBand->repaint();
+//        }
+//        double endX = tracer->position->key();
+//        double endY = tracer->position->value() / measureMult;
+//        QString coordinates("X: %1 Y: %2 DELTAX: %3 ms --> DELTAY: %4 (Mult: %5 )");
+//        coordinates = coordinates.arg(startX).arg(startY).arg(endX - startX).arg(endY - startY).arg(measureMult);
+//        ui->statusBar->setStyleSheet("background-color: lightgreen;");
+//        ui->statusBar->showMessage(coordinates);
+//        ui->plot->replot();
     }
 }
 
@@ -1029,7 +1029,7 @@ void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
         double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
         tracer->setGraphKey(coordX);
         tracer->updatePosition();
-        rubberOrigin = tracer->position->pixelPoint().toPoint();
+//        rubberOrigin = tracer->position->pixelPoint().toPoint();
         if (rubberBand) {
             delete rubberBand;
         }
