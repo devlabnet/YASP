@@ -133,8 +133,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
 
+//    ui->tabWidget->setTabEnabled(1, false);
+    QWidget* tabW = ui->tabWidget->findChild<QWidget *>("tabPlots");
+    qDebug() << "constructor tabW : " << tabW;
 
-    //qDebug() << "QLocale::system() --> " << QLocale::system().;
+    ui->tabWidget->removeTab(1);
+
     // Clear the terminal
     on_clearTermButton_clicked();
     ticksXTime.start();
@@ -373,6 +377,12 @@ void MainWindow::portOpenedSuccess() {
     serialPort->setDataTerminalReady(true);
     connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
     connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
+//    ui->tabWidget->setTabEnabled(1, true);
+    QWidget* tabW = ui->tabWidget->findChild<QWidget *>("tabPlots");
+    qDebug() << "tabW : " << tabW;
+    ui->tabWidget->insertTab(1, tabW, "Plots");
+    ui->tabWidget->setCurrentIndex(1);
+
     updateTimer.start();
     ticksXTimer.start();
     ticksXTime.restart();
@@ -390,6 +400,10 @@ void MainWindow::dataTerminalReadyChanged(bool dtr) {
 /******************************************************************************************************************/
 void MainWindow:: closePort() {
     cleanGraphs();
+//    ui->tabWidget->setTabEnabled(1, false);
+    ui->tabWidget->removeTab(1);
+    ui->tabWidget->setCurrentIndex(0);
+
     if (logFile != nullptr) {
         if(logFile->isOpen()) {
             logFile->close();
@@ -805,7 +819,6 @@ void MainWindow::doMeasure() {
 
 /******************************************************************************************************************/
 void MainWindow::shiftPlot(double posY) {
-    if (selectedPlotContainer == nullptr) return;
     qDebug() << "shiftPlot ---> " << posY;
     if (startShiftPlot) {
         lastPosY = posY;
@@ -999,7 +1012,6 @@ void MainWindow::selectionChangedByUserInPlot() {
             mouseState = mouseMove;
             startShiftPlot = false;
             ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
-            selectedPlotContainer = nullptr;
         }
     }
 }

@@ -35,7 +35,6 @@
 #include <QToolBox>
 //#include "tabwidget.h"
 #include <QTextEdit>
-#include "graphcontainer.h"
 #include <QTime>
 #include <QRubberBand>
 #include "yaspgraph.h"
@@ -155,7 +154,6 @@ private:
     DialogWidgets *widgets = nullptr;
 //    QTabWidget* plotsToolBox = nullptr;
 //    QVector<graphContainer*> plotsVector;
-    QLabel* bottomWidget;
     QFile* logFile = nullptr;
     QTextStream streamLog;
     QFile* logData = nullptr;
@@ -166,7 +164,6 @@ private:
     bool measureInProgress = false;
     int measureMult;
     double traceerStartKey;
-    graphContainer* selectedPlotContainer = nullptr;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();
