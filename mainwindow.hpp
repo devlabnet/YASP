@@ -97,7 +97,10 @@ private slots:
     void doMeasure();
     void doShift();
     void cleanTracer();
-    void cancelMeasure();
+    void doMenuPlotShiftAction();
+    void doMenuPlotColorAction();
+    void doMenuPlotScaleAction();
+    void doMenuPlotShowHideAction();
     void on_spinPoints_valueChanged(int arg1);                                            // Spin box controls how many data points are collected and displayed
     void on_actionHow_to_use_triggered();
     void on_sendLine_returnPressed();
@@ -158,6 +161,9 @@ private:
     QTextStream streamLog;
     QFile* logData = nullptr;
     QTextStream streamData;
+
+    QMenu* contextMenu = nullptr;
+    QAction* plotShowHideAction;
     QRubberBand* rubberBand = nullptr;
     QPointF rubberOrigin;
     QCPItemTracer *tracer = nullptr;

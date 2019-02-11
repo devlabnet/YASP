@@ -214,6 +214,7 @@ void MainWindow::enableControls(bool enable) {
 /******************************************************************************************************************/
 void MainWindow::cleanGraphs() {
     ui->plot->clearItems();
+    ui->plot->clearGraphs();
     ui->plot->hide();
     graphs.clear();
 }
@@ -244,10 +245,13 @@ yaspGraph* MainWindow::addGraph(int id) {
         QCPGraph* graph = ui->plot->addGraph();
         graph->setName(plotStr);
         QCPItemText* textLabel = new QCPItemText(ui->plot);
+        textLabel->setProperty("id", id);
         textLabel->setColor(colours[id]);
         textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
         textLabel->position->setType(QCPItemPosition::ptAbsolute );
         textLabel->setSelectable(true);
+        textLabel->setPadding(QMargins(2,2,2,2));
+
         connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
         QCPItemLine* axisLine = new QCPItemLine(ui->plot);
         axisLine->setPen(QPen(colours[id], 1.0, Qt::DashDotLine));
@@ -271,11 +275,12 @@ void MainWindow::updateLabel(int id, QString info) {
     QFontMetricsF fm(font);
     qreal pixelsWide = fm.width(info);
     qreal pixelsHigh = fm.height();
-    QPoint labelPos;
-    labelPos.setX(pixelsWide + 100);
-    labelPos.setY(10 + (id * pixelsHigh));
     QCPItemText* textLabel =  yGraph->info();
     Q_ASSERT(textLabel != nullptr);
+    QPoint labelPos;
+    labelPos.setX(pixelsWide + textLabel->padding().left()+ textLabel->padding().right() + 100 );
+    labelPos.setY( (id+1) * (5 + (pixelsHigh + textLabel->padding().top() + textLabel->padding().bottom())));
+    textLabel->setColor(color);
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
     textLabel->setText(info);
     yGraph->rLine()->setPen(QPen(color, 1.0, Qt::DashDotLine));
@@ -471,7 +476,7 @@ void MainWindow::on_stopPlotButton_clicked() {
         ui->stopPlotButton->setText("Start Plot");
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
         // setup policy and connect slot for context menu popup:
-        ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
+//        ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     } else {                                                                              // Start plotting
         // Start updating plot timer
         ticksXTimer.start();
@@ -480,8 +485,7 @@ void MainWindow::on_stopPlotButton_clicked() {
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
-        ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
-        cancelMeasure();
+//        ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     }
 }
 
@@ -550,8 +554,8 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
                  yGraph->plot()->setName(param2);
             }
         }
-        qDebug() << "param1 : " << param1;
-        qDebug() << "param2 : " << param2;
+//        qDebug() << "param1 : " << param1;
+//        qDebug() << "param2 : " << param2;
         QString info =  yGraph->plot()->name();
         info += " -> ";
         updateLabel(plotId, info);
@@ -856,14 +860,62 @@ void MainWindow::cleanTracer() {
 }
 
 /******************************************************************************************************************/
-void MainWindow::cancelMeasure() {
-    cleanTracer();
-    ui->plot->setCursor(Qt::ArrowCursor);
-    ui->plot->deselectAll();
+void MainWindow::doMenuPlotShiftAction() {
+    Q_ASSERT(contextMenu);
+    qDebug() << "doMenuPlotShiftAction: " << contextMenu->property("id");
+//    cleanTracer();
+//    ui->plot->setCursor(Qt::ArrowCursor);
+//    ui->plot->deselectAll();
+//    ui->plot->replot();
+}
+
+/******************************************************************************************************************/
+void MainWindow::doMenuPlotColorAction() {
+    Q_ASSERT(contextMenu);
+    int plotId = contextMenu->property("id").toInt();
+    qDebug() << "doMenuPlotColorAction: " << plotId;
+    QColor color = QColorDialog::getColor(Qt::white, nullptr, "plot color");
+    qDebug() << "doMenuPlotColorAction: " << color;
+    yaspGraph* yGraph = graphs[plotId];
+    Q_ASSERT(yGraph);
+    yGraph->plot()->setPen(QPen(color));
+    yGraph->info()->setColor(color);
+    yGraph->info()->setSelectedPen(QPen(color));
+    yGraph->info()->setSelectedColor(color);
+    yGraph->rLine()->setPen(QPen(color, 1.0, Qt::DashDotLine));
     ui->plot->replot();
 }
 
 /******************************************************************************************************************/
+void MainWindow::doMenuPlotScaleAction() {
+    Q_ASSERT(contextMenu);
+    qDebug() << "doMenuPlotScaleAction: " << contextMenu->property("id");
+
+}
+
+/******************************************************************************************************************/
+void MainWindow::doMenuPlotShowHideAction() {
+    Q_ASSERT(contextMenu);
+    int plotId = contextMenu->property("id").toInt();
+    yaspGraph* yGraph = graphs[plotId];
+    Q_ASSERT(yGraph);
+    if (yGraph->plot()->visible()) {
+        yGraph->plot()->setVisible(false);
+//        contextMenu->actions().at(1)->setText("show");
+        plotShowHideAction->setText("show");
+
+    } else {
+        yGraph->plot()->setVisible(true);
+//        contextMenu->actions().at(1)->setText("hide");
+        plotShowHideAction->setText("Hide");
+
+    }
+    ui->plot->replot();
+//    contextMenu->removeAction(contextMenu->activeAction());
+//    contextMenu->addAction("Show", this, SLOT(doMenuPlotShowAction()));
+}
+
+//*******************************************************************************************/
 void MainWindow::saveDataPlot(QCPGraph* g) {
     qDebug() << "Graph Data: " << g->data();
 //    QCPDataMap* map = g->data();
@@ -1068,22 +1120,23 @@ void MainWindow::onMousePressInPlot(QMouseEvent *event) {
 
 /******************************************************************************************************************/
 void MainWindow::plotContextMenuRequest(QPoint pos) {
-    QMenu* contextMenu = new QMenu(this);
-    contextMenu->setAttribute(Qt::WA_DeleteOnClose);
+    if (contextMenu == nullptr) return;
+//    QMenu* contextMenu = new QMenu(this);
+//    contextMenu->setAttribute(Qt::WA_DeleteOnClose);
 
-    if ((ui->plot->selectedGraphs().size() > 0) || (measureInProgress)) {
-        if (measureInProgress) {
-            contextMenu->addAction("Stop Measure", this, SLOT(cancelMeasure()));
-        } else {
-            contextMenu->addAction("Save Graph Data", this, SLOT(saveSelectedGraph()));
-            contextMenu->addAction("Start Measure", this, SLOT(doMeasure()));
-            contextMenu->addAction("Shift", this, SLOT(doShift()));
-        }
-    } else {
-        if (ui->plot->graphCount() > 0) {
-            //contextMenu->addAction("Save All Graphs Data", this, SLOT(saveAllGraphs()));
-        }
-    }
+//    if ((ui->plot->selectedGraphs().size() > 0) || (measureInProgress)) {
+//        if (measureInProgress) {
+//            contextMenu->addAction("Stop Measure", this, SLOT(cancelMeasure()));
+//        } else {
+//            contextMenu->addAction("Save Graph Data", this, SLOT(saveSelectedGraph()));
+//            contextMenu->addAction("Start Measure", this, SLOT(doMeasure()));
+//            contextMenu->addAction("Shift", this, SLOT(doShift()));
+//        }
+//    } else {
+//        if (ui->plot->graphCount() > 0) {
+//            //contextMenu->addAction("Save All Graphs Data", this, SLOT(saveAllGraphs()));
+//        }
+//    }
     contextMenu->popup(ui->plot->mapToGlobal(pos));
 }
 
@@ -1202,7 +1255,43 @@ void MainWindow::plotLabelSelected(bool b) {
         //Q_ASSERT(ui->plot->selectedItems().size() == 1);
         qDebug() << "plotLabelSelected : " << ui->plot->selectedItems().size();
         QCPAbstractItem* item = ui->plot->selectedItems().at(0);
-        qDebug() << "plotLabelSelected : " << item;
-
+        qDebug() << "plotLabelSelected : " << item << " property id " << item->property("id");
+        contextMenu = new QMenu(this);
+        QVariant plotId = item->property("id");
+        contextMenu->setProperty("id", plotId);
+//        graphs[plotId.toInt()]->info()->setPen(QPen(Qt::white));
+        yaspGraph* yGraph = graphs[plotId.toInt()];
+        Q_ASSERT(yGraph);
+        QPen pen = yGraph->plot()->pen();
+        pen.setWidth(2);
+        QBrush brush(Qt::white, Qt::Dense7Pattern);
+        yGraph->plot()->setBrush(brush);
+        yGraph->info()->setSelectedPen(pen);
+        yGraph->info()->setSelectedColor(pen.color());
+        contextMenu->addAction("Color", this, SLOT(doMenuPlotColorAction()));
+        plotShowHideAction = contextMenu->addAction("Hide", this, SLOT(doMenuPlotShowHideAction()));
+        if (yGraph->plot()->visible()) {
+            plotShowHideAction->setText("Hide");
+        } else {
+            plotShowHideAction->setText("Show");
+        }
+        contextMenu->addAction("Scale", this, SLOT(doMenuPlotScaleAction()));
+        contextMenu->addAction("Shift", this, SLOT(doMenuPlotShiftAction()));
+        ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
+    } else {
+        if (contextMenu) {
+            QVariant plotId = contextMenu->property("id");
+            yaspGraph* yGraph = graphs[plotId.toInt()];
+            Q_ASSERT(yGraph);
+//            QPen pen = yGraph->plot()->pen();
+//            pen.setWidth(1);
+            QBrush brush(Qt::white, Qt::NoBrush);
+            yGraph->plot()->setBrush(brush);
+            yGraph->info()->setSelectedPen(Qt::NoPen);
+//            yGraph->info()->setPadding(QMargins());
+        }
+        delete contextMenu;
+        contextMenu = nullptr;
+        ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     }
 }
