@@ -12,10 +12,12 @@ public:
     QCPItemLine* rLine() {
         return refLine;
     }
-
+    QCPGraph* plot() {
+        return infoGraph;
+    }
 private:
     int id;
-    QCPGraph* graph;
+    QCPGraph* infoGraph;
     QCPItemText* infoText;
     QCPItemLine* refLine;
 };

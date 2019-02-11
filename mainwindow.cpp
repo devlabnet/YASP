@@ -268,63 +268,47 @@ void MainWindow::updateGraphParams(QColor plotBgColor) {
 /* Setup the plot area */
 /******************************************************************************************************************/
 void MainWindow::setupPlot() {
-    plotsToolBox = new QTabWidget();
-    plotsToolBox->setTabPosition(QTabWidget::North);
-    ui->verticalLayoutPlots->addWidget(plotsToolBox);
-    plotsToolBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    bottomWidget = new QLabel();
-    bottomWidget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    bottomWidget->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png"));
-    bottomWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
-    ui->verticalLayoutPlots->addWidget(bottomWidget);
+//    plotsToolBox = new QTabWidget();
+//    plotsToolBox->setTabPosition(QTabWidget::North);
+//    ui->verticalLayoutPlots->addWidget(plotsToolBox);
+//    plotsToolBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+//    bottomWidget = new QLabel();
+//    bottomWidget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+//    bottomWidget->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png"));
+//    bottomWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+//    ui->verticalLayoutPlots->addWidget(bottomWidget);
     ui->plot->show();
-    addPlots();
+//    addPlots();
 }
 
 /******************************************************************************************************************/
-void MainWindow::addPlots() {
-    for (int  tabInd = 0;  tabInd < 10; ++ tabInd) {
+yaspGraph* MainWindow::addGraph(int id) {
         ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
         ui->plot->xAxis->setRange(0, numberOfPoints);                                      // Set x axis range for specified number of points
         setAutoYRange(ui->plot->yAxis->range().size());
-        QString plotStr = "Plot " + QString::number(tabInd);
+        QString plotStr = "Plot " + QString::number(id);
         QCPGraph* graph = ui->plot->addGraph();
         graph->setName(plotStr);
         QCPItemText* textLabel = new QCPItemText(ui->plot);
-        textLabel->setColor(colours[tabInd]);
+        textLabel->setColor(colours[id]);
         textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
         textLabel->position->setType(QCPItemPosition::ptAbsolute );
-//        textLabel->setText(plotStr);
         textLabel->setSelectable(true);
-//        updateLabel(tabInd, plotStr);
         connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
         QCPItemLine* axisLine = new QCPItemLine(ui->plot);
-        //axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
-        axisLine->setPen(QPen(colours[tabInd], 1.0, Qt::DashDotLine));
-
+        axisLine->setPen(QPen(colours[id], 1.0, Qt::DashDotLine));
         axisLine->start->setCoords(0,0);
         axisLine->end->setCoords(numberOfPoints,0);
-
-        graphs.insert(tabInd, new yaspGraph(tabInd, graph, textLabel, axisLine));
-//        QFont font;
-//        font.setPointSize(7);
-//        font.setStyleHint(QFont::Monospace);
-//        font.setWeight(QFont::Medium);
-//        font.setStyle(QFont::StyleItalic);
-//        QFontMetricsF fm(font);
-//        qreal pixelsHigh;
-//        QPoint labelPos;
-//        pixelsHigh = fm.height();
-//        qreal pixelsWide = fm.width(plotStr);
-//        labelPos.setX(pixelsWide + 100);
-//        labelPos.setY(10 + (tabInd * pixelsHigh));
-//        qDebug() << "label " << plotStr << " / pos: " << labelPos;
-//        textLabel->position->setCoords(labelPos.x(), labelPos.y());
-    }
+        yaspGraph* g = new yaspGraph(id, graph, textLabel, axisLine);
+        graphs.insert(id, g);
+        return g;
 }
 
 /******************************************************************************************************************/
-void MainWindow::updateLabel(int id, QString info, QColor color) {
+void MainWindow::updateLabel(int id, QString info) {
+    yaspGraph* yGraph = graphs[id];
+    Q_ASSERT(yGraph);
+    QColor color = yGraph->plot()->pen().color();
     QFont font;
     font.setPointSize(7);
     font.setStyleHint(QFont::Monospace);
@@ -336,13 +320,11 @@ void MainWindow::updateLabel(int id, QString info, QColor color) {
     QPoint labelPos;
     labelPos.setX(pixelsWide + 100);
     labelPos.setY(10 + (id * pixelsHigh));
-//    QCPItemText* textLabel =  dynamic_cast<QCPItemText*>(ui->plot->item(id));
-    yaspGraph* graph = graphs[id];
-    Q_ASSERT(graph);
-    QCPItemText* textLabel =  graph->info();
+    QCPItemText* textLabel =  yGraph->info();
     Q_ASSERT(textLabel != nullptr);
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
     textLabel->setText(info);
+    yGraph->rLine()->setPen(QPen(color, 1.0, Qt::DashDotLine));
 }
 
 /******************************************************************************************************************/
@@ -566,6 +548,17 @@ bool MainWindow::isColor(QString str) {
 }
 
 /******************************************************************************************************************/
+yaspGraph* MainWindow::getGraph(int id) {
+    if (graphs.contains(id)) {
+        return graphs[id];
+    }
+    // Create new Graph
+    qDebug() << "Create new Graph -> " << id;
+    yaspGraph* graph = addGraph(id);
+    return graph;
+}
+
+/******************************************************************************************************************/
 void MainWindow::onNewPlotDataArrived(QStringList newData) {
     if (newData.size() > 1) {
         int plotId = newData.at(0).toInt();
@@ -575,23 +568,7 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
             return;
         }
 //        qDebug() << "PLOT DATA : " << plotId << " --> " << newData;
-        QCPGraph* plot = ui->plot->graph(plotId);
-//        graphContainer* plot = plotsVector[plotId];
-        Q_ASSERT(plot != nullptr);
-//        int tabPos;
-////        if (!plot->isUsed()) {
-////            tabPos = plotsToolBox->addTab(plot, plot->getName());
-////            plotsToolBox->setTabEnabled(tabPos, true);
-//        QPen pen(colours[plotId]);
-//    //    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
-//        plot->setPen(pen);
-
-//            plot->setUsed(true);
-//            plot->setTabPos(tabPos);
-//            plot->getGraph()->addToLegend();
-//        } else {
-////            tabPos = plot->getTabPos();
-//        }
+        yaspGraph* yGraph = getGraph(plotId);
         QString param1 = "";
         QString param2 = "";
         QString id = newData.at(0);
@@ -602,32 +579,26 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
             param1 = newData.at(1);
         }
         if (isColor(param1)) {
-                plot->setPen(QPen(QColor(param1)));
-            //    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+                yGraph->plot()->setPen(QPen(QColor(param1)));
 
         } else {
-            if ((!param1.isEmpty()) && (plot->name() != param1)) {
-                plot->setName(param1);
+            if ((!param1.isEmpty()) && ( yGraph->plot()->name() != param1)) {
+                 yGraph->plot()->setName(param1);
 //                plotsToolBox->tabBar()->setTabText(tabPos, param1);
             }
         }
         if (isColor(param2)) {
-//            plot->setColor(QColor(param2));
-        //    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
-            plot->setPen(QPen(QColor(param2)));
-
+             yGraph->plot()->setPen(QPen(QColor(param2)));
         } else {
-            if ((!param2.isEmpty()) && (plot->name() != param2)) {
-                plot->setName(param2);
-//                plotsToolBox->tabBar()->setTabText(tabPos, param2);
+            if ((!param2.isEmpty()) && ( yGraph->plot()->name() != param2)) {
+                 yGraph->plot()->setName(param2);
             }
         }
         qDebug() << "param1 : " << param1;
         qDebug() << "param2 : " << param2;
-        QString info = plot->name();
+        QString info =  yGraph->plot()->name();
         info += " -> ";
-        updateLabel(plotId, info, plot->pen().color());
-        ui->plot->replot();
+        updateLabel(plotId, info);
     }
 }
 
@@ -641,51 +612,19 @@ void MainWindow::onNewDataArrived(QStringList newData) {
         addMessageText(QString::number(ticksXTime.elapsed()) + " BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
         return;
     }
+    yaspGraph* yGraph = getGraph(plotId);
     //qDebug() << "NEW DATA : " << plotId << " --> " << newData;
-    if(plotting) {
+    if (plotting) {
         int dataListSize = newData.size();                                                    // Get size of received list
         dataPointNumber++;
         if (dataListSize > 1) {
             double val = newData[1].toDouble();
             // Add data to graphs according plot Id
-            QCPGraph* plot = ui->plot->graph(plotId);
-//            qDebug() << "PLOT : " << plot->name();
+            QCPGraph* plot = yGraph->plot();
             QString info = plot->name();
             info +=  + " -> ";
             info += QString::number(val);
-            updateLabel(plotId, info, plot->pen().color());
-        ////    if (radioInfo->isChecked()) {
-        //        dataStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
-        //                + " Min = " + QString::number(dataMin)
-        //                + " Max = " + QString::number(dataMax)
-        //                + " Val = " + QString::number(dataValue );
-        ////                + " Val = " + QString::number(dataAverage );
-        //    }
-
-
-            //            graphContainer* plot = plotsVector[plotId];
-            //            Q_ASSERT(plot != nullptr);
-            //            int tabPos;
-            //            QPen pen;
-            //            pen.setColor(QColor(colours[plotId]));
-            //        //    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
-            //            plot->setPen(pen);
-
-            //            if (!plot->isUsed()) {
-            ////                tabPos = plotsToolBox->addTab(plot, plot->getName());
-            ////                plotsToolBox->setTabEnabled(tabPos, true);
-            //                plot->setColor(colours[plotId]);
-            ////                plot->setUsed(true);
-            ////                plot->setTabPos(tabPos);
-            ////                plotColorChanged(tabPos, colours[plotId]);
-            //            } else {
-            //                tabPos = plot->getTabPos();
-            //            }
-            //            int time = plotTime.elapsed();
-            //            if (time > 1000) {
-            //                plotTime.restart();
-
-            //            textTicker->addTick(dataPointNumber, plotTime.toString("mm:ss.zzz"));
+            updateLabel(plotId, info);
             plot->addData(dataPointNumber, val);
             if (logFile != nullptr) {
                 //                if (plot->isDisplayed()) {

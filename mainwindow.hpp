@@ -135,6 +135,7 @@ private:
     mouseAction mouseState = mouseMove;
     QSharedPointer<QCPAxisTickerText> textTicker;
     QMap<int, yaspGraph*> graphs;
+    yaspGraph* getGraph(int id);
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
     bool mousePressed = false;
@@ -170,8 +171,8 @@ private:
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();
-    void addPlots();
-    void updateLabel(int id, QString info, QColor color);
+    yaspGraph *addGraph(int id);
+    void updateLabel(int id, QString info);
     bool isColor(QString str);
     // Setup the QCustomPlot
     void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
