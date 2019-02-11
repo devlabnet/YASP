@@ -78,7 +78,6 @@ private slots:
     void onNewDataArrived(QStringList newData);                                           // Slot for new data from serial port
     void onNewPlotDataArrived(QStringList newData);                                       // Slot for new data from serial port
     void readData();                                                                      // Slot for inside serial port
-    void plotColorChanged(int tabInd, QColor color);
     void dataTerminalReadyChanged(bool dtr);
     void messageSent(QString str);
     void on_comboPort_currentIndexChanged(const QString &arg1);                           // Slot displays message on status bar
@@ -154,8 +153,8 @@ private:
     int numberOfPoints;                                                                 // Number of points plotted
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
-    QTabWidget* plotsToolBox = nullptr;
-    QVector<graphContainer*> plotsVector;
+//    QTabWidget* plotsToolBox = nullptr;
+//    QVector<graphContainer*> plotsVector;
     QLabel* bottomWidget;
     QFile* logFile = nullptr;
     QTextStream streamLog;
@@ -176,9 +175,6 @@ private:
     bool isColor(QString str);
     // Setup the QCustomPlot
     void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
-    void updateGraphNops(bool resetDelta = false);
-    void updateGraphParams(QColor plotBgColor);
-    int getIdOfQCPGraph(QCPGraph* g);
     void openPort();
     void portOpenedSuccess();                                                             // Called when port opens OK
     void closePort();                                                                  // Called when closing the port

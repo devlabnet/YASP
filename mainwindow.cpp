@@ -210,58 +210,8 @@ void MainWindow::enableControls(bool enable) {
 /******************************************************************************************************************/
 void MainWindow::cleanGraphs() {
     ui->plot->clearItems();
-    if (plotsToolBox != nullptr) {
-        for (int i = plotsVector.size() - 1; i >= 0; i--) {
-            graphContainer* gc = plotsVector[i];
-            if (gc != nullptr) {
-                gc->clearData();
-                gc->clearLabels();
-                gc->setUsed(false);
-                delete gc;
-            }
-            // Remove everything from the plot
-            plotsToolBox->removeTab(gc->getTabPos());
-        }
-        plotsVector.clear();
-        delete plotsToolBox;
-        plotsToolBox = nullptr;
-        delete bottomWidget;
-    }
     ui->plot->hide();
-}
-
-/******************************************************************************************************************/
-void MainWindow::updateGraphNops(bool resetDelta) {
-//    ui->plot->clearItems();
-    for (int i = plotsVector.size() - 1; i >= 0; i--) {
-        graphContainer* gc = plotsVector[i];
-        if (gc != nullptr) {
-            gc->updateGraphNop(numberOfPoints, resetDelta);
-        }
-    }
-}
-
-/******************************************************************************************************************/
-int MainWindow::getIdOfQCPGraph(QCPGraph* g) {
-    for (int i = plotsVector.size() - 1; i >= 0; i--) {
-        graphContainer* gc = plotsVector[i];
-        if (gc != nullptr) {
-            if (gc->getGraph() == g) {
-                return i;
-            }
-        }
-    }
-    return -1;
-}
-
-/******************************************************************************************************************/
-void MainWindow::updateGraphParams(QColor plotBgColor) {
-    for (int i = plotsVector.size() - 1; i >= 0; i--) {
-        graphContainer* gc = plotsVector[i];
-        if (gc != nullptr) {
-            gc->updateGraphParams(plotBgColor);
-        }
-    }
+    graphs.clear();
 }
 
 /******************************************************************************************************************/
@@ -328,14 +278,6 @@ void MainWindow::updateLabel(int id, QString info) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::plotColorChanged(int tabInd, QColor color) {
-    QPixmap pixmap(16, 16);
-    pixmap.fill(color);
-    plotsToolBox->tabBar()->setTabIcon(tabInd, QIcon(pixmap));
-    ui->plot->replot();
-}
-
-/******************************************************************************************************************/
 /* Open the inside serial port; connect its signals */
 /******************************************************************************************************************/
 void MainWindow::openPort() {
@@ -373,7 +315,7 @@ void MainWindow::openPort() {
     serialPort->setDataBits(dataBits);
     serialPort->setStopBits(stopBits);
     if (serialPort->open(QIODevice::ReadWrite) ) {
-        setupPlot();                                                                          // Create the QCustomPlot area
+        ui->plot->show();
         receivedData.clear();
         noMsgReceivedData.clear();
         portOpenedSuccess();
@@ -802,7 +744,6 @@ void MainWindow::setAutoYRange(double r, bool resetDelta) {
     int x = m / mult;
     int vMin = qMax(x * mult, 5);
 //    ui->plot->yAxis->setTickStep(vMin);
-    updateGraphNops(resetDelta);
     ui->plot->replot();
 }
 
@@ -839,7 +780,6 @@ void MainWindow::on_spinPoints_valueChanged(int arg1) {
     qDebug() << "ticksXTimer : " << numberOfPoints / 10;
 
     ticksXTimer.setInterval(numberOfPoints / 10);
-    updateGraphNops();
     ui->plot->replot();
 }
 
@@ -859,11 +799,6 @@ void MainWindow::doMeasure() {
         tracer->setPen(QPen(Qt::white));
     }
         QCPGraph* gr = ui->plot->selectedGraphs().at(0);
-        int measureGraphId = getIdOfQCPGraph(gr);
-        Q_ASSERT(measureGraphId >= 0);
-        Q_ASSERT(measureGraphId < 9);
-        qDebug() << "GRAPH ID ---> " << measureGraphId;
-        measureMult = plotsVector[measureGraphId]->getMult();
         tracer->setGraph(gr);
         ui->plot->deselectAll();
 }
@@ -890,11 +825,6 @@ void MainWindow::shiftPlot(double posY) {
 void MainWindow::doShift() {
     Q_ASSERT(ui->plot->selectedGraphs().size());
     QCPGraph* gr = ui->plot->selectedGraphs().at(0);
-    int measureGraphId = getIdOfQCPGraph(gr);
-    selectedPlotContainer = plotsVector[measureGraphId];
-    Q_ASSERT(measureGraphId >= 0);
-    Q_ASSERT(measureGraphId < 9);
-    qDebug() << "doShift GRAPH ID ---> " << measureGraphId;
     mouseState = mouseShift;
     startShiftPlot = true;
 }
@@ -1199,7 +1129,6 @@ void MainWindow::on_bgColorButton_pressed() {
     bgColor = QColorDialog::getColor(bgColor, this, "Select Background Color");
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
     ui->plot->setBackground(QBrush(bgColor));   // Background for the plot area
-    updateGraphParams(bgColor);
     if (tracer) {
         if (bgColor.lightness() > 128) {
             tracer->setPen(QPen(Qt::black));
@@ -1212,9 +1141,6 @@ void MainWindow::on_bgColorButton_pressed() {
 
 /******************************************************************************************************************/
 void MainWindow::on_plotsInfoRadio_clicked(bool checked) {
-    for (int var = 0; var < plotsVector.size(); ++var) {
-        plotsVector[var]->setRadioInfo(checked);
-    }
     ui->plot->replot();
 }
 
