@@ -28,6 +28,7 @@
 #include "ui_mainwindow.h"
 #include <QSplitter>
 #include <QtGui>
+#include <QPen>
 
 /******************************************************************************************************************/
 /* Constructor */
@@ -71,6 +72,14 @@ MainWindow::MainWindow(QWidget *parent) :
 //    ui->plot->yAxis->setAutoTickStep(false);                                              // User can change tick step with a spin box
 //    ui->plot->yAxis->setTickStep(500);                                                    // Set initial tick step
     ui->plot->xAxis->setTickLabelColor(gridColor);                              // Tick labels color
+    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
+    timeTicker->setTimeFormat("%h:%m:%s");
+    ui->plot->xAxis->setTicker(timeTicker);
+//    timeTicker->setTimeFormat("%m:%s:%z");
+    textTicker = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText());
+    ui->plot->xAxis->setTicker(textTicker);
+
+
     ui->plot->yAxis->setTickLabelColor(gridColor);                              // See QCustomPlot examples / styled demo
     ui->plot->xAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
     ui->plot->yAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
@@ -106,6 +115,9 @@ MainWindow::MainWindow(QWidget *parent) :
     serialPort = nullptr;                                                                    // Set serial port pointer to NULL initially
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));                       // Connect update timer to replot slot
     ui->menuWidgets->menuAction()->setVisible(false);
+    connect(&ticksXTimer, SIGNAL(timeout()), this, SLOT(addTickX()));
+    updateTimer.setInterval(20);
+    ticksXTimer.setInterval(numberOfPoints/10);
 
     /* Also, just I want to show you how to choose the color separator.
         * To do this we need to use a class QPallete, for which you choose the background color.
@@ -125,7 +137,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //qDebug() << "QLocale::system() --> " << QLocale::system().;
     // Clear the terminal
     on_clearTermButton_clicked();
-    plotTime.start();
+    ticksXTime.start();
 }
 
 /******************************************************************************************************************/
@@ -220,7 +232,7 @@ void MainWindow::cleanGraphs() {
 
 /******************************************************************************************************************/
 void MainWindow::updateGraphNops(bool resetDelta) {
-    ui->plot->clearItems();
+//    ui->plot->clearItems();
     for (int i = plotsVector.size() - 1; i >= 0; i--) {
         graphContainer* gc = plotsVector[i];
         if (gc != nullptr) {
@@ -275,14 +287,51 @@ void MainWindow::addPlots() {
         ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
         ui->plot->xAxis->setRange(0, numberOfPoints);                                      // Set x axis range for specified number of points
         setAutoYRange(ui->plot->yAxis->range().size());
-        QString plotStr = "Plot " + QString::number( tabInd);
-        QCPGraph* x = ui->plot->addGraph();
-        QSharedPointer<QCPGraph> g(x);
-        graphContainer* gc = new graphContainer(g, numberOfPoints, plotStr, colours[ tabInd],  tabInd, this);
-        plotsVector.insert(tabInd, gc);
-        connect(gc, SIGNAL(plotColorChanged(int, QColor)), this, SLOT(plotColorChanged(int, QColor)));
-        gc->updateGraphParams(bgColor);
+        QString plotStr = "Plot " + QString::number(tabInd);
+        QCPGraph* graph = ui->plot->addGraph();
+        graph->setName(plotStr);
+        QCPItemText* textLabel = new QCPItemText(ui->plot);
+        textLabel->setColor(colours[tabInd]);
+        textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
+        textLabel->position->setType(QCPItemPosition::ptAbsolute );
+//        textLabel->setText(plotStr);
+        textLabel->setSelectable(true);
+//        updateLabel(tabInd, plotStr);
+        connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
+//        QFont font;
+//        font.setPointSize(7);
+//        font.setStyleHint(QFont::Monospace);
+//        font.setWeight(QFont::Medium);
+//        font.setStyle(QFont::StyleItalic);
+//        QFontMetricsF fm(font);
+//        qreal pixelsHigh;
+//        QPoint labelPos;
+//        pixelsHigh = fm.height();
+//        qreal pixelsWide = fm.width(plotStr);
+//        labelPos.setX(pixelsWide + 100);
+//        labelPos.setY(10 + (tabInd * pixelsHigh));
+//        qDebug() << "label " << plotStr << " / pos: " << labelPos;
+//        textLabel->position->setCoords(labelPos.x(), labelPos.y());
     }
+}
+
+/******************************************************************************************************************/
+void MainWindow::updateLabel(int id, QString info, QColor color) {
+    QFont font;
+    font.setPointSize(7);
+    font.setStyleHint(QFont::Monospace);
+    font.setWeight(QFont::Medium);
+    font.setStyle(QFont::StyleItalic);
+    QFontMetricsF fm(font);
+    qreal pixelsWide = fm.width(info);
+    qreal pixelsHigh = fm.height();
+    QPoint labelPos;
+    labelPos.setX(pixelsWide + 100);
+    labelPos.setY(10 + (id * pixelsHigh));
+    QCPItemText* textLabel =  dynamic_cast<QCPItemText*>(ui->plot->item(id));
+    Q_ASSERT(textLabel != nullptr);
+    textLabel->position->setCoords(labelPos.x(), labelPos.y());
+    textLabel->setText(info);
 }
 
 /******************************************************************************************************************/
@@ -381,7 +430,7 @@ void MainWindow::portOpenedSuccess() {
     ui->stopPlotButton->setText("Stop Plot");                                             // Enable button for stopping plot
     ui->stopPlotButton->setEnabled(true);
     ui->saveJPGButton->setEnabled(true);                                                  // Enable button for saving plot
-    updateTimer.start(20);                                                                // Slot is refreshed 20 times per second
+    // Slot is refreshed 20 times per second
     connected = true;                                                                     // Set flags
     plotting = true;
     ui->tabWidget->setCurrentIndex(1);
@@ -389,7 +438,10 @@ void MainWindow::portOpenedSuccess() {
     serialPort->setDataTerminalReady(true);
     connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
     connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
-    plotTime.restart();
+    updateTimer.start();
+    ticksXTimer.start();
+    ticksXTime.restart();
+
 }
 
 /******************************************************************************************************************/
@@ -417,6 +469,7 @@ void MainWindow:: closePort() {
             widgets->hide();
     }
     updateTimer.stop();
+    ticksXTimer.stop();
     connected = false;
     disconnect(serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
     disconnect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
@@ -447,18 +500,34 @@ void MainWindow::replot() {
 }
 
 /******************************************************************************************************************/
+void MainWindow::addTickX() {
+//    QTime y(0, 0);
+//    y = y.addMSecs(ticksXTime.elapsed());
+    QTime z(0, 0);
+    z = z.addSecs(qRound(ticksXTime.elapsed()/1000.0));
+//    qDebug() << "st: " <<  z.toString("mm:ss.z") << "/ tick: " << y.toString("mm:ss.z");
+//    textTicker->addTick(dataPointNumber, y.toString("mm:ss.z"));
+    textTicker->addTick(dataPointNumber, z.toString("mm:ss"));
+}
+
+/******************************************************************************************************************/
 /* Stop Plot Button */
 /******************************************************************************************************************/
 void MainWindow::on_stopPlotButton_clicked() {
     if (plotting) {                                                                        // Stop plotting
-        updateTimer.stop();                                                               // Stop updating plot timer
+        // Stop updating plot timer
+        updateTimer.stop();
+        ticksXTimer.stop();
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
         // setup policy and connect slot for context menu popup:
         ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     } else {                                                                              // Start plotting
-        updateTimer.start();                                                              // Start updating plot timer
+        // Start updating plot timer
+        ticksXTimer.start();
+        updateTimer.start();
+        ticksXTime.restart();
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
@@ -490,24 +559,28 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
     if (newData.size() > 1) {
         int plotId = newData.at(0).toInt();
         if ((plotId < 0) || (plotId > 9)) {
-            qDebug() << plotTime.elapsed() << " BAD PLOT ID : " << plotId << " --> " << newData;
-            addMessageText(QString::number(plotTime.elapsed()) + " BAD PLOT ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
+            qDebug() << ticksXTime.elapsed() << " BAD PLOT ID : " << plotId << " --> " << newData;
+            addMessageText(QString::number(ticksXTime.elapsed()) + " BAD PLOT ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
             return;
         }
 //        qDebug() << "PLOT DATA : " << plotId << " --> " << newData;
-        graphContainer* plot = plotsVector[plotId];
+        QCPGraph* plot = ui->plot->graph(plotId);
+//        graphContainer* plot = plotsVector[plotId];
         Q_ASSERT(plot != nullptr);
-        int tabPos;
-        if (!plot->isUsed()) {
-            tabPos = plotsToolBox->addTab(plot, plot->getName());
-            plotsToolBox->setTabEnabled(tabPos, true);
-            plot->setColor(colours[plotId]);
-            plot->setUsed(true);
-            plot->setTabPos(tabPos);
+//        int tabPos;
+////        if (!plot->isUsed()) {
+////            tabPos = plotsToolBox->addTab(plot, plot->getName());
+////            plotsToolBox->setTabEnabled(tabPos, true);
+//        QPen pen(colours[plotId]);
+//    //    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+//        plot->setPen(pen);
+
+//            plot->setUsed(true);
+//            plot->setTabPos(tabPos);
 //            plot->getGraph()->addToLegend();
-        } else {
-            tabPos = plot->getTabPos();
-        }
+//        } else {
+////            tabPos = plot->getTabPos();
+//        }
         QString param1 = "";
         QString param2 = "";
         QString id = newData.at(0);
@@ -518,23 +591,32 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
             param1 = newData.at(1);
         }
         if (isColor(param1)) {
-                plot->setColor(QColor(param1));
+                plot->setPen(QPen(QColor(param1)));
+            //    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+
         } else {
-            if ((!param1.isEmpty()) && (plot->getName() != param1)) {
+            if ((!param1.isEmpty()) && (plot->name() != param1)) {
                 plot->setName(param1);
-                plotsToolBox->tabBar()->setTabText(tabPos, param1);
+//                plotsToolBox->tabBar()->setTabText(tabPos, param1);
             }
         }
         if (isColor(param2)) {
-            plot->setColor(QColor(param2));
+//            plot->setColor(QColor(param2));
+        //    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+            plot->setPen(QPen(QColor(param2)));
+
         } else {
-            if ((!param2.isEmpty()) && (plot->getName() != param2)) {
+            if ((!param2.isEmpty()) && (plot->name() != param2)) {
                 plot->setName(param2);
-                plotsToolBox->tabBar()->setTabText(tabPos, param2);
+//                plotsToolBox->tabBar()->setTabText(tabPos, param2);
             }
         }
-//        qDebug() << "param1 : " << param1;
-//        qDebug() << "param2 : " << param2;
+        qDebug() << "param1 : " << param1;
+        qDebug() << "param2 : " << param2;
+        QString info = plot->name();
+        info += " -> ";
+        updateLabel(plotId, info, plot->pen().color());
+        ui->plot->replot();
     }
 }
 
@@ -545,35 +627,59 @@ void MainWindow::onNewDataArrived(QStringList newData) {
     Q_ASSERT(newData.size() > 0);
     int plotId = newData.at(0).toInt();
     if ((plotId < 0) || (plotId > 9)) {
-        addMessageText(QString::number(plotTime.elapsed()) + " BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
+        addMessageText(QString::number(ticksXTime.elapsed()) + " BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
         return;
     }
-//    qDebug() << "NEW DATA : " << plotId << " --> " << newData;
+    //qDebug() << "NEW DATA : " << plotId << " --> " << newData;
     if(plotting) {
         int dataListSize = newData.size();                                                    // Get size of received list
         dataPointNumber++;
         if (dataListSize > 1) {
             double val = newData[1].toDouble();
             // Add data to graphs according plot Id
-            graphContainer* plot = plotsVector[plotId];
-            Q_ASSERT(plot != nullptr);
-            int tabPos;
-            if (!plot->isUsed()) {
-                tabPos = plotsToolBox->addTab(plot, plot->getName());
-                plotsToolBox->setTabEnabled(tabPos, true);
-                plot->setColor(colours[plotId]);
-                plot->setUsed(true);
-                plot->setTabPos(tabPos);
-                plotColorChanged(tabPos, colours[plotId]);
-            } else {
-                tabPos = plot->getTabPos();
-            }
-            int time = plotTime.elapsed();
-            plot->addData(dataPointNumber, val, time);
+            QCPGraph* plot = ui->plot->graph(plotId);
+//            qDebug() << "PLOT : " << plot->name();
+            QString info = plot->name();
+            info +=  + " -> ";
+            info += QString::number(val);
+            updateLabel(plotId, info, plot->pen().color());
+        ////    if (radioInfo->isChecked()) {
+        //        dataStr =  plotName + " -> Mult = " + QString::number(mult) + " Delta = " + QString::number(delta)
+        //                + " Min = " + QString::number(dataMin)
+        //                + " Max = " + QString::number(dataMax)
+        //                + " Val = " + QString::number(dataValue );
+        ////                + " Val = " + QString::number(dataAverage );
+        //    }
+
+
+            //            graphContainer* plot = plotsVector[plotId];
+            //            Q_ASSERT(plot != nullptr);
+            //            int tabPos;
+            //            QPen pen;
+            //            pen.setColor(QColor(colours[plotId]));
+            //        //    axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+            //            plot->setPen(pen);
+
+            //            if (!plot->isUsed()) {
+            ////                tabPos = plotsToolBox->addTab(plot, plot->getName());
+            ////                plotsToolBox->setTabEnabled(tabPos, true);
+            //                plot->setColor(colours[plotId]);
+            ////                plot->setUsed(true);
+            ////                plot->setTabPos(tabPos);
+            ////                plotColorChanged(tabPos, colours[plotId]);
+            //            } else {
+            //                tabPos = plot->getTabPos();
+            //            }
+            //            int time = plotTime.elapsed();
+            //            if (time > 1000) {
+            //                plotTime.restart();
+
+            //            textTicker->addTick(dataPointNumber, plotTime.toString("mm:ss.zzz"));
+            plot->addData(dataPointNumber, val);
             if (logFile != nullptr) {
-                if (plot->isDisplayed()) {
-                    streamLog << plot->getName() << ";" << dataPointNumber << ";" << val << ";" << time << "\n";
-                }
+                //                if (plot->isDisplayed()) {
+                //                    streamLog << plot->getName() << ";" << dataPointNumber << ";" << val << ";" << time << "\n";
+                //                }
             }
         }
     }
@@ -767,10 +873,12 @@ void MainWindow::on_saveJPGButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_resetPlotButton_clicked() {
     numberOfPoints = NUMBER_OF_POINTS_DEF;
+
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
     ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
     setAutoYRange(ui->plot->yAxis->range().size(), true);
     on_spinPoints_valueChanged(numberOfPoints);
+    ticksXTimer.setInterval(numberOfPoints / 10);
 }
 
 /******************************************************************************************************************/
@@ -778,6 +886,9 @@ void MainWindow::on_resetPlotButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_spinPoints_valueChanged(int arg1) {
     numberOfPoints = arg1;
+    qDebug() << "ticksXTimer : " << numberOfPoints / 10;
+
+    ticksXTimer.setInterval(numberOfPoints / 10);
     updateGraphNops();
     ui->plot->replot();
 }

@@ -71,7 +71,9 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 private slots:
-    void replot();                                                                        // Slot for repainting the plot
+    void replot();
+    void addTickX();
+    // Slot for repainting the plot
     void onNewDataArrived(QStringList newData);                                           // Slot for new data from serial port
     void onNewPlotDataArrived(QStringList newData);                                       // Slot for new data from serial port
     void readData();                                                                      // Slot for inside serial port
@@ -130,14 +132,16 @@ private:
                        mouseShift   = 0x02
                      };
     mouseAction mouseState = mouseMove;
-    QTime plotTime;
+    QSharedPointer<QCPAxisTickerText> textTicker;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
     bool mousePressed = false;
     int dataPointNumber;                                                                  // Keep track of data points
-    QTimer updateTimer;                                                                   // Timer used for replotting the plot
+    QTimer updateTimer;
+    QTimer ticksXTimer;
+    QTime ticksXTime;
+    // Timer used for replotting the plot
     int numberOfAxes;                                                                     // Number of axes for the plot
-    QTime timeOfFirstData;                                                                // Record the time of the first data point
     double timeBetweenSamples;                                                            // Store time between samples
     QSerialPort *serialPort;                                                              // Serial port; runs in this thread
     QString receivedData;                                                                 // Used for reading from the port
@@ -165,6 +169,7 @@ private:
     void enableControls(bool enable);                                                     // Enable/disable controls
     void setupPlot();
     void addPlots();
+    void updateLabel(int id, QString info, QColor color);
     bool isColor(QString str);
     // Setup the QCustomPlot
     void cleanGraphs();                                                                                          // Open the inside serial port with these parameters

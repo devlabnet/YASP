@@ -14441,8 +14441,9 @@ void QCustomPlot::replot(QCustomPlot::RefreshPriority refreshPriority)
   updateLayout();
   // draw all layered objects (grid, axes, plottables, items, legend,...) into their buffers:
   setupPaintBuffers();
-  foreach (QCPLayer *layer, mLayers)
+  foreach (QCPLayer *layer, mLayers) {
     layer->drawToPaintBuffer();
+  }
   for (int i=0; i<mPaintBuffers.size(); ++i)
     mPaintBuffers.at(i)->setInvalidated(false);
   
@@ -28834,7 +28835,9 @@ QCPItemText::QCPItemText(QCustomPlot *parentPlot) :
   bottom(createAnchor(QLatin1String("bottom"), aiBottom)),
   bottomLeft(createAnchor(QLatin1String("bottomLeft"), aiBottomLeft)),
   left(createAnchor(QLatin1String("left"), aiLeft)),
-  mText(QLatin1String("text")),
+  // Avoid to have some strange "text" displayed on top right of the plot area !!
+  // mText(QLatin1String("text")),
+  mText(QLatin1String("")),
   mPositionAlignment(Qt::AlignCenter),
   mTextAlignment(Qt::AlignTop|Qt::AlignHCenter),
   mRotation(0)
@@ -28991,12 +28994,12 @@ void QCPItemText::setPadding(const QMargins &padding)
 double QCPItemText::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
 {
   Q_UNUSED(details)
-  if (onlySelectable && !mSelectable)
-    return -1;
-  
+  if (onlySelectable && !mSelectable) return -1;
   // The rect may be rotated, so we transform the actual clicked pos to the rotated
   // coordinate system, so we can use the normal rectDistance function for non-rotated rects:
   QPointF positionPixels(position->pixelPosition());
+  // Avoid "QTransform::translate with NaN called" message from QTransform !!!
+  if (qIsNaN(positionPixels.x()) || qIsNaN(positionPixels.y())) return -1;
   QTransform inputTransform;
   inputTransform.translate(positionPixels.x(), positionPixels.y());
   inputTransform.rotate(-mRotation);
@@ -29016,6 +29019,8 @@ void QCPItemText::draw(QCPPainter *painter)
 {
   QPointF pos(position->pixelPosition());
   QTransform transform = painter->transform();
+  // Avoid "QTransform::translate with NaN called" message from QTransform !!!
+  if (qIsNaN(pos.x()) || qIsNaN(pos.y())) return;
   transform.translate(pos.x(), pos.y());
   if (!qFuzzyIsNull(mRotation))
     transform.rotate(mRotation);
@@ -29049,6 +29054,8 @@ QPointF QCPItemText::anchorPixelPosition(int anchorId) const
   // get actual rect points (pretty much copied from draw function):
   QPointF pos(position->pixelPosition());
   QTransform transform;
+  // Avoid "QTransform::translate with NaN called" message from QTransform !!!
+  if (qIsNaN(pos.x()) || qIsNaN(pos.y())) return QPointF();
   transform.translate(pos.x(), pos.y());
   if (!qFuzzyIsNull(mRotation))
     transform.rotate(mRotation);
