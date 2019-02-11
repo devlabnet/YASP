@@ -38,6 +38,7 @@
 #include "graphcontainer.h"
 #include <QTime>
 #include <QRubberBand>
+#include "yaspgraph.h"
 
 #define START_MSG      0x10
 #define PLOT_MSG       0X11
@@ -133,6 +134,7 @@ private:
                      };
     mouseAction mouseState = mouseMove;
     QSharedPointer<QCPAxisTickerText> textTicker;
+    QMap<int, yaspGraph*> graphs;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
     bool mousePressed = false;

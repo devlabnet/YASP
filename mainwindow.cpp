@@ -298,6 +298,14 @@ void MainWindow::addPlots() {
         textLabel->setSelectable(true);
 //        updateLabel(tabInd, plotStr);
         connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
+        QCPItemLine* axisLine = new QCPItemLine(ui->plot);
+        //axisLine->setPen(QPen(penColor, 1.0, Qt::DashDotLine));
+        axisLine->setPen(QPen(colours[tabInd], 1.0, Qt::DashDotLine));
+
+        axisLine->start->setCoords(0,0);
+        axisLine->end->setCoords(numberOfPoints,0);
+
+        graphs.insert(tabInd, new yaspGraph(tabInd, graph, textLabel, axisLine));
 //        QFont font;
 //        font.setPointSize(7);
 //        font.setStyleHint(QFont::Monospace);
@@ -328,7 +336,10 @@ void MainWindow::updateLabel(int id, QString info, QColor color) {
     QPoint labelPos;
     labelPos.setX(pixelsWide + 100);
     labelPos.setY(10 + (id * pixelsHigh));
-    QCPItemText* textLabel =  dynamic_cast<QCPItemText*>(ui->plot->item(id));
+//    QCPItemText* textLabel =  dynamic_cast<QCPItemText*>(ui->plot->item(id));
+    yaspGraph* graph = graphs[id];
+    Q_ASSERT(graph);
+    QCPItemText* textLabel =  graph->info();
     Q_ASSERT(textLabel != nullptr);
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
     textLabel->setText(info);
