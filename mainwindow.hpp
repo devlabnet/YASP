@@ -134,12 +134,13 @@ private:
                        mouseShift   = 0x02
                      };
     mouseAction mouseState = mouseMove;
+    bool mousePressed = false;
     QSharedPointer<QCPAxisTickerText> textTicker;
     QMap<int, yaspGraph*> graphs;
     yaspGraph* getGraph(int id);
+    QVector<qreal> lineDashPattern;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
-    bool mousePressed = false;
     int dataPointNumber;                                                                  // Keep track of data points
     QTimer updateTimer;
     QTimer ticksXTimer;
@@ -187,10 +188,11 @@ private:
     bool isNumericChar(char cc);
     void updateTracer(int pX);
     void saveDataPlot(QCPGraph* g);
-    void shiftPlot(double posY);
+    void shiftPlot(int pY);
     bool startShiftPlot = false;
     double lastPosY = 0;
-
+    int lastY = 0;
+    yaspGraph* workingGraph = nullptr;
 };
 
 

@@ -15,11 +15,19 @@ public:
     QCPGraph* plot() {
         return infoGraph;
     }
+    void setOffset(double o) {
+        yOffset = o;
+    }
+    double offset() {
+        return yOffset;
+    }
+
 private:
     int id;
     QCPGraph* infoGraph;
     QCPItemText* infoText;
     QCPItemLine* refLine;
+    double yOffset = 0;
 };
 
 #endif // YASPGRAPH_H
