@@ -243,6 +243,7 @@ yaspGraph* MainWindow::addGraph(int id) {
         setAutoYRange(ui->plot->yAxis->range().size());
         QString plotStr = "Plot " + QString::number(id);
         QCPGraph* graph = ui->plot->addGraph();
+        plotDashPattern = QVector<qreal>() << 16 << 4 << 8 << 4;
         graph->setName(plotStr);
         QCPItemText* textLabel = new QCPItemText(ui->plot);
         textLabel->setProperty("id", id);
@@ -254,9 +255,12 @@ yaspGraph* MainWindow::addGraph(int id) {
 
         connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
         QCPItemLine* axisLine = new QCPItemLine(ui->plot);
-        axisLine->setPen(QPen(colours[id], 1.0, Qt::DashDotLine));
+        QPen pen = QPen(colours[id], 0.5);
+        rLineDashPattern = QVector<qreal>() << 64 << 4 ;
+        pen.setDashPattern(rLineDashPattern);
+        axisLine->setPen(pen);
         axisLine->start->setCoords(0,0);
-        axisLine->end->setCoords(numberOfPoints,0);
+        axisLine->end->setCoords(numberOfPoints, 0);
         yaspGraph* g = new yaspGraph(id, graph, textLabel, axisLine);
         graphs.insert(id, g);
         return g;
@@ -283,7 +287,9 @@ void MainWindow::updateLabel(int id, QString info) {
     textLabel->setColor(color);
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
     textLabel->setText(info);
-    yGraph->rLine()->setPen(QPen(color, 1.0, Qt::DashDotLine));
+    QPen pen(color, 0.5);
+    pen.setDashPattern(rLineDashPattern);
+    yGraph->rLine()->setPen(pen);
 }
 
 /******************************************************************************************************************/
@@ -594,6 +600,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             updateLabel(plotId, info);
 //            qDebug() << yGraph->offset();
             plot->addData(dataPointNumber, val );
+            yGraph->update(dataPointNumber);
             if (logFile != nullptr) {
                 //                if (plot->isDisplayed()) {
                 //                    streamLog << plot->getName() << ";" << dataPointNumber << ";" << val << ";" << time << "\n";
@@ -759,19 +766,19 @@ void MainWindow::readData() {
 
 /******************************************************************************************************************/
 void MainWindow::setAutoYRange(double r, bool resetDelta) {
-    return;
-    int step = 10;
-    if (r < step) {
-//        ui->plot->yAxis->setTickStep(1);
-        return;
-    }
-    int m = r / step;
-    int v = qMax((int)(log10(m)), 1);
-    int mult =  pow(10, v);
-    int x = m / mult;
-    int vMin = qMax(x * mult, 5);
-//    ui->plot->yAxis->setTickStep(vMin);
-    ui->plot->replot();
+//    return;
+//    int step = 10;
+//    if (r < step) {
+////        ui->plot->yAxis->setTickStep(1);
+//        return;
+//    }
+//    int m = r / step;
+//    int v = qMax((int)(log10(m)), 1);
+//    int mult =  pow(10, v);
+//    int x = m / mult;
+//    int vMin = qMax(x * mult, 5);
+////    ui->plot->yAxis->setTickStep(vMin);
+//    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -842,9 +849,13 @@ void MainWindow::shiftPlot(int pY) {
     } else {
         double offset = posY - lastPosY;
         int gOffset = pY - lastY;
-        workingGraph->setOffset(workingGraph->offset() + offset);
+        workingGraph->setOffset(dataPointNumber, offset);
+//        double yl = workingGraph->rLine()->start->coords().y() + offset;
+//        workingGraph->rLine()->start->setCoords(0, yl);
+//        workingGraph->rLine()->end->setCoords(numberOfPoints, yl);
+
 //        qDebug() << "shiftPlot ---> Y:" << pY << " / posY:" << posY << " gOff:" << workingGraph->offset();
-        qDebug() << "shiftPlot --->  Y:" << posY << " /offset:" << offset << " /o:" << gOffset;
+//        qDebug() << "shiftPlot --->  Y:" << posY << " /offset:" << offset << " /o:" << gOffset;
         QSharedPointer<QCPGraphDataContainer> gData = gr->data();
         //QCPDataMap *dataMap = selectedPlotContainer->getGraph()->data();
         for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
@@ -907,7 +918,7 @@ void MainWindow::doMenuPlotColorAction() {
     yGraph->info()->setColor(color);
     yGraph->info()->setSelectedPen(QPen(color));
     yGraph->info()->setSelectedColor(color);
-    yGraph->rLine()->setPen(QPen(color, 1.0, Qt::DashDotLine));
+    yGraph->rLine()->setPen(QPen(color));
     ui->plot->replot();
 }
 
@@ -1293,12 +1304,10 @@ void MainWindow::plotLabelSelected(bool b) {
 //        graphs[plotId.toInt()]->info()->setPen(QPen(Qt::white));
         yaspGraph* yGraph = graphs[plotId.toInt()];
         Q_ASSERT(yGraph);
-        lineDashPattern = QVector<qreal>() << 16 << 4 << 8 << 4;
         QPen pen = yGraph->plot()->pen();
         pen.setWidth(1);
-        pen.setDashPattern(lineDashPattern);
+        pen.setDashPattern(plotDashPattern);
 //        pen.setDashPattern( QVector<qreal>() << 1 << 1 << 1 << 1 << 2 << 2 << 2 << 2 << 4 << 4 << 4 << 4 << 8 << 8 << 8 << 8 );
-        lineDashPattern = QVector<qreal>();
 
 //        pen.setStyle(Qt::DotLine);
         yGraph->plot()->setPen(pen);

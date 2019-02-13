@@ -138,7 +138,8 @@ private:
     QSharedPointer<QCPAxisTickerText> textTicker;
     QMap<int, yaspGraph*> graphs;
     yaspGraph* getGraph(int id);
-    QVector<qreal> lineDashPattern;
+    QVector<qreal> plotDashPattern;
+    QVector<qreal> rLineDashPattern;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
     int dataPointNumber;                                                                  // Keep track of data points
