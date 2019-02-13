@@ -93,7 +93,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
 //    connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChangedByUserInPlot()));
-
 //    // setup policy and connect slot for context menu popup:
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     connect(ui->plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
