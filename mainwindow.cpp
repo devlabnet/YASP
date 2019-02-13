@@ -85,7 +85,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
 
-
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
