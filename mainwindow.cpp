@@ -54,28 +54,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->logPlotButton->setVisible(false);
     // Legend
-//    ui->plot->setAutoAddPlottableToLegend(false);
     ui->plot->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
-//    ui->plot->legend->setVisible(true);
-//    QFont legendFont = font();  // start out with MainWindow's font..
-//    legendFont.setPointSize(9); // and make a bit smaller for legend
-//    ui->plot->legend->setFont(legendFont);
-//    ui->plot->legend->setBrush(QBrush(QColor(255,255,255,230)));
 
     ui->plot->setNotAntialiasedElements(QCP::aeAll);                                      // used for higher performance (see QCustomPlot real time example)
     QFont font;
     font.setStyleStrategy(QFont::NoAntialias);
     ui->plot->xAxis->setTickLabelFont(font);
     ui->plot->yAxis->setTickLabelFont(font);
-//    ui->plot->legend->setFont(font);
-//    ui->plot->legend->setSelectableParts(QCPLegend::spItems);
-//    ui->plot->yAxis->setAutoTickStep(false);                                              // User can change tick step with a spin box
-//    ui->plot->yAxis->setTickStep(500);                                                    // Set initial tick step
     ui->plot->xAxis->setTickLabelColor(gridColor);                              // Tick labels color
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
     ui->plot->xAxis->setTicker(timeTicker);
-//    timeTicker->setTimeFormat("%m:%s:%z");
     textTicker = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText());
     ui->plot->xAxis->setTicker(textTicker);
 
@@ -104,9 +93,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
-    connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChangedByUserInPlot()));
-//    connect(ui->plot->legend, SIGNAL(selectionChanged(QCPLegend::SelectableParts)),
-//            this, SLOT(legendSelectionChanged(QCPLegend::SelectableParts)));
+//    connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChangedByUserInPlot()));
 
 //    // setup policy and connect slot for context menu popup:
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
@@ -119,9 +106,6 @@ MainWindow::MainWindow(QWidget *parent) :
     updateTimer.setInterval(20);
     ticksXTimer.setInterval(numberOfPoints/10);
 
-    /* Also, just I want to show you how to choose the color separator.
-        * To do this we need to use a class QPallete, for which you choose the background color.
-        * */
     QPalette p;
     p.setColor(QPalette::Background, QColor(144, 238, 144));
     ui->splitter->setPalette(p);
@@ -133,7 +117,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
 
-//    ui->tabWidget->setTabEnabled(1, false);
     QWidget* tabW = ui->tabWidget->findChild<QWidget *>("tabPlots");
     qDebug() << "constructor tabW : " << tabW;
 
@@ -148,13 +131,11 @@ MainWindow::MainWindow(QWidget *parent) :
 /* Destructor */
 /******************************************************************************************************************/
 MainWindow::~MainWindow() {
-//    qDebug() << "MainWindow Destructor";
     if(serialPort != nullptr) delete serialPort;
     delete ui;
 }
 /******************************************************************************************************************/
 void MainWindow::closeEvent(QCloseEvent *event) {
-//   qDebug() << "MainWindow closeEvent";
    if (logFile != nullptr) {
        if(logFile->isOpen()) {
            logFile->close();
@@ -220,27 +201,10 @@ void MainWindow::cleanGraphs() {
 }
 
 /******************************************************************************************************************/
-/* Setup the plot area */
-/******************************************************************************************************************/
-void MainWindow::setupPlot() {
-//    plotsToolBox = new QTabWidget();
-//    plotsToolBox->setTabPosition(QTabWidget::North);
-//    ui->verticalLayoutPlots->addWidget(plotsToolBox);
-//    plotsToolBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-//    bottomWidget = new QLabel();
-//    bottomWidget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-//    bottomWidget->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png"));
-//    bottomWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
-//    ui->verticalLayoutPlots->addWidget(bottomWidget);
-    ui->plot->show();
-//    addPlots();
-}
-
-/******************************************************************************************************************/
 yaspGraph* MainWindow::addGraph(int id) {
         ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
         ui->plot->xAxis->setRange(0, numberOfPoints);                                      // Set x axis range for specified number of points
-        setAutoYRange(ui->plot->yAxis->range().size());
+//        setAutoYRange(ui->plot->yAxis->range().size());
         QString plotStr = "Plot " + QString::number(id);
         QCPGraph* graph = ui->plot->addGraph();
         plotDashPattern = QVector<qreal>() << 16 << 4 << 8 << 4;
@@ -388,7 +352,6 @@ void MainWindow::portOpenedSuccess() {
     serialPort->setDataTerminalReady(true);
     connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
     connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
-//    ui->tabWidget->setTabEnabled(1, true);
     QWidget* tabW = ui->tabWidget->findChild<QWidget *>("tabPlots");
     qDebug() << "tabW : " << tabW;
     ui->tabWidget->insertTab(1, tabW, "Plots");
@@ -411,10 +374,8 @@ void MainWindow::dataTerminalReadyChanged(bool dtr) {
 /******************************************************************************************************************/
 void MainWindow:: closePort() {
     cleanGraphs();
-//    ui->tabWidget->setTabEnabled(1, false);
     ui->tabWidget->removeTab(1);
     ui->tabWidget->setCurrentIndex(0);
-
     if (logFile != nullptr) {
         if(logFile->isOpen()) {
             logFile->close();
@@ -461,12 +422,8 @@ void MainWindow::replot() {
 
 /******************************************************************************************************************/
 void MainWindow::addTickX() {
-//    QTime y(0, 0);
-//    y = y.addMSecs(ticksXTime.elapsed());
     QTime z(0, 0);
     z = z.addSecs(qRound(ticksXTime.elapsed()/1000.0));
-//    qDebug() << "st: " <<  z.toString("mm:ss.z") << "/ tick: " << y.toString("mm:ss.z");
-//    textTicker->addTick(dataPointNumber, y.toString("mm:ss.z"));
     textTicker->addTick(dataPointNumber, z.toString("mm:ss"));
 }
 
@@ -481,8 +438,6 @@ void MainWindow::on_stopPlotButton_clicked() {
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
-        // setup policy and connect slot for context menu popup:
-//        ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     } else {                                                                              // Start plotting
         // Start updating plot timer
         ticksXTimer.start();
@@ -491,7 +446,6 @@ void MainWindow::on_stopPlotButton_clicked() {
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
-//        ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     }
 }
 
@@ -533,7 +487,6 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
             addMessageText(QString::number(ticksXTime.elapsed()) + " BAD PLOT ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
             return;
         }
-//        qDebug() << "PLOT DATA : " << plotId << " --> " << newData;
         yaspGraph* yGraph = getGraph(plotId);
         QString param1 = "";
         QString param2 = "";
@@ -552,7 +505,6 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
         } else {
             if ((!param1.isEmpty()) && ( yGraph->plot()->name() != param1)) {
                  yGraph->plot()->setName(param1);
-//                plotsToolBox->tabBar()->setTabText(tabPos, param1);
             }
         }
         if (isColor(param2)) {
@@ -730,7 +682,6 @@ void MainWindow::readData() {
                 case IN_MESSAGE:                                                          // If state is IN_MESSAGE
                     if( cc == END_MSG) {                                              // If char examined is ;, switch state to END_MSG
                         STATE = WAIT_START;
-//                        qDebug() << "receivedData: " << receivedData;
                         QStringList incomingData = receivedData.split(SPACE_MSG);               // Split string received from port and put it into list
                         emit newData(incomingData);                                       // Emit signal for data received with the list
                         break;
@@ -765,21 +716,21 @@ void MainWindow::readData() {
 }
 
 /******************************************************************************************************************/
-void MainWindow::setAutoYRange(double r, bool resetDelta) {
-//    return;
-//    int step = 10;
-//    if (r < step) {
-////        ui->plot->yAxis->setTickStep(1);
-//        return;
-//    }
-//    int m = r / step;
-//    int v = qMax((int)(log10(m)), 1);
-//    int mult =  pow(10, v);
-//    int x = m / mult;
-//    int vMin = qMax(x * mult, 5);
-////    ui->plot->yAxis->setTickStep(vMin);
-//    ui->plot->replot();
-}
+//void MainWindow::setAutoYRange(double r, bool resetDelta) {
+////    return;
+////    int step = 10;
+////    if (r < step) {
+//////        ui->plot->yAxis->setTickStep(1);
+////        return;
+////    }
+////    int m = r / step;
+////    int v = qMax((int)(log10(m)), 1);
+////    int mult =  pow(10, v);
+////    int x = m / mult;
+////    int vMin = qMax(x * mult, 5);
+//////    ui->plot->yAxis->setTickStep(vMin);
+////    ui->plot->replot();
+//}
 
 /******************************************************************************************************************/
 /* Save a JPG image of the plot to current EXE directory */
@@ -798,10 +749,9 @@ void MainWindow::on_saveJPGButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_resetPlotButton_clicked() {
     numberOfPoints = NUMBER_OF_POINTS_DEF;
-
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
     ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
-    setAutoYRange(ui->plot->yAxis->range().size(), true);
+//    setAutoYRange(ui->plot->yAxis->range().size(), true);
     on_spinPoints_valueChanged(numberOfPoints);
     ticksXTimer.setInterval(numberOfPoints / 10);
 }
@@ -811,8 +761,7 @@ void MainWindow::on_resetPlotButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_spinPoints_valueChanged(int arg1) {
     numberOfPoints = arg1;
-    qDebug() << "ticksXTimer : " << numberOfPoints / 10;
-
+//    qDebug() << "ticksXTimer : " << numberOfPoints / 10;
     ticksXTimer.setInterval(numberOfPoints / 10);
     ui->plot->replot();
 }
@@ -848,16 +797,8 @@ void MainWindow::shiftPlot(int pY) {
         startShiftPlot = false;
     } else {
         double offset = posY - lastPosY;
-        int gOffset = pY - lastY;
         workingGraph->setOffset(dataPointNumber, offset);
-//        double yl = workingGraph->rLine()->start->coords().y() + offset;
-//        workingGraph->rLine()->start->setCoords(0, yl);
-//        workingGraph->rLine()->end->setCoords(numberOfPoints, yl);
-
-//        qDebug() << "shiftPlot ---> Y:" << pY << " / posY:" << posY << " gOff:" << workingGraph->offset();
-//        qDebug() << "shiftPlot --->  Y:" << posY << " /offset:" << offset << " /o:" << gOffset;
         QSharedPointer<QCPGraphDataContainer> gData = gr->data();
-        //QCPDataMap *dataMap = selectedPlotContainer->getGraph()->data();
         for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
             it->value += offset;
         }
@@ -868,12 +809,9 @@ void MainWindow::shiftPlot(int pY) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::doShift() {
-//    Q_ASSERT(ui->plot->selectedGraphs().size());
-//    QCPGraph* gr = ui->plot->selectedGraphs().at(0);
-    mouseState = mouseShift;
-//    startShiftPlot = true;
-}
+//void MainWindow::doShift() {
+//    mouseState = mouseShift;
+//}
 
 /******************************************************************************************************************/
 void MainWindow::cleanTracer() {
@@ -896,13 +834,7 @@ void MainWindow::doMenuPlotShiftAction() {
     yaspGraph* yGraph = graphs[plotId];
     Q_ASSERT(yGraph);
     workingGraph = yGraph;
-//    yGraph->plot()->setSelectable(QCP::SelectionType::stWhole);
-//    yGraph->plot()->setSelection(QCPDataSelection(QCPDataRange(0, dataPointNumber)));
-    doShift();
-//    cleanTracer();
-//    ui->plot->setCursor(Qt::ArrowCursor);
-//    ui->plot->deselectAll();
-//    ui->plot->replot();
+    mouseState = mouseShift;
 }
 
 /******************************************************************************************************************/
@@ -937,18 +869,12 @@ void MainWindow::doMenuPlotShowHideAction() {
     Q_ASSERT(yGraph);
     if (yGraph->plot()->visible()) {
         yGraph->plot()->setVisible(false);
-//        contextMenu->actions().at(1)->setText("show");
         plotShowHideAction->setText("show");
-
     } else {
         yGraph->plot()->setVisible(true);
-//        contextMenu->actions().at(1)->setText("hide");
         plotShowHideAction->setText("Hide");
-
     }
     ui->plot->replot();
-//    contextMenu->removeAction(contextMenu->activeAction());
-//    contextMenu->addAction("Show", this, SLOT(doMenuPlotShowAction()));
 }
 
 //*******************************************************************************************/
@@ -1073,7 +999,6 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     Q_UNUSED(event)
     mousePressed = false;
     startShiftPlot = false;
-
     ui->statusBar->showMessage("release");
     if (plotting) {
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
@@ -1087,31 +1012,26 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     }
 }
 
+
 ///******************************************************************************************************************/
-//void MainWindow::legendSelectionChanged(QCPLegend::SelectableParts l) {
-//    qDebug() << "legendSelectionChanged: " << l;
-
+//void MainWindow::selectionChangedByUserInPlot() {
+////    qDebug() << "selectionChangedByUserInPlot";
+////    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedGraphs().size() : " << ui->plot->selectedGraphs().size();
+////    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedItems().size() : " << ui->plot->selectedItems().size();
+////    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedPlottables().size() : " << ui->plot->selectedPlottables().size();
+//    if (ui->plot->selectedGraphs().size() == 0) {
+//        if (mouseState == mouseShift) {
+//            mouseState = mouseMove;
+//            startShiftPlot = false;
+//            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+//        }
+//    }
 //}
-
-/******************************************************************************************************************/
-void MainWindow::selectionChangedByUserInPlot() {
-    qDebug() << "selectionChangedByUserInPlot";
-    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedGraphs().size() : " << ui->plot->selectedGraphs().size();
-    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedItems().size() : " << ui->plot->selectedItems().size();
-    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedPlottables().size() : " << ui->plot->selectedPlottables().size();
-    if (ui->plot->selectedGraphs().size() == 0) {
-        if (mouseState == mouseShift) {
-            mouseState = mouseMove;
-            startShiftPlot = false;
-            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
-        }
-    }
-}
 
 /******************************************************************************************************************/
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     if (wheelState == wheelZoom) {
-        setAutoYRange(ui->plot->yAxis->range().size());
+//        setAutoYRange(ui->plot->yAxis->range().size());
         updateTracer(event->pos().x());
     } else if (wheelState == wheelShift) {
 //        shiftPlot(ui->plot->yAxis->range().size());
@@ -1301,15 +1221,11 @@ void MainWindow::plotLabelSelected(bool b) {
         contextMenu = new QMenu(this);
         QVariant plotId = item->property("id");
         contextMenu->setProperty("id", plotId);
-//        graphs[plotId.toInt()]->info()->setPen(QPen(Qt::white));
         yaspGraph* yGraph = graphs[plotId.toInt()];
         Q_ASSERT(yGraph);
         QPen pen = yGraph->plot()->pen();
         pen.setWidth(1);
         pen.setDashPattern(plotDashPattern);
-//        pen.setDashPattern( QVector<qreal>() << 1 << 1 << 1 << 1 << 2 << 2 << 2 << 2 << 4 << 4 << 4 << 4 << 8 << 8 << 8 << 8 );
-
-//        pen.setStyle(Qt::DotLine);
         yGraph->plot()->setPen(pen);
 //        QBrush brush(Qt::white, Qt::Dense7Pattern);
 //        yGraph->plot()->setBrush(brush);
@@ -1330,8 +1246,6 @@ void MainWindow::plotLabelSelected(bool b) {
             QVariant plotId = contextMenu->property("id");
             yaspGraph* yGraph = graphs[plotId.toInt()];
             Q_ASSERT(yGraph);
-//            QPen pen = yGraph->plot()->pen();
-//            pen.setWidth(1);
             QPen pen = yGraph->plot()->pen();
             pen.setWidth(1);
             pen.setStyle(Qt::SolidLine);
@@ -1339,7 +1253,6 @@ void MainWindow::plotLabelSelected(bool b) {
 //            QBrush brush(Qt::white, Qt::NoBrush);
 //            yGraph->plot()->setBrush(brush);
             yGraph->info()->setSelectedPen(Qt::NoPen);
-//            yGraph->info()->setPadding(QMargins());
         }
         delete contextMenu;
         contextMenu = nullptr;

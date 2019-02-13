@@ -90,12 +90,12 @@ private slots:
     void onMousePressInPlot(QMouseEvent *event);
     void onMouseDoubleClickInPlot(QMouseEvent* event);
     void plotContextMenuRequest(QPoint pos);
-    void selectionChangedByUserInPlot();
+//    void selectionChangedByUserInPlot();
 //    void legendSelectionChanged(QCPLegend::SelectableParts l);
     void saveSelectedGraph();
     void saveAllGraphs();
     void doMeasure();
-    void doShift();
+//    void doShift();
     void cleanTracer();
     void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
@@ -157,8 +157,6 @@ private:
     int numberOfPoints;                                                                 // Number of points plotted
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
-//    QTabWidget* plotsToolBox = nullptr;
-//    QVector<graphContainer*> plotsVector;
     QFile* logFile = nullptr;
     QTextStream streamLog;
     QFile* logData = nullptr;
@@ -174,7 +172,6 @@ private:
     double traceerStartKey;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
-    void setupPlot();
     yaspGraph *addGraph(int id);
     void updateLabel(int id, QString info);
     bool isColor(QString str);
@@ -183,7 +180,7 @@ private:
     void openPort();
     void portOpenedSuccess();                                                             // Called when port opens OK
     void closePort();                                                                  // Called when closing the port
-    void setAutoYRange(double r, bool resetDelta = false);
+//    void setAutoYRange(double r, bool resetDelta = false);
     void addMessageText(QString data, QString color = "black");
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
