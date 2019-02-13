@@ -90,7 +90,7 @@ private slots:
     void onMousePressInPlot(QMouseEvent *event);
     void onMouseDoubleClickInPlot(QMouseEvent* event);
     void plotContextMenuRequest(QPoint pos);
-//    void selectionChangedByUserInPlot();
+    void selectionChangedByUserInPlot();
 //    void legendSelectionChanged(QCPLegend::SelectableParts l);
     void saveSelectedGraph();
     void saveAllGraphs();

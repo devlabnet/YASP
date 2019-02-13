@@ -92,7 +92,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
-//    connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChangedByUserInPlot()));
+    connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChangedByUserInPlot()));
     //    // setup policy and connect slot for context menu popup:
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     connect(ui->plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
@@ -844,11 +844,15 @@ void MainWindow::doMenuPlotColorAction() {
     qDebug() << "doMenuPlotColorAction: " << color;
     yaspGraph* yGraph = graphs[plotId];
     Q_ASSERT(yGraph);
-    yGraph->plot()->setPen(QPen(color));
+    QPen pen = yGraph->plot()->pen();
+    pen.setColor(color);
+//    pen.setWidth(1);
+//    pen.setDashPattern(plotDashPattern);
+    yGraph->plot()->setPen(pen);
     yGraph->info()->setColor(color);
     yGraph->info()->setSelectedPen(QPen(color));
     yGraph->info()->setSelectedColor(color);
-    yGraph->rLine()->setPen(QPen(color));
+    yGraph->rLine()->setPen(QPen(pen.color()));
     ui->plot->replot();
 }
 
@@ -1012,11 +1016,12 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
 
 
 ///******************************************************************************************************************/
-//void MainWindow::selectionChangedByUserInPlot() {
-////    qDebug() << "selectionChangedByUserInPlot";
-////    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedGraphs().size() : " << ui->plot->selectedGraphs().size();
-////    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedItems().size() : " << ui->plot->selectedItems().size();
-////    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedPlottables().size() : " << ui->plot->selectedPlottables().size();
+void MainWindow::selectionChangedByUserInPlot() {
+    mouseState = mouseMove;
+    qDebug() << "selectionChangedByUserInPlot";
+    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedGraphs().size() : " << ui->plot->selectedGraphs().size();
+    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedItems().size() : " << ui->plot->selectedItems().size();
+    qDebug() << "selectionChangedByUserInPlot ui->plot->selectedPlottables().size() : " << ui->plot->selectedPlottables().size();
 //    if (ui->plot->selectedGraphs().size() == 0) {
 //        if (mouseState == mouseShift) {
 //            mouseState = mouseMove;
@@ -1024,7 +1029,7 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
 //            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
 //        }
 //    }
-//}
+}
 
 /******************************************************************************************************************/
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
