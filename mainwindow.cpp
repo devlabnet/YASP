@@ -57,10 +57,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
 
     ui->plot->setNotAntialiasedElements(QCP::aeAll);                                      // used for higher performance (see QCustomPlot real time example)
-    QFont font;
-    font.setStyleStrategy(QFont::NoAntialias);
-    ui->plot->xAxis->setTickLabelFont(font);
-    ui->plot->yAxis->setTickLabelFont(font);
+//    QFont font;
+//    font.setStyleStrategy(QFont::NoAntialias);
+//    ui->plot->xAxis->setTickLabelFont(font);
+//    ui->plot->yAxis->setTickLabelFont(font);
     ui->plot->xAxis->setTickLabelColor(gridColor);                              // Tick labels color
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
@@ -84,6 +84,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->yAxis->setSubTickPen(QPen(gridColor));
     ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+
+    infoModeLabel = new QCPItemText(ui->plot);
+    infoModeLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignLeft);
+    infoModeLabel->position->setType(QCPItemPosition::ptAbsolute );
+    infoModeLabel->setPadding(QMargins(2,2,2,2));
+    QFont font;
+    font.setPointSize(12);
+    font.setStyleHint(QFont::Monospace);
+    font.setWeight(QFont::Bold);
+    font.setStyle(QFont::StyleItalic);
+    infoModeLabel->setFont(font);
+    infoModeLabel->setText(("VIEW MODE"));
+    resetMouseWheelState();
 
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
     // Slot for printing coordinates
@@ -232,6 +245,7 @@ yaspGraph* MainWindow::addGraph(int id) {
 void MainWindow::updateLabel(int id, QString info) {
     yaspGraph* yGraph = graphs[id];
     Q_ASSERT(yGraph);
+    info = yGraph->plot()->name() + " -> " + info;
     QColor color = yGraph->plot()->pen().color();
     QFont font;
     font.setPointSize(7);
@@ -244,7 +258,7 @@ void MainWindow::updateLabel(int id, QString info) {
     QCPItemText* textLabel =  yGraph->info();
     Q_ASSERT(textLabel != nullptr);
     QPoint labelPos;
-    labelPos.setX(pixelsWide + textLabel->padding().left()+ textLabel->padding().right() + 100 );
+    labelPos.setX(pixelsWide + textLabel->padding().left()+ textLabel->padding().right() + ui->plot->yAxis->axisRect()->left() + 70 );
     labelPos.setY( (id+1) * (5 + (pixelsHigh + textLabel->padding().top() + textLabel->padding().bottom())));
     textLabel->setColor(color);
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
@@ -332,6 +346,7 @@ void MainWindow::portOpenedSuccess() {
     connect(serialPort, SIGNAL(dataTerminalReadyChanged(bool)), this, SLOT(dataTerminalReadyChanged(bool)));
     serialPort->setDataTerminalReady(false);
     ui->menuWidgets->menuAction()->setVisible(true);
+
     if ((widgets != nullptr)) {
         widgets->setSerialPort(serialPort);
     }
@@ -354,11 +369,24 @@ void MainWindow::portOpenedSuccess() {
     qDebug() << "tabW : " << tabW;
     ui->tabWidget->insertTab(1, tabW, "Plots");
     ui->tabWidget->setCurrentIndex(1);
+    qDebug() << "ui->plot->geometry: " << ui->plot->geometry();
+    QFontMetricsF fm(infoModeLabel->font());
+    qreal pixelsWide = fm.width(infoModeLabel->text());
+    qDebug() << "pixelsWide " << pixelsWide;
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
 
     updateTimer.start();
     ticksXTimer.start();
     ticksXTime.restart();
 
+}
+
+/******************************************************************************************************************/
+void MainWindow::resizeEvent(QResizeEvent* event) {
+   QMainWindow::resizeEvent(event);
+   QFontMetricsF fm(infoModeLabel->font());
+   qreal pixelsWide = fm.width(infoModeLabel->text());
+   infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
 }
 
 /******************************************************************************************************************/
@@ -516,9 +544,7 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
         }
 //        qDebug() << "param1 : " << param1;
 //        qDebug() << "param2 : " << param2;
-        QString info =  yGraph->plot()->name();
-        info += " -> ";
-        updateLabel(plotId, info);
+        updateLabel(plotId);
     }
 }
 
@@ -540,13 +566,15 @@ void MainWindow::onNewDataArrived(QStringList newData) {
         if (dataListSize > 1) {
             double val = newData[1].toDouble();
             val += yGraph->offset();
+            val *= yGraph->mult();
             // Add data to graphs according plot Id
             QCPGraph* plot = yGraph->plot();
-            QString info = plot->name();
-            info +=  + " val: ";
+            QString info = " val: ";
             info += QString::number(val);
             info +=  + " offset: ";
             info += QString::number(yGraph->offset());
+            info +=  + " mult: ";
+            info += QString::number(yGraph->mult());
             updateLabel(plotId, info);
 //            qDebug() << yGraph->offset();
             plot->addData(dataPointNumber, val );
@@ -786,6 +814,7 @@ void MainWindow::doMeasure() {
 
 /******************************************************************************************************************/
 void MainWindow::shiftPlot(int pY) {
+    if (graphDataUpdating) return;
     double posY = ui->plot->yAxis->pixelToCoord(pY);
     Q_ASSERT(workingGraph);
     QCPGraph* gr = workingGraph->plot();
@@ -796,14 +825,61 @@ void MainWindow::shiftPlot(int pY) {
     } else {
         double offset = posY - lastPosY;
         workingGraph->setOffset(dataPointNumber, offset);
+        graphDataUpdating = true;
         QSharedPointer<QCPGraphDataContainer> gData = gr->data();
         for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
             it->value += offset;
         }
         ui->plot->replot();
+        graphDataUpdating = false;
+
         lastPosY = posY;
         lastY = pY;
     }
+}
+
+/******************************************************************************************************************/
+void MainWindow::scalePlot(int numDeg) {
+    if (graphDataUpdating) return;
+    if (numDeg == 0) return;
+    if (startScalePlot) {
+        scaleMult = 1.0;
+        startScalePlot = false;
+    }
+    Q_ASSERT(workingGraph);
+    qDebug() << "numDeg: " << numDeg;
+    double scale = 1 + ((double)numDeg / 1000.0);
+//    scaleMult = 1 + scale;
+    double yMult;
+    scaleMult *= scale;
+//    scaleMult = round(scaleMult,2);
+    if (scaleMult < 0.1) return;
+//    if (numDeg > 0) {
+//        yMult = workingGraph->mult() * scale;
+//    } else {
+//        yMult = workingGraph->mult() / scale;
+//    }
+    qDebug() << "scale: " << scale << " mult: " << scaleMult;
+
+//    scaleDegs += numDeg;
+    //double posY = ui->plot->yAxis->pixelToCoord(pY);
+    double m = (1 / workingGraph->mult()) * scaleMult;
+    workingGraph->setMult(m);
+    graphDataUpdating = true;
+    QCPGraph* gr = workingGraph->plot();
+    QSharedPointer<QCPGraphDataContainer> gData = gr->data();
+    for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
+//        if (numDeg > 0) {
+//            it->value -= workingGraph->offset();
+            it->value *= m;
+//            it->value += workingGraph->offset();
+//        } else {
+//            it->value /= scale;
+//        }
+    }
+    ui->plot->replot();
+    graphDataUpdating = false;
+
 }
 
 /******************************************************************************************************************/
@@ -827,6 +903,13 @@ void MainWindow::cleanTracer() {
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotShiftAction() {
     Q_ASSERT(contextMenu);
+    resetMouseWheelState();
+    infoModeLabel->setText("MODE SHIFT");
+    infoModeLabel->setColor(Qt::red);
+    QFontMetricsF fm(infoModeLabel->font());
+    qreal pixelsWide = fm.width(infoModeLabel->text());
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+
     qDebug() << "doMenuPlotShiftAction: " << contextMenu->property("id");
     int plotId = contextMenu->property("id").toInt();
     yaspGraph* yGraph = graphs[plotId];
@@ -838,6 +921,12 @@ void MainWindow::doMenuPlotShiftAction() {
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotColorAction() {
     Q_ASSERT(contextMenu);
+    resetMouseWheelState();
+    infoModeLabel->setText("MODE COLOR");
+    infoModeLabel->setColor(Qt::red);
+    QFontMetricsF fm(infoModeLabel->font());
+    qreal pixelsWide = fm.width(infoModeLabel->text());
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
     int plotId = contextMenu->property("id").toInt();
     qDebug() << "doMenuPlotColorAction: " << plotId;
     QColor color = QColorDialog::getColor(Qt::white, nullptr, "plot color");
@@ -859,13 +948,26 @@ void MainWindow::doMenuPlotColorAction() {
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotScaleAction() {
     Q_ASSERT(contextMenu);
+    resetMouseWheelState();
+    infoModeLabel->setText("MODE SCALE");
+    infoModeLabel->setColor(Qt::red);
+    QFontMetricsF fm(infoModeLabel->font());
+    qreal pixelsWide = fm.width(infoModeLabel->text());
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
     qDebug() << "doMenuPlotScaleAction: " << contextMenu->property("id");
-
+    int plotId = contextMenu->property("id").toInt();
+    yaspGraph* yGraph = graphs[plotId];
+    Q_ASSERT(yGraph);
+    workingGraph = yGraph;
+    wheelState = wheelScalePlot;
+    startScalePlot = true;
+    ui->plot->setInteraction(QCP::iRangeZoom, false);
 }
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotShowHideAction() {
     Q_ASSERT(contextMenu);
+    resetMouseWheelState();
     int plotId = contextMenu->property("id").toInt();
     yaspGraph* yGraph = graphs[plotId];
     Q_ASSERT(yGraph);
@@ -977,7 +1079,9 @@ void MainWindow::updateTracer(int pX) {
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     if (mouseState == mouseMove) {
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+        if (wheelState == wheelZoom) {
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+        }
         if (measureInProgress == false) {
             double xx = ui->plot->xAxis->pixelToCoord(event->x());
             double yy = ui->plot->yAxis->pixelToCoord(event->y());
@@ -1005,23 +1109,36 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     if (plotting) {
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     } else {
-        if (tracer) {
-            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
-            tracer->blockSignals(false);
-        } else {
-            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
-        }
+//        if (tracer) {
+//            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+//            tracer->blockSignals(false);
+//        } else {
+//            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
+//        }
     }
 }
 
-
-///******************************************************************************************************************/
-void MainWindow::selectionChangedByUserInPlot() {
+/******************************************************************************************************************/
+void MainWindow::resetMouseWheelState() {
     mouseState = mouseMove;
+    wheelState = wheelZoom;
+    startScalePlot = false;
+    startShiftPlot = false;
+    infoModeLabel->setText("MODE SHOW");
+    infoModeLabel->setColor(QColor(0, 255, 255));
+    QFontMetricsF fm(infoModeLabel->font());
+    qreal pixelsWide = fm.width(infoModeLabel->text());
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+}
+
+/******************************************************************************************************************/
+void MainWindow::selectionChangedByUserInPlot() {
+    resetMouseWheelState();
     qDebug() << "selectionChangedByUserInPlot";
     qDebug() << "selectionChangedByUserInPlot ui->plot->selectedGraphs().size() : " << ui->plot->selectedGraphs().size();
     qDebug() << "selectionChangedByUserInPlot ui->plot->selectedItems().size() : " << ui->plot->selectedItems().size();
     qDebug() << "selectionChangedByUserInPlot ui->plot->selectedPlottables().size() : " << ui->plot->selectedPlottables().size();
+    ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
 //    if (ui->plot->selectedGraphs().size() == 0) {
 //        if (mouseState == mouseShift) {
 //            mouseState = mouseMove;
@@ -1036,7 +1153,10 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     if (wheelState == wheelZoom) {
 //        setAutoYRange(ui->plot->yAxis->range().size());
         updateTracer(event->pos().x());
-    } else if (wheelState == wheelShift) {
+    } else if (wheelState == wheelScalePlot) {
+        QPoint numDegrees = event->angleDelta();
+        qDebug() << "numDegrees " << numDegrees;
+        scalePlot(numDegrees.y());
 //        shiftPlot(ui->plot->yAxis->range().size());
     }
 }
@@ -1214,6 +1334,12 @@ void MainWindow::on_logPlotButton_clicked() {
 }
 
 /******************************************************************************************************************/
+void MainWindow::contextMenuTriggered(QAction* act) {
+    qDebug() << "contextMenuTriggered : " << act;
+
+}
+
+/******************************************************************************************************************/
 void MainWindow::plotLabelSelected(bool b) {
     qDebug() << "plotLabelSelected : " << b;
     if (b) {
@@ -1222,6 +1348,7 @@ void MainWindow::plotLabelSelected(bool b) {
         QCPAbstractItem* item = ui->plot->selectedItems().at(0);
         qDebug() << "plotLabelSelected : " << item << " property id " << item->property("id");
         contextMenu = new QMenu(this);
+        connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuTriggered(QAction*)));
         QVariant plotId = item->property("id");
         contextMenu->setProperty("id", plotId);
         yaspGraph* yGraph = graphs[plotId.toInt()];

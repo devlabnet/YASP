@@ -2,5 +2,8 @@
 
 yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine)
     : id(id), infoGraph(g), infoText(info), refLine(rLine) {
+    yOffset = 0;
+    yMult = 1.0;
+    yAxis = 0;
 }
 

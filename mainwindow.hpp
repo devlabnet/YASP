@@ -68,7 +68,8 @@ public:
     ~MainWindow();
 
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private slots:
     void replot();
@@ -108,7 +109,7 @@ private slots:
     void on_actionShowWidgets_triggered();
     void on_bgColorButton_pressed();
     void on_plotsInfoRadio_clicked(bool checked);
-
+    void contextMenuTriggered(QAction*);
     void on_scrollButton_clicked(bool checked);
 
     void on_logPlotButton_clicked();
@@ -126,14 +127,18 @@ private:
                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                           QColor("#ff00aa")};
 
-    enum WheelAction { wheelZoom   = 0x01,
-                       wheelShift   = 0x02
+    enum WheelAction { wheelZoom        = 0x01,
+                       wheelScalePlot   = 0x02
                      };
     WheelAction wheelState = wheelZoom;
     enum mouseAction { mouseMove   = 0x01,
                        mouseShift   = 0x02
                      };
     mouseAction mouseState = mouseMove;
+    void resetMouseWheelState();
+    bool graphDataUpdating = false;
+    QCPItemText* infoModeLabel;
+
     bool mousePressed = false;
     QSharedPointer<QCPAxisTickerText> textTicker;
     QMap<int, yaspGraph*> graphs;
@@ -173,7 +178,7 @@ private:
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     yaspGraph *addGraph(int id);
-    void updateLabel(int id, QString info);
+    void updateLabel(int id, QString info = "");
     bool isColor(QString str);
     // Setup the QCustomPlot
     void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
@@ -187,10 +192,19 @@ private:
     void updateTracer(int pX);
     void saveDataPlot(QCPGraph* g);
     void shiftPlot(int pY);
+    void scalePlot(int numDeg);
     bool startShiftPlot = false;
+    bool startScalePlot = false;
     double lastPosY = 0;
     int lastY = 0;
+    double scaleMult = 1.0;
     yaspGraph* workingGraph = nullptr;
+
+    double round(long double number, int precision) {
+      int decimals = std::pow(10, precision);
+      return (std::round(number * decimals)) / decimals;
+    }
+
 };
 
 

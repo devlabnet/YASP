@@ -24,6 +24,22 @@ public:
     double offset() {
         return yOffset;
     }
+    void setMult(double m) {
+//        double scale = (double)numDeg / 1000.0;
+        yMult = yMult * m;
+//        yOffset *= m;
+//        yAxis *= m;
+//        qDebug() << "scale: " << scale << " mult: " << yMult;
+//        if (numDeg < 0) {
+//            yMult = yMult * scale;
+//        } else {
+//            yMult = yMult / scale;
+//        }
+    }
+
+    double mult() {
+        return yMult;
+    }
     void update(int dpn) {
         refLine->start->setCoords(0, yAxis);
         refLine->end->setCoords(dpn, yAxis);
@@ -33,8 +49,9 @@ private:
     QCPGraph* infoGraph;
     QCPItemText* infoText;
     QCPItemLine* refLine;
-    double yOffset = 0;
-    double yAxis = 0;
+    double yOffset;
+    double yMult;
+    double yAxis;
 };
 
 #endif // YASPGRAPH_H
