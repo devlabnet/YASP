@@ -574,6 +574,8 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             info += QString::number(val);
             info +=  + " offset: ";
             info += QString::number(yGraph->offset());
+            info +=  + " axis: ";
+            info += QString::number(yGraph->axis());
             info +=  + " mult: ";
             info += QString::number(yGraph->mult());
             updateLabel(plotId, info);
