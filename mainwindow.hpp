@@ -138,7 +138,7 @@ private:
     void resetMouseWheelState();
     bool graphDataUpdating = false;
     QCPItemText* infoModeLabel;
-
+    QCP::Interactions plotInteractions;
     bool mousePressed = false;
     QSharedPointer<QCPAxisTickerText> textTicker;
     QMap<int, yaspGraph*> graphs;

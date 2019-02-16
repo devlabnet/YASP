@@ -6,41 +6,58 @@ class yaspGraph
 {
 public:
     yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine);
+    //-----------------------------------------------------------------------------------------
     QCPItemText* info() {
         return infoText;
     }
+    //-----------------------------------------------------------------------------------------
     QCPItemLine* rLine() {
         return refLine;
     }
+    //-----------------------------------------------------------------------------------------
     QCPGraph* plot() {
         return infoGraph;
     }
+    //-----------------------------------------------------------------------------------------
     void setOffset(int dpn, double o) {
         yOffset = yOffset + o;
-        yAxis = refLine->start->coords().y() + o;
+        qDebug() << "yOffset " << yOffset << " o-> " << o;
+        QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
+        for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
+            it->value /= yMult;
+            it->value += o;
+            it->value *= yMult;
+//            it->value += o*yMult;
+
+        }
+        yAxis /= yMult;
+        yAxis += o;
+        yAxis *= yMult;
         refLine->start->setCoords(0, yAxis);
         refLine->end->setCoords(dpn, yAxis);
     }
+    //-----------------------------------------------------------------------------------------
     double offset() {
         return yOffset;
     }
-    void setMult(double m) {
-//        double scale = (double)numDeg / 1000.0;
+    //-----------------------------------------------------------------------------------------
+    void setMult(int dpn, double m) {
         yMult = yMult * m;
-//        yOffset *= m;
-//        yAxis *= m;
-//        qDebug() << "scale: " << scale << " mult: " << yMult;
-//        if (numDeg < 0) {
-//            yMult = yMult * scale;
-//        } else {
-//            yMult = yMult / scale;
-//        }
+        qDebug() << "yMult " << yMult << " m-> " << m;
+        QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
+        for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
+            it->value *= m;
+        }
+        yAxis *= m;
+        refLine->start->setCoords(0, yAxis);
+        refLine->end->setCoords(dpn, yAxis);
     }
-
+    //-----------------------------------------------------------------------------------------
     double mult() {
         return yMult;
     }
-    void update(int dpn) {
+    //-----------------------------------------------------------------------------------------
+    void updateRefLine(int dpn) {
         refLine->start->setCoords(0, yAxis);
         refLine->end->setCoords(dpn, yAxis);
     }

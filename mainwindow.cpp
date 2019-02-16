@@ -463,7 +463,7 @@ void MainWindow::on_stopPlotButton_clicked() {
         ticksXTimer.stop();
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
+        //ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
     } else {                                                                              // Start plotting
         // Start updating plot timer
         ticksXTimer.start();
@@ -471,7 +471,7 @@ void MainWindow::on_stopPlotButton_clicked() {
         ticksXTime.restart();
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+        //ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     }
 }
 
@@ -552,6 +552,7 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
 /* Slot for new data from serial port . Data is comming in QStringList and needs to be parsed */
 /******************************************************************************************************************/
 void MainWindow::onNewDataArrived(QStringList newData) {
+    if (graphDataUpdating) return;
     Q_ASSERT(newData.size() > 0);
     int plotId = newData.at(0).toInt();
     if ((plotId < 0) || (plotId > 9)) {
@@ -559,7 +560,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
         return;
     }
     yaspGraph* yGraph = getGraph(plotId);
-    //qDebug() << "NEW DATA : " << plotId << " --> " << newData;
+//    qDebug() << "NEW DATA : " << plotId << " --> " << newData;
     if (plotting) {
         int dataListSize = newData.size();                                                    // Get size of received list
         dataPointNumber++;
@@ -578,7 +579,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             updateLabel(plotId, info);
 //            qDebug() << yGraph->offset();
             plot->addData(dataPointNumber, val );
-            yGraph->update(dataPointNumber);
+            yGraph->updateRefLine(dataPointNumber);
             if (logFile != nullptr) {
                 //                if (plot->isDisplayed()) {
                 //                    streamLog << plot->getName() << ";" << dataPointNumber << ";" << val << ";" << time << "\n";
@@ -814,7 +815,7 @@ void MainWindow::doMeasure() {
 
 /******************************************************************************************************************/
 void MainWindow::shiftPlot(int pY) {
-    if (graphDataUpdating) return;
+//    if (graphDataUpdating) return;
     double posY = ui->plot->yAxis->pixelToCoord(pY);
     Q_ASSERT(workingGraph);
     QCPGraph* gr = workingGraph->plot();
@@ -824,12 +825,12 @@ void MainWindow::shiftPlot(int pY) {
         startShiftPlot = false;
     } else {
         double offset = posY - lastPosY;
-        workingGraph->setOffset(dataPointNumber, offset);
         graphDataUpdating = true;
-        QSharedPointer<QCPGraphDataContainer> gData = gr->data();
-        for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
-            it->value += offset;
-        }
+        workingGraph->setOffset(dataPointNumber, offset);
+//        QSharedPointer<QCPGraphDataContainer> gData = gr->data();
+//        for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
+//            it->value += offset;
+//        }
         ui->plot->replot();
         graphDataUpdating = false;
 
@@ -840,43 +841,43 @@ void MainWindow::shiftPlot(int pY) {
 
 /******************************************************************************************************************/
 void MainWindow::scalePlot(int numDeg) {
-    if (graphDataUpdating) return;
+//    if (graphDataUpdating) return;
     if (numDeg == 0) return;
     if (startScalePlot) {
         scaleMult = 1.0;
         startScalePlot = false;
     }
     Q_ASSERT(workingGraph);
-    qDebug() << "numDeg: " << numDeg;
     double scale = 1 + ((double)numDeg / 1000.0);
-//    scaleMult = 1 + scale;
-    double yMult;
-    scaleMult *= scale;
-//    scaleMult = round(scaleMult,2);
-    if (scaleMult < 0.1) return;
-//    if (numDeg > 0) {
-//        yMult = workingGraph->mult() * scale;
-//    } else {
-//        yMult = workingGraph->mult() / scale;
-//    }
-    qDebug() << "scale: " << scale << " mult: " << scaleMult;
+////    scaleMult = 1 + scale;
+//    double yMult;
+//    scaleMult *= scale;
+//    qDebug() << "numDeg: " << numDeg << " scale: " << scale << " scaleMult: " << scaleMult;
+////    scaleMult = round(scaleMult,2);
+//    if (scaleMult < 0.1) return;
+////    if (numDeg > 0) {
+////        yMult = workingGraph->mult() * scale;
+////    } else {
+////        yMult = workingGraph->mult() / scale;
+////    }
+//    qDebug() << "scale: " << scale << " mult: " << scaleMult;
 
-//    scaleDegs += numDeg;
-    //double posY = ui->plot->yAxis->pixelToCoord(pY);
-    double m = (1 / workingGraph->mult()) * scaleMult;
-    workingGraph->setMult(m);
+////    scaleDegs += numDeg;
+//    //double posY = ui->plot->yAxis->pixelToCoord(pY);
+//    double m = (1 / workingGraph->mult()) * scaleMult;
     graphDataUpdating = true;
-    QCPGraph* gr = workingGraph->plot();
-    QSharedPointer<QCPGraphDataContainer> gData = gr->data();
-    for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
-//        if (numDeg > 0) {
-//            it->value -= workingGraph->offset();
-            it->value *= m;
-//            it->value += workingGraph->offset();
-//        } else {
-//            it->value /= scale;
-//        }
-    }
+    workingGraph->setMult(dataPointNumber, scale);
+//    QCPGraph* gr = workingGraph->plot();
+//    QSharedPointer<QCPGraphDataContainer> gData = gr->data();
+//    for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
+////        if (numDeg > 0) {
+////            it->value -= workingGraph->offset();
+//            it->value *= m;
+////            it->value += workingGraph->offset();
+////        } else {
+////            it->value /= scale;
+////        }
+//    }
     ui->plot->replot();
     graphDataUpdating = false;
 
