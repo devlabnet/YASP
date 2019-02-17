@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1461</width>
-    <height>875</height>
+    <height>1205</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -440,35 +440,6 @@
              </property>
              <property name="text">
               <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_14">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Expanding</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>10</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="plotsInfoRadio">
-             <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
-             </property>
-             <property name="text">
-              <string>Shows Infos</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
              </property>
             </widget>
            </item>

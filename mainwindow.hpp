@@ -108,7 +108,6 @@ private slots:
     void on_clearTermButton_clicked();
     void on_actionShowWidgets_triggered();
     void on_bgColorButton_pressed();
-    void on_plotsInfoRadio_clicked(bool checked);
     void contextMenuTriggered(QAction*);
     void on_scrollButton_clicked(bool checked);
 
@@ -137,7 +136,7 @@ private:
     mouseAction mouseState = mouseMove;
     void resetMouseWheelState();
     bool graphDataUpdating = false;
-    QCPItemText* infoModeLabel;
+    QCPItemText* infoModeLabel = nullptr;
     QCP::Interactions plotInteractions;
     bool mousePressed = false;
     QSharedPointer<QCPAxisTickerText> textTicker;
@@ -185,7 +184,6 @@ private:
     void openPort();
     void portOpenedSuccess();                                                             // Called when port opens OK
     void closePort();                                                                  // Called when closing the port
-//    void setAutoYRange(double r, bool resetDelta = false);
     void addMessageText(QString data, QString color = "black");
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
