@@ -1267,15 +1267,30 @@ void MainWindow::plotLabelSelected(bool b) {
         connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuTriggered(QAction*)));
         QVariant plotId = item->property("id");
         contextMenu->setProperty("id", plotId);
+        contextMenu->setAttribute(Qt::WA_TranslucentBackground);
+        contextMenu->setStyleSheet("QMenu {border-radius:16px;}");
         yaspGraph* yGraph = graphs[plotId.toInt()];
         Q_ASSERT(yGraph);
+        QLabel* menuTitle = new QLabel("plot " + yGraph->plot()->name(), contextMenu);
+        menuTitle->setAlignment(Qt::AlignCenter);
+        QString styleTitle = "color:" + yGraph->plot()->pen().color().name() + ";"
+                + "background-color:" + bgColor.name() + ";"
+                + "font:bold;"
+                + "padding:8px;";
+//                + "border-radius:8px;";
+//        + "border-width:2px;border-style:solid;border-color:black;font:bold;padding:2px;";
+        menuTitle->setStyleSheet(styleTitle);
+        QWidgetAction *LabelAction= new QWidgetAction(contextMenu);
+        LabelAction->setDefaultWidget(menuTitle);
+        contextMenu->addAction(LabelAction);
         QPen pen = yGraph->plot()->pen();
         pen.setWidth(1);
         pen.setDashPattern(plotDashPattern);
         yGraph->plot()->setPen(pen);
         yGraph->info()->setSelectedPen(pen);
         yGraph->info()->setSelectedColor(pen.color());
-        contextMenu->addAction("Color", this, SLOT(doMenuPlotColorAction()));
+        QAction* action = contextMenu->addAction("Color", this, SLOT(doMenuPlotColorAction()));
+        action->setIcon(QIcon(":/Icons/Icons/plotter0.ico"));
         plotShowHideAction = contextMenu->addAction("Hide", this, SLOT(doMenuPlotShowHideAction()));
         if (yGraph->plot()->visible()) {
             plotShowHideAction->setText("Hide");
