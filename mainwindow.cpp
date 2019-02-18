@@ -781,8 +781,9 @@ void MainWindow::on_resetPlotButton_clicked() {
     ui->plot->deselectAll();
     numberOfPoints = NUMBER_OF_POINTS_DEF;
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
-    ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
-    on_spinPoints_valueChanged(numberOfPoints);
+//    ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
+//    on_spinPoints_valueChanged(numberOfPoints);
+    ui->spinPoints->setValue(numberOfPoints);
     ticksXTimer.setInterval(numberOfPoints / 10);
     qDebug() << "on_resetPlotButton_clicked : " << selectedPlotId << " / " << ui->plot->selectedItems().size();
     qDebug() << "on_resetPlotButton_clicked : " <<  ui->plot->selectedItems().size();
@@ -797,6 +798,7 @@ void MainWindow::on_resetPlotButton_clicked() {
 void MainWindow::on_spinPoints_valueChanged(int arg1) {
     numberOfPoints = arg1;
     ticksXTimer.setInterval(numberOfPoints / 10);
+    ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
     ui->plot->replot();
 }
 
@@ -1086,8 +1088,9 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     startShiftPlot = false;
     mouseButtonState = Qt::NoButton;
     ui->statusBar->showMessage("release");
+    ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     if (plotting) {
-        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+//        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     } else {
 //        if (tracer) {
 //            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
@@ -1125,9 +1128,25 @@ void MainWindow::selectionChangedByUserInPlot() {
 /******************************************************************************************************************/
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     if (wheelState == wheelZoom) {
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
         ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
-        if ((plotting == false) && (mouseButtonState == Qt::RightButton)) {
-            ui->plot->axisRect()->setRangeZoom(Qt::Horizontal);
+        if (mouseButtonState == Qt::RightButton) {
+            if (plotting) {
+//                ui->plot->axisRect()->setRangeZoomAxes(nullptr, nullptr);
+                ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
+                QPoint numDegrees = event->angleDelta();
+                if (numDegrees.y() == 0) return;
+//                qDebug() << "0000 numDegrees " << numDegrees;
+                int inc = numberOfPoints / 100;
+                if (numDegrees.y() > 0) {
+                    ui->spinPoints->setValue(ui->spinPoints->value() + inc);
+                } else {
+                    ui->spinPoints->setValue(ui->spinPoints->value() - inc);
+                }
+//                ui->plot->axisRect()->setRangeZoom(Qt::Horizontal);
+            } else {
+                ui->plot->axisRect()->setRangeZoom(Qt::Horizontal);
+            }
         }
         updateTracer(event->pos().x());
     } else if (wheelState == wheelScalePlot) {
