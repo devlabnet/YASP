@@ -141,6 +141,7 @@ private:
     Qt::MouseButton mouseButtonState;
     QSharedPointer<QCPAxisTickerText> textTicker;
     QMap<int, yaspGraph*> graphs;
+    QMap<int, int> pointTime;
     yaspGraph* getGraph(int id);
     QVector<qreal> plotDashPattern;
     QVector<qreal> rLineDashPattern;
@@ -189,7 +190,7 @@ private:
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
     void updateTracer(int pX);
-    void saveDataPlot(QCPGraph* g);
+    void saveDataPlot(yaspGraph* yGraph);
     void shiftPlot(int pY);
     void scalePlot(int numDeg);
     bool startShiftPlot = false;

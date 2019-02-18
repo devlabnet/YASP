@@ -550,7 +550,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
     }
     yaspGraph* yGraph = getGraph(plotId);
 //    qDebug() << "NEW DATA : " << plotId << " --> " << newData;
-    if (plotting) {
+    if (true) {
         int dataListSize = newData.size();                                                    // Get size of received list
         dataPointNumber++;
         if (dataListSize > 1) {
@@ -567,6 +567,8 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             info += QString::number(yGraph->mult());
             updateLabel(plotId, info);
             plot->addData(dataPointNumber, val );
+//             qDebug() << "ADD DATA : " << plotId << " --> " << dataPointNumber << " / " << ticksXTime.elapsed();
+            pointTime.insert(dataPointNumber, ticksXTime.elapsed());
             yGraph->updateRefLine(dataPointNumber);
             if (logFile != nullptr) {
                 //                if (plot->isDisplayed()) {
@@ -658,7 +660,7 @@ bool MainWindow::isNumericChar(char cc) {
 void MainWindow::readData() {
     if (serialPort->bytesAvailable()) {                                                    // If any bytes are available
         data = serialPort->readAll();         // Read all data in QByteArray
-        if (!updateTimer.isActive()) return;
+//        if (!updateTimer.isActive()) return;
         if(!data.isEmpty()) {                                                             // If the byte array is not empty
             char *temp = data.data();
             // Get a '\0'-terminated char* to the data
@@ -869,7 +871,6 @@ void MainWindow::doMenuPlotColorAction() {
         ui->plot->replot();
     }
     resetMouseWheelState();
-
 }
 
 /******************************************************************************************************************/
@@ -920,8 +921,14 @@ void MainWindow::doMenuPlotShowHideAction() {
 }
 
 //*******************************************************************************************/
-void MainWindow::saveDataPlot(QCPGraph* g) {
-    qDebug() << "Graph Data: " << g->data();
+void MainWindow::saveDataPlot(yaspGraph* yGraph) {
+    QCPGraph* g = yGraph->plot();
+    if (!g->visible()) return;
+    infoModeLabel->setText(yGraph->plot()->name() + " --> SAVE MODE");
+    infoModeLabel->setColor(yGraph->plot()->pen().color());
+//    plotting = false;
+    qDebug() << "saveDataPlot Graph Data: " << g->data();
+    int nop = dataPointNumber;
 //    QCPDataMap* map = g->data();
 //    // Iterate over Plot Data
 //    if (map->size()) {
@@ -929,51 +936,38 @@ void MainWindow::saveDataPlot(QCPGraph* g) {
 //        Q_ASSERT(measureGraphId >= 0);
 //        Q_ASSERT(measureGraphId < 9);
 //        qDebug() << "GRAPH ID ---> " << measureGraphId;
-//        QString plotName = plotsVector[measureGraphId]->getName();
-//        if (logData == nullptr) {
-//            QString fileName = QFileDialog::getSaveFileName(this, tr("Log Plot"),
-//                                       plotName,
-//                                       tr("Data (*.csv)"));
-//            qDebug() << "Log DATA : " << fileName;
-//            logData = new QFile(fileName);
-//            if (!logData->open(QIODevice::WriteOnly)) {
-//                QMessageBox::information(this, tr("Unable to open file"),
-//                                         logData->errorString());
-//                logData = nullptr;
-//                return;
-//            }
-//            qDebug() << "Log DATA Opened : " << logData->fileName();
-//            streamData.setDevice(logData);
-//            QLocale locale = QLocale("fr_FR");
-//            locale.setNumberOptions(QLocale::OmitGroupSeparator);
-//            //QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-//            streamData.setLocale(locale);
-
-//            // Set Headers
-////            streamData << "NAME" << ";" << "TIME" << ";" << "VALUE" << "\n";
-//            streamData << "TIME" << ";" << "VALUE" << "\n";
-//            QCPDataMap::const_iterator it = map->constBegin();
-//            while (it != map->constEnd()) {
-//                QCPData data =  it.value();
-////                streamData << plotName << ";" << data.key << ";" << data.value  << "\n";
-//                streamData << data.key << ";" << data.value  << "\n";
-//                ++it;
-//            }
-//        }
-//       qDebug() << "Close Log DATA : " << logData->fileName();
-//       logData->close();
-//       delete logData;
-//       logData = nullptr;
+        QString plotName = g->name();
+        if (logData == nullptr) {
+            QString fileName = QFileDialog::getSaveFileName(this, tr("Log Plot"),
+                                       plotName,
+                                       tr("Data (*.csv)"));
+            qDebug() << "Log DATA : " << fileName;
+            logData = new QFile(fileName);
+            if (!logData->open(QIODevice::WriteOnly)) {
+                QMessageBox::information(this, tr("Unable to open file"),
+                                         logData->errorString());
+                logData = nullptr;
+                return;
+            }
+            qDebug() << "Log DATA Opened : " << logData->fileName();
+            streamData.setDevice(logData);
+            yGraph->save(streamData, pointTime, nop);
+        }
+       qDebug() << "Close Log DATA : " << logData->fileName();
+       logData->close();
+       delete logData;
+       logData = nullptr;
 //    }
+//       plotting = true;
 }
 
 /******************************************************************************************************************/
 void MainWindow::saveSelectedGraph() {
-    QList<QCPGraph*> sg = ui->plot->selectedGraphs();
-    qDebug() << "Selected Graph: " << sg;
-    QCPGraph* g = sg.at(0);
-    if (!g->visible()) return;
-    saveDataPlot(g);
+    Q_ASSERT(selectedPlotId >= 0);
+    yaspGraph* yGraph = graphs[selectedPlotId];
+    Q_ASSERT(yGraph);
+    saveDataPlot(yGraph);
+    resetMouseWheelState();
 }
 
 /******************************************************************************************************************/
@@ -1327,6 +1321,9 @@ void MainWindow::plotLabelSelected(bool b) {
         action->setIcon(QIcon(":/Icons/Icons/icons8-height-48.png"));
         action = contextMenu->addAction("Shift", this, SLOT(doMenuPlotShiftAction()));
         action->setIcon(QIcon(":/Icons/Icons/icons8-shift-48.png"));
+        action = contextMenu->addAction("Save", this, SLOT(saveSelectedGraph()));
+        action->setIcon(QIcon(":/Icons/Icons/icons8-save-48.png"));
+
         ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     } else {
         if (contextMenu) {

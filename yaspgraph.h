@@ -19,6 +19,23 @@ public:
         return infoGraph;
     }
     //-----------------------------------------------------------------------------------------
+    void save(QTextStream& streamData, QMap<int, int>& pointTime, int nop) {
+        QLocale locale = QLocale("fr_FR");
+        locale.setNumberOptions(QLocale::OmitGroupSeparator);
+        //QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+        streamData.setLocale(locale);
+         // Set Headers
+//            streamData << "NAME" << ";" << "TIME" << ";" << "VALUE" << "\n";
+        streamData << "TIME" << ";" << "VALUE" << "\n";
+        QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
+        qDebug() << "SAVE PLOT: " << nop << " /data: " << gData->size() << " /Ticks: " << pointTime.size();
+        for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
+            if (it->key > nop) return;
+//            streamData << pointTime.value(it->key) << ";" << it->value  << "\n";
+            streamData << it->key << ";" << it->value  << "\n";
+        }
+    }
+    //-----------------------------------------------------------------------------------------
     void setOffset(int dpn, double o) {
 //        qDebug() << "yOffset " << yOffset << " o-> " << o;
         QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
