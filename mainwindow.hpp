@@ -144,6 +144,7 @@ private:
     yaspGraph* getGraph(int id);
     QVector<qreal> plotDashPattern;
     QVector<qreal> rLineDashPattern;
+    int selectedPlotId = -1;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
     int dataPointNumber;                                                                  // Keep track of data points

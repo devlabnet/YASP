@@ -233,6 +233,7 @@ void MainWindow::updateLabel(int id, QString info) {
     Q_ASSERT(yGraph);
     info = yGraph->plot()->name() + " -> " + info;
     QColor color = yGraph->plot()->pen().color();
+//    if (id ==1) qDebug() << "updateLabel " << id << " / " << info << " / " << color;
     QFont font;
     font.setPointSize(7);
     font.setStyleHint(QFont::Monospace);
@@ -247,11 +248,20 @@ void MainWindow::updateLabel(int id, QString info) {
     labelPos.setX(pixelsWide + textLabel->padding().left()+ textLabel->padding().right() + ui->plot->yAxis->axisRect()->left() + 70 );
     labelPos.setY( (id+1) * (5 + (pixelsHigh + textLabel->padding().top() + textLabel->padding().bottom())));
     textLabel->setColor(color);
+//    textLabel->pen().setColor(color);
+//    textLabel->selectedPen().setColor(color);
+    textLabel->setSelectedColor(color);
+    textLabel->setSelectedPen(yGraph->plot()->pen());
+
     textLabel->position->setCoords(labelPos.x(), labelPos.y());
     textLabel->setText(info);
     QPen pen(color, 0.5);
     pen.setDashPattern(rLineDashPattern);
     yGraph->rLine()->setPen(pen);
+    yGraph->info()->pen().setColor(color);
+    if (selectedPlotId == id) {
+        infoModeLabel->setColor(yGraph->plot()->pen().color());
+    }
 }
 
 /******************************************************************************************************************/
@@ -369,7 +379,8 @@ void MainWindow::portOpenedSuccess() {
     qreal pixelsWide = fm.width(infoModeLabel->text());
     qDebug() << "pixelsWide " << pixelsWide;
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
-    resetMouseWheelState();
+    plotLabelSelected(false);
+//    resetMouseWheelState();
 
     qDebug() << "ui->plot->geometry: " << ui->plot->geometry();
     updateTimer.start();
@@ -455,6 +466,7 @@ void MainWindow::addTickX() {
 /* Stop Plot Button */
 /******************************************************************************************************************/
 void MainWindow::on_stopPlotButton_clicked() {
+    ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     if (plotting) {                                                                        // Stop plotting
         // Stop updating plot timer
         updateTimer.stop();
@@ -754,11 +766,28 @@ void MainWindow::on_saveJPGButton_clicked() {
 /* Reset the zoom of the plot to the initial values */
 /******************************************************************************************************************/
 void MainWindow::on_resetPlotButton_clicked() {
+//    if (selectedPlotId >= 0) {
+//        yaspGraph* yGraph = graphs[selectedPlotId];
+//        Q_ASSERT(yGraph);
+//        qDebug() << "!!!!!!!!!!!!!!!!!!!!!! " << selectedPlotId;
+//        QPen pen(Qt::red, 0);
+//        yGraph->info()->setSelectedPen(pen);
+//        yGraph->info()->setColor(Qt::red);
+//    }
+//    ui->plot->selectedItems().clear();
+//    ui->plot->selectedItems().removeFirst();
+//    plotLabelSelected(false);
+    ui->plot->deselectAll();
     numberOfPoints = NUMBER_OF_POINTS_DEF;
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
     ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
     on_spinPoints_valueChanged(numberOfPoints);
     ticksXTimer.setInterval(numberOfPoints / 10);
+    qDebug() << "on_resetPlotButton_clicked : " << selectedPlotId << " / " << ui->plot->selectedItems().size();
+    qDebug() << "on_resetPlotButton_clicked : " <<  ui->plot->selectedItems().size();
+    selectionChangedByUserInPlot();
+
+//    resetMouseWheelState();
 }
 
 /******************************************************************************************************************/
@@ -849,7 +878,7 @@ void MainWindow::doMenuPlotShiftAction() {
     workingGraph = yGraph;
     mouseState = mouseShift;
     infoModeLabel->setText(yGraph->plot()->name() + " -> SHIFT MODE");
-    infoModeLabel->setColor(Qt::red);
+    infoModeLabel->setColor(yGraph->plot()->pen().color());
     QFontMetricsF fm(infoModeLabel->font());
     qreal pixelsWide = fm.width(infoModeLabel->text());
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
@@ -864,20 +893,22 @@ void MainWindow::doMenuPlotColorAction() {
     Q_ASSERT(yGraph);
     qDebug() << "doMenuPlotColorAction: " << plotId;
     infoModeLabel->setText(yGraph->plot()->name() + " --> COLOR MODE");
-    infoModeLabel->setColor(Qt::red);
+    infoModeLabel->setColor(yGraph->plot()->pen().color());
     QFontMetricsF fm(infoModeLabel->font());
     qreal pixelsWide = fm.width(infoModeLabel->text());
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
     QColor color = QColorDialog::getColor(Qt::white, nullptr, "plot color");
-    qDebug() << "doMenuPlotColorAction: " << color;
-    QPen pen = yGraph->plot()->pen();
-    pen.setColor(color);
-    yGraph->plot()->setPen(pen);
-    yGraph->info()->setColor(color);
-    yGraph->info()->setSelectedPen(QPen(color));
-    yGraph->info()->setSelectedColor(color);
-    yGraph->rLine()->setPen(QPen(pen.color()));
-    ui->plot->replot();
+    if (color.isValid()) {
+        qDebug() << "doMenuPlotColorAction: " << color;
+        QPen pen = yGraph->plot()->pen();
+        pen.setColor(color);
+        yGraph->plot()->setPen(pen);
+        yGraph->info()->setColor(color);
+        yGraph->info()->setSelectedPen(QPen(color));
+        yGraph->info()->setSelectedColor(color);
+        yGraph->rLine()->setPen(QPen(pen.color()));
+        ui->plot->replot();
+    }
 }
 
 /******************************************************************************************************************/
@@ -889,7 +920,7 @@ void MainWindow::doMenuPlotScaleAction() {
     Q_ASSERT(yGraph);
     workingGraph = yGraph;
     infoModeLabel->setText(yGraph->plot()->name() + " --> SCALE MODE");
-    infoModeLabel->setColor(Qt::red);
+    infoModeLabel->setColor(yGraph->plot()->pen().color());
     QFontMetricsF fm(infoModeLabel->font());
     qreal pixelsWide = fm.width(infoModeLabel->text());
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
@@ -911,13 +942,13 @@ void MainWindow::doMenuPlotShowHideAction() {
         yGraph->rLine()->setVisible(false);
         plotShowHideAction->setText("show");
         infoModeLabel->setText(yGraph->plot()->name() + " --> HIDE MODE");
-        infoModeLabel->setColor(QColor(0, 255, 255));
+        infoModeLabel->setColor(yGraph->plot()->pen().color());
     } else {
         yGraph->plot()->setVisible(true);
         yGraph->rLine()->setVisible(true);
         plotShowHideAction->setText("Hide");
         infoModeLabel->setText(yGraph->plot()->name() + " --> SHOW MODE");
-        infoModeLabel->setColor(QColor(0, 255, 255));
+        infoModeLabel->setColor(yGraph->plot()->pen().color());
     }
     QFontMetricsF fm(infoModeLabel->font());
     qreal pixelsWide = fm.width(infoModeLabel->text());
@@ -1198,16 +1229,18 @@ void MainWindow::on_actionShowWidgets_triggered()
 /******************************************************************************************************************/
 void MainWindow::on_bgColorButton_pressed() {
     bgColor = QColorDialog::getColor(bgColor, this, "Select Background Color");
-    ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
-    ui->plot->setBackground(QBrush(bgColor));   // Background for the plot area
-    if (tracer) {
-        if (bgColor.lightness() > 128) {
-            tracer->setPen(QPen(Qt::black));
-        } else {
-            tracer->setPen(QPen(Qt::white));
+    if (bgColor.isValid()) {
+        ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
+        ui->plot->setBackground(QBrush(bgColor));   // Background for the plot area
+        if (tracer) {
+            if (bgColor.lightness() > 128) {
+                tracer->setPen(QPen(Qt::black));
+            } else {
+                tracer->setPen(QPen(Qt::white));
+            }
         }
+        ui->plot->replot();
     }
-    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -1266,6 +1299,7 @@ void MainWindow::plotLabelSelected(bool b) {
         contextMenu = new QMenu(this);
         connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuTriggered(QAction*)));
         QVariant plotId = item->property("id");
+        selectedPlotId = plotId.toInt();
         contextMenu->setProperty("id", plotId);
         contextMenu->setAttribute(Qt::WA_TranslucentBackground);
         contextMenu->setStyleSheet("QMenu {border-radius:16px;}");
@@ -1295,11 +1329,11 @@ void MainWindow::plotLabelSelected(bool b) {
         if (yGraph->plot()->visible()) {
             plotShowHideAction->setText("Hide");
             infoModeLabel->setText(yGraph->plot()->name() + " --> SHOW MODE");
-            infoModeLabel->setColor(QColor(0, 255, 255));
+            infoModeLabel->setColor(yGraph->plot()->pen().color());
         } else {
             plotShowHideAction->setText("Show");
             infoModeLabel->setText(yGraph->plot()->name() + " --> HIDE MODE");
-            infoModeLabel->setColor(QColor(0, 255, 255));
+            infoModeLabel->setColor(yGraph->plot()->pen().color());
         }
         QFontMetricsF fm(infoModeLabel->font());
         qreal pixelsWide = fm.width(infoModeLabel->text());
@@ -1312,6 +1346,7 @@ void MainWindow::plotLabelSelected(bool b) {
     } else {
         if (contextMenu) {
             QVariant plotId = contextMenu->property("id");
+            qDebug() << "xxxxxxxxxxxxxxxxxxxxxxxx " << plotId;
             yaspGraph* yGraph = graphs[plotId.toInt()];
             Q_ASSERT(yGraph);
             QPen pen = yGraph->plot()->pen();
@@ -1319,9 +1354,11 @@ void MainWindow::plotLabelSelected(bool b) {
             pen.setStyle(Qt::SolidLine);
             yGraph->plot()->setPen(pen);
             yGraph->info()->setSelectedPen(Qt::NoPen);
+            qDebug() << "xxxxxxxxxxxxxxxxxxxxxxxx";
         }
         delete contextMenu;
         contextMenu = nullptr;
+        selectedPlotId = -1;
         ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     }
 }
