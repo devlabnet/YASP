@@ -135,7 +135,6 @@ private:
                      };
     mouseAction mouseState = mouseMove;
     void resetMouseWheelState();
-    bool graphDataUpdating = false;
     QCPItemText* infoModeLabel = nullptr;
     QCP::Interactions plotInteractions;
 //    bool mousePressed = false;

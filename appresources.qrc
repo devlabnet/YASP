@@ -7,6 +7,12 @@
         <file>Icons/plotter2.ico</file>
         <file>Icons/oscillo.ico</file>
         <file>Icons/Oscilloscope-128.png</file>
+        <file>Icons/icons8-hide-48.png</file>
+        <file>Icons/icons8-eye-48.png</file>
+        <file>Icons/icons8-paint-palette-48.png</file>
+        <file>Icons/icons8-height-48.png</file>
+        <file>Icons/icons8-shift-48.png</file>
+        <file>Icons/icons8-search-480.png</file>
     </qresource>
     <qresource prefix="/StyleSheet">
         <file>StyleSheet/style.qss</file>
