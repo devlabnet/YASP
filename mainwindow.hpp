@@ -138,7 +138,8 @@ private:
     bool graphDataUpdating = false;
     QCPItemText* infoModeLabel = nullptr;
     QCP::Interactions plotInteractions;
-    bool mousePressed = false;
+//    bool mousePressed = false;
+    Qt::MouseButton mouseButtonState;
     QSharedPointer<QCPAxisTickerText> textTicker;
     QMap<int, yaspGraph*> graphs;
     yaspGraph* getGraph(int id);

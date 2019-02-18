@@ -466,19 +466,20 @@ void MainWindow::addTickX() {
 /* Stop Plot Button */
 /******************************************************************************************************************/
 void MainWindow::on_stopPlotButton_clicked() {
-    ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+    //ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     if (plotting) {                                                                        // Stop plotting
+        ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
         // Stop updating plot timer
         updateTimer.stop();
-        ticksXTimer.stop();
+//        ticksXTimer.stop();
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
         //ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems  | QCP::iSelectAxes | QCP::iSelectPlottables);
     } else {                                                                              // Start plotting
         // Start updating plot timer
-        ticksXTimer.start();
+//        ticksXTimer.start();
         updateTimer.start();
-        ticksXTime.restart();
+//        ticksXTime.restart();
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
         //ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
@@ -1069,9 +1070,11 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
             updateTracer(event->pos().x());
         }
     } else {
-        if (mousePressed) {
-            ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
-            shiftPlot(event->y());
+        if (mouseState == mouseShift) {
+            if (mouseButtonState == Qt::LeftButton) {
+                ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
+                shiftPlot(event->y());
+            }
         }
     }
 }
@@ -1079,8 +1082,9 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
 /******************************************************************************************************************/
 void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     Q_UNUSED(event)
-    mousePressed = false;
+//    mousePressed = false;
     startShiftPlot = false;
+    mouseButtonState = Qt::NoButton;
     ui->statusBar->showMessage("release");
     if (plotting) {
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
@@ -1121,6 +1125,10 @@ void MainWindow::selectionChangedByUserInPlot() {
 /******************************************************************************************************************/
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     if (wheelState == wheelZoom) {
+        ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
+        if ((plotting == false) && (mouseButtonState == Qt::RightButton)) {
+            ui->plot->axisRect()->setRangeZoom(Qt::Horizontal);
+        }
         updateTracer(event->pos().x());
     } else if (wheelState == wheelScalePlot) {
         QPoint numDegrees = event->angleDelta();
@@ -1149,7 +1157,9 @@ void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
 
 /******************************************************************************************************************/
 void MainWindow::onMousePressInPlot(QMouseEvent *event) {
-    mousePressed = true;
+    qDebug() << "onMousePressInPlot " << event->button();
+//    mousePressed = true;
+    mouseButtonState = event->button();
     startShiftPlot = true;
 
     if (tracer) {
