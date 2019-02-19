@@ -82,8 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
     fixedTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples );
     ui->plot->xAxis->setTickPen(QPen(Qt::red, 2));
     ui->plot->xAxis->setTickLength(15);
-    connect(ui->plot->xAxis, SIGNAL(rangeChanged(const QCPRange&, const QCPRange&)),
-            this, SLOT(xAxisRangeChanged(const QCPRange&, const QCPRange&)));
+    connect(ui->plot->xAxis, SIGNAL(rangeChanged(const QCPRange&)), this, SLOT(xAxisRangeChanged(const QCPRange&)));
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(onMouseDoubleClickInPlot(QMouseEvent*)));
@@ -103,10 +102,13 @@ MainWindow::MainWindow(QWidget *parent) :
     p.setColor(QPalette::Background, QColor(144, 238, 144));
     ui->splitter->setPalette(p);
     ui->tabWidget->setCurrentIndex(0);
-    ui->spinPoints->setMinimum(PLOT_TIME_MIN_DEF);
-    ui->spinPoints->setMaximum(PLOT_TIME_MAX_DEF);
-    ui->spinPoints->setSingleStep(PLOT_TIME_STEP_DEF);
-    ui->spinPoints->setValue(PLOT_TIME_DEF);
+    ui->spinDisplayTime->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
+    ui->spinDisplayTime->setMinimum(PLOT_TIME_MIN_DEF);
+    ui->spinDisplayTime->setMaximum(PLOT_TIME_MAX_DEF);
+    ui->spinDisplayTime->setSingleStep(PLOT_TIME_STEP_DEF);
+    ui->spinDisplayTime->setValue(PLOT_TIME_DEF);
+    ui->spinDisplayTime->setDecimals(1);
+    ui->spinDisplayTime->setSuffix(" Secs");
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
     ui->tabWidget->removeTab(1);
@@ -765,7 +767,7 @@ void MainWindow::on_resetPlotButton_clicked() {
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
 
-    ui->spinPoints->setValue(plotTimeInSeconds);
+    ui->spinDisplayTime->setValue(plotTimeInSeconds);
 //    ticksXTimer.setInterval(plotTimeInSeconds / 10);
     selectionChangedByUserInPlot();
 }
@@ -773,7 +775,7 @@ void MainWindow::on_resetPlotButton_clicked() {
 /******************************************************************************************************************/
 /* Spin box controls how many data points are collected and displayed */
 /******************************************************************************************************************/
-void MainWindow::on_spinPoints_valueChanged(double arg1) {
+void MainWindow::on_spinDisplayTime_valueChanged(double arg1) {
     plotTimeInSeconds = arg1;
 //    ticksXTimer.setInterval(plotTimeInSeconds / 10);
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
@@ -1104,11 +1106,11 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
                 ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
                 QPoint numDegrees = event->angleDelta();
                 if (numDegrees.y() == 0) return;
-                int inc = plotTimeInSeconds / 100;
+                double inc = plotTimeInSeconds / 100;
                 if (numDegrees.y() > 0) {
-                    ui->spinPoints->setValue(ui->spinPoints->value() + inc);
+                    ui->spinDisplayTime->setValue(ui->spinDisplayTime->value() + inc);
                 } else {
-                    ui->spinPoints->setValue(ui->spinPoints->value() - inc);
+                    ui->spinDisplayTime->setValue(ui->spinDisplayTime->value() - inc);
                 }
             } else {
                 ui->plot->axisRect()->setRangeZoom(Qt::Horizontal);
@@ -1360,13 +1362,13 @@ void MainWindow::plotLabelSelected(bool b) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::xAxisRangeChanged(const QCPRange& newRange, const QCPRange& oldRange) {
+void MainWindow::xAxisRangeChanged(const QCPRange& range) {
 //    qDebug() << "xAxisRangeChanged: " << oldRange << " -> " << newRange;
 //    qDebug() << "xAxisRangeChanged: " << oldRange.upper - oldRange.lower << " -> " << newRange.upper - newRange.lower;
-//    qDebug() << "fixedTicker->tickStep: " << fixedTicker->tickStep() << " / " << ui->plot->xAxis->ticker()->tickCount();
-    double val = newRange.upper - newRange.lower;
-    if (val != ui->spinPoints->value()) {
-        ui->spinPoints->setValue(val);
+    double val = range.upper - range.lower;
+    if (!qFuzzyCompare(val, ui->spinDisplayTime->value())) {
+//        qDebug() << "fixedTicker->tickStep: " << val;
+        ui->spinDisplayTime->setValue(val);
     }
 }
 

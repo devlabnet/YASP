@@ -50,7 +50,7 @@
 #define UNDEFINED       4
 
 #define DEF_YAXIS_RANGE 1500
-#define PLOT_TIME_DEF 30
+#define PLOT_TIME_DEF 15
 #define PLOT_TIME_MIN_DEF 0.001
 #define PLOT_TIME_MAX_DEF 100000
 #define PLOT_TIME_STEP_DEF 1
@@ -65,7 +65,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -111,8 +111,8 @@ private slots:
     void on_scrollButton_clicked(bool checked);
     void on_logPlotButton_clicked();
     void plotLabelSelected(bool b);
-    void xAxisRangeChanged(const QCPRange& newRange, const QCPRange& oldRange);
-    void on_spinPoints_valueChanged(double arg1);
+    void xAxisRangeChanged(const QCPRange& range);
+    void on_spinDisplayTime_valueChanged(double arg1);
 
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
@@ -150,6 +150,8 @@ private:
     QVector<qreal> plotDashPattern;
     QVector<qreal> rLineDashPattern;
     int selectedPlotId = -1;
+    int numberOfAxes;                                                                     // Number of axes for the plot
+    int STATE;                                                                            // State of recieiving message from port
     double plotTimeInSeconds;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
@@ -158,12 +160,10 @@ private:
 //    QTimer ticksXTimer;
 //    QTime ticksXTime;
     // Timer used for replotting the plot
-    int numberOfAxes;                                                                     // Number of axes for the plot
     QSerialPort *serialPort;                                                              // Serial port; runs in this thread
     QString receivedData;                                                                 // Used for reading from the port
     QString noMsgReceivedData;                                                                 // Used for reading from the port
     QByteArray data;
-    int STATE;                                                                            // State of recieiving message from port
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
     QFile* logFile = nullptr;
@@ -203,10 +203,10 @@ private:
     double scaleMult = 1.0;
     yaspGraph* workingGraph = nullptr;
 
-    double round(long double number, int precision) {
-      int decimals = std::pow(10, precision);
-      return (std::round(number * decimals)) / decimals;
-    }
+//    double round(long double number, int precision) {
+//      int decimals = std::pow(10, precision);
+//      return (std::round(number * decimals)) / decimals;
+//    }
 
 };
 
