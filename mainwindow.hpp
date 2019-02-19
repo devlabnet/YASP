@@ -49,11 +49,11 @@
 #define IN_PLOT_MSG     3
 #define UNDEFINED       4
 
-#define NUMBER_OF_POINTS_DEF 10000
 #define DEF_YAXIS_RANGE 1500
-#define SPIN_MIN_DEF 100
-#define SPIN_MAX_DEF 100000
-#define SPIN_STEP_DEF 1000
+#define PLOT_TIME_DEF 30
+#define PLOT_TIME_MIN_DEF 0.001
+#define PLOT_TIME_MAX_DEF 100000
+#define PLOT_TIME_STEP_DEF 1
 
 namespace Ui {
 class MainWindow;
@@ -102,7 +102,6 @@ private slots:
     void doMenuPlotColorAction();
     void doMenuPlotScaleAction();
     void doMenuPlotShowHideAction();
-    void on_spinPoints_valueChanged(int arg1);                                            // Spin box controls how many data points are collected and displayed
     void on_actionHow_to_use_triggered();
     void on_sendLine_returnPressed();
     void on_clearTermButton_clicked();
@@ -110,9 +109,11 @@ private slots:
     void on_bgColorButton_pressed();
     void contextMenuTriggered(QAction*);
     void on_scrollButton_clicked(bool checked);
-
     void on_logPlotButton_clicked();
     void plotLabelSelected(bool b);
+    void xAxisRangeChanged(const QCPRange& newRange, const QCPRange& oldRange);
+    void on_spinPoints_valueChanged(double arg1);
+
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
@@ -139,7 +140,9 @@ private:
     QCP::Interactions plotInteractions;
 //    bool mousePressed = false;
     Qt::MouseButton mouseButtonState;
-    QSharedPointer<QCPAxisTickerText> textTicker;
+//    QSharedPointer<QCPAxisTickerText> textTicker;
+    QSharedPointer<QCPAxisTickerFixed> fixedTicker;
+
     QMap<int, yaspGraph*> graphs;
 //    QMap<int, int> pointTime;
     double lastDataTtime;
@@ -147,6 +150,7 @@ private:
     QVector<qreal> plotDashPattern;
     QVector<qreal> rLineDashPattern;
     int selectedPlotId = -1;
+    double plotTimeInSeconds;
     bool connected;                                                                       // Status connection variable
     bool plotting;                                                                        // Status plotting variable
     int dataPointNumber;                                                                  // Keep track of data points
@@ -155,13 +159,11 @@ private:
 //    QTime ticksXTime;
     // Timer used for replotting the plot
     int numberOfAxes;                                                                     // Number of axes for the plot
-    double timeBetweenSamples;                                                            // Store time between samples
     QSerialPort *serialPort;                                                              // Serial port; runs in this thread
     QString receivedData;                                                                 // Used for reading from the port
     QString noMsgReceivedData;                                                                 // Used for reading from the port
     QByteArray data;
     int STATE;                                                                            // State of recieiving message from port
-    int numberOfPoints;                                                                 // Number of points plotted
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
     QFile* logFile = nullptr;

@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     connected(false), plotting(false), dataPointNumber(0), numberOfAxes(1),
-    STATE(WAIT_START), numberOfPoints(NUMBER_OF_POINTS_DEF) {
+    STATE(WAIT_START), plotTimeInSeconds(PLOT_TIME_DEF) {
     ui->setupUi(this);
     QLocale::setDefault(QLocale::C);
     createUI();      // Create the UI
@@ -69,18 +69,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->xAxis->setSubTickPen(QPen(gridColor));
     ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->xAxis->setTickLabelColor(gridColor);
-    QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
+    fixedTicker = QSharedPointer<QCPAxisTickerFixed>(new QCPAxisTickerFixed);
+    plotTimeInSeconds = 30;
     ui->plot->xAxis->setTicker(fixedTicker);
     // tick step shall be 0.001 second -> 1 milisecond
     // tick step shall be 0.0001 second -> 0.1 milisecond -> 100 microdeconds
     // tick step shall be 0.00001 second -> 0.01 milisecond -> 10 microdeconds
     fixedTicker->setTickStep(0.00001);
-//    fixedTicker->setTickCount(20);
-//    fixedTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
-    fixedTicker->setTickStepStrategy( QCPAxisTicker::tssReadability);
+    fixedTicker->setTickCount(10);
+    fixedTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
+//    fixedTicker->setTickStepStrategy( QCPAxisTicker::tssReadability);
     fixedTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples );
     ui->plot->xAxis->setTickPen(QPen(Qt::red, 2));
     ui->plot->xAxis->setTickLength(15);
+    connect(ui->plot->xAxis, SIGNAL(rangeChanged(const QCPRange&, const QCPRange&)),
+            this, SLOT(xAxisRangeChanged(const QCPRange&, const QCPRange&)));
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(onMouseDoubleClickInPlot(QMouseEvent*)));
@@ -100,10 +103,10 @@ MainWindow::MainWindow(QWidget *parent) :
     p.setColor(QPalette::Background, QColor(144, 238, 144));
     ui->splitter->setPalette(p);
     ui->tabWidget->setCurrentIndex(0);
-    ui->spinPoints->setMinimum(SPIN_MIN_DEF);
-    ui->spinPoints->setMaximum(SPIN_MAX_DEF);
-    ui->spinPoints->setSingleStep(SPIN_STEP_DEF);
-    ui->spinPoints->setValue(NUMBER_OF_POINTS_DEF);
+    ui->spinPoints->setMinimum(PLOT_TIME_MIN_DEF);
+    ui->spinPoints->setMaximum(PLOT_TIME_MAX_DEF);
+    ui->spinPoints->setSingleStep(PLOT_TIME_STEP_DEF);
+    ui->spinPoints->setValue(PLOT_TIME_DEF);
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
     ui->tabWidget->removeTab(1);
@@ -189,7 +192,7 @@ void MainWindow::cleanGraphs() {
 /******************************************************************************************************************/
 yaspGraph* MainWindow::addGraph(int id) {
         ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
-        ui->plot->xAxis->setRange(0, numberOfPoints);                                      // Set x axis range for specified number of points
+//        ui->plot->xAxis->setRange(0, plotTimeInSeconds);                                      // Set x axis range for specified number of points
         QString plotStr = "Plot " + QString::number(id);
         QCPGraph* graph = ui->plot->addGraph();
         plotDashPattern = QVector<qreal>() << 16 << 4 << 8 << 4;
@@ -208,7 +211,7 @@ yaspGraph* MainWindow::addGraph(int id) {
         pen.setDashPattern(rLineDashPattern);
         axisLine->setPen(pen);
         axisLine->start->setCoords(0,0);
-        axisLine->end->setCoords(numberOfPoints, 0);
+        axisLine->end->setCoords(plotTimeInSeconds, 0);
         yaspGraph* g = new yaspGraph(id, graph, textLabel, axisLine);
         graphs.insert(id, g);
         return g;
@@ -366,6 +369,11 @@ void MainWindow::portOpenedSuccess() {
     plotLabelSelected(false);
 //    qDebug() << "ui->plot->geometry: " << ui->plot->geometry();
     updateTimer.start();
+    lastDataTtime = 0;
+    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+
+//    ui->plot->xAxis->setRange(lastDataTtime - 20, lastDataTtime);
+
 //    ticksXTimer.start();
 //    ticksXTime.restart();
 }
@@ -432,9 +440,8 @@ void MainWindow:: closePort() {
 /******************************************************************************************************************/
 void MainWindow::replot() {
     if(connected) {
-//        ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
-        ui->plot->xAxis->setRange(lastDataTtime - 20, lastDataTtime);
-
+//        ui->plot->xAxis->setRange(dataPointNumber - plotTimeInSeconds, dataPointNumber);
+        ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
         ui->plot->replot();
     }
 }
@@ -754,20 +761,24 @@ void MainWindow::on_saveJPGButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_resetPlotButton_clicked() {
     ui->plot->deselectAll();
-    numberOfPoints = NUMBER_OF_POINTS_DEF;
+    plotTimeInSeconds = PLOT_TIME_DEF;
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
-    ui->spinPoints->setValue(numberOfPoints);
-//    ticksXTimer.setInterval(numberOfPoints / 10);
+    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+
+    ui->spinPoints->setValue(plotTimeInSeconds);
+//    ticksXTimer.setInterval(plotTimeInSeconds / 10);
     selectionChangedByUserInPlot();
 }
 
 /******************************************************************************************************************/
 /* Spin box controls how many data points are collected and displayed */
 /******************************************************************************************************************/
-void MainWindow::on_spinPoints_valueChanged(int arg1) {
-    numberOfPoints = arg1;
-//    ticksXTimer.setInterval(numberOfPoints / 10);
-    ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
+void MainWindow::on_spinPoints_valueChanged(double arg1) {
+    plotTimeInSeconds = arg1;
+//    ticksXTimer.setInterval(plotTimeInSeconds / 10);
+    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+
+//    ui->plot->xAxis->setRange(dataPointNumber - plotTimeInSeconds, dataPointNumber);
     ui->plot->replot();
 }
 
@@ -1093,7 +1104,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
                 ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
                 QPoint numDegrees = event->angleDelta();
                 if (numDegrees.y() == 0) return;
-                int inc = numberOfPoints / 100;
+                int inc = plotTimeInSeconds / 100;
                 if (numDegrees.y() > 0) {
                     ui->spinPoints->setValue(ui->spinPoints->value() + inc);
                 } else {
@@ -1347,3 +1358,15 @@ void MainWindow::plotLabelSelected(bool b) {
         ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     }
 }
+
+/******************************************************************************************************************/
+void MainWindow::xAxisRangeChanged(const QCPRange& newRange, const QCPRange& oldRange) {
+//    qDebug() << "xAxisRangeChanged: " << oldRange << " -> " << newRange;
+//    qDebug() << "xAxisRangeChanged: " << oldRange.upper - oldRange.lower << " -> " << newRange.upper - newRange.lower;
+//    qDebug() << "fixedTicker->tickStep: " << fixedTicker->tickStep() << " / " << ui->plot->xAxis->ticker()->tickCount();
+    double val = newRange.upper - newRange.lower;
+    if (val != ui->spinPoints->value()) {
+        ui->spinPoints->setValue(val);
+    }
+}
+

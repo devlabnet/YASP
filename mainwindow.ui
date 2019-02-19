@@ -468,12 +468,12 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>POINTS</string>
+              <string>DISPLAY TIME</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="spinPoints">
+            <widget class="QDoubleSpinBox" name="spinPoints">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -481,16 +481,16 @@
               </sizepolicy>
              </property>
              <property name="minimum">
-              <number>100</number>
+              <double>0.000000000000000</double>
              </property>
              <property name="maximum">
-              <number>100000</number>
+              <double>1000.000000000000000</double>
              </property>
              <property name="singleStep">
-              <number>1000</number>
+              <double>0.100000000000000</double>
              </property>
              <property name="value">
-              <number>10000</number>
+              <double>30.000000000000000</double>
              </property>
             </widget>
            </item>
