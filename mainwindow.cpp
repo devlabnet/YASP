@@ -48,21 +48,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->setBackground(QBrush(bgColor));                                    // Background for the plot area
     ui->plot->hide();
     ui->stopPlotButton->setEnabled(false);                                                // Plot button is disabled initially
-
     ui->logPlotButton->setVisible(false);
     // Legend
     ui->plot->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
     ui->plot->setNotAntialiasedElements(QCP::aeAll);                                      // used for higher performance (see QCustomPlot real time example)
-//    QFont font;
-//    font.setStyleStrategy(QFont::NoAntialias);
-//    ui->plot->xAxis->setTickLabelFont(font);
-//    ui->plot->yAxis->setTickLabelFont(font);
-    ui->plot->xAxis->setTickLabelColor(gridColor);                              // Tick labels color
-    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
-    timeTicker->setTimeFormat("%h:%m:%s");
-    ui->plot->xAxis->setTicker(timeTicker);
-    textTicker = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText());
-    ui->plot->xAxis->setTicker(textTicker);
+    // Y Axes
     ui->plot->yAxis->setTickLabelColor(gridColor);                              // See QCustomPlot examples / styled demo
     ui->plot->xAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
     ui->plot->yAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
@@ -70,14 +60,27 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->yAxis->grid()->setSubGridPen(QPen(subGridColor, 1, Qt::DotLine));
     ui->plot->xAxis->grid()->setSubGridVisible(true);
     ui->plot->yAxis->grid()->setSubGridVisible(true);
-    ui->plot->xAxis->setBasePen(QPen(gridColor));
     ui->plot->yAxis->setBasePen(QPen(gridColor));
-    ui->plot->xAxis->setTickPen(QPen(gridColor));
     ui->plot->yAxis->setTickPen(QPen(gridColor));
-    ui->plot->xAxis->setSubTickPen(QPen(gridColor));
     ui->plot->yAxis->setSubTickPen(QPen(gridColor));
-    ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+    // X Axes
+    ui->plot->xAxis->setBasePen(QPen(gridColor));
+    ui->plot->xAxis->setSubTickPen(QPen(gridColor));
+    ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+    ui->plot->xAxis->setTickLabelColor(gridColor);
+    QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
+    ui->plot->xAxis->setTicker(fixedTicker);
+    // tick step shall be 0.001 second -> 1 milisecond
+    // tick step shall be 0.0001 second -> 0.1 milisecond -> 100 microdeconds
+    // tick step shall be 0.00001 second -> 0.01 milisecond -> 10 microdeconds
+    fixedTicker->setTickStep(0.00001);
+//    fixedTicker->setTickCount(20);
+//    fixedTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
+    fixedTicker->setTickStepStrategy( QCPAxisTicker::tssReadability);
+    fixedTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples );
+    ui->plot->xAxis->setTickPen(QPen(Qt::red, 2));
+    ui->plot->xAxis->setTickLength(15);
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(onMouseDoubleClickInPlot(QMouseEvent*)));
@@ -88,12 +91,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //    // setup policy and connect slot for context menu popup:
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     connect(ui->plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
-    serialPort = nullptr;                                                                    // Set serial port pointer to NULL initially
-    connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));                       // Connect update timer to replot slot
+    serialPort = nullptr;
+    // Connect update timer to replot slot
+    connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));
     ui->menuWidgets->menuAction()->setVisible(false);
-    connect(&ticksXTimer, SIGNAL(timeout()), this, SLOT(addTickX()));
     updateTimer.setInterval(20);
-    ticksXTimer.setInterval(numberOfPoints/10);
     QPalette p;
     p.setColor(QPalette::Background, QColor(144, 238, 144));
     ui->splitter->setPalette(p);
@@ -104,11 +106,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinPoints->setValue(NUMBER_OF_POINTS_DEF);
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
-//    QWidget* tabW = ui->tabWidget->findChild<QWidget *>("tabPlots");
     ui->tabWidget->removeTab(1);
     // Clear the terminal
     on_clearTermButton_clicked();
-    ticksXTime.start();
+//    ticksXTime.start();
 }
 
 /******************************************************************************************************************/
@@ -365,8 +366,8 @@ void MainWindow::portOpenedSuccess() {
     plotLabelSelected(false);
 //    qDebug() << "ui->plot->geometry: " << ui->plot->geometry();
     updateTimer.start();
-    ticksXTimer.start();
-    ticksXTime.restart();
+//    ticksXTimer.start();
+//    ticksXTime.restart();
 }
 
 /******************************************************************************************************************/
@@ -406,7 +407,7 @@ void MainWindow:: closePort() {
             widgets->hide();
     }
     updateTimer.stop();
-    ticksXTimer.stop();
+//    ticksXTimer.stop();
     connected = false;
     disconnect(serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
     disconnect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
@@ -431,17 +432,19 @@ void MainWindow:: closePort() {
 /******************************************************************************************************************/
 void MainWindow::replot() {
     if(connected) {
-        ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
+//        ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
+        ui->plot->xAxis->setRange(lastDataTtime - 20, lastDataTtime);
+
         ui->plot->replot();
     }
 }
 
-/******************************************************************************************************************/
-void MainWindow::addTickX() {
-    QTime z(0, 0);
-    z = z.addSecs(qRound(ticksXTime.elapsed()/1000.0));
-    textTicker->addTick(dataPointNumber, z.toString("mm:ss"));
-}
+///******************************************************************************************************************/
+//void MainWindow::addTickX() {
+//    QTime z(0, 0);
+//    z = z.addSecs(qRound(ticksXTime.elapsed()/1000.0));
+//    textTicker->addTick(dataPointNumber, z.toString("mm:ss"));
+//}
 
 /******************************************************************************************************************/
 /* Stop Plot Button */
@@ -499,8 +502,8 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
     if (newData.size() > 1) {
         int plotId = newData.at(0).toInt();
         if ((plotId < 0) || (plotId > 9)) {
-            qDebug() << ticksXTime.elapsed() << " BAD PLOT ID : " << plotId << " --> " << newData;
-            addMessageText(QString::number(ticksXTime.elapsed()) + " BAD PLOT ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
+            qDebug() << " BAD PLOT ID : " << plotId << " --> " << newData;
+            addMessageText(" BAD PLOT ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
             return;
         }
         yaspGraph* yGraph = getGraph(plotId);
@@ -545,16 +548,17 @@ void MainWindow::onNewDataArrived(QStringList newData) {
     Q_ASSERT(newData.size() > 0);
     int plotId = newData.at(0).toInt();
     if ((plotId < 0) || (plotId > 9)) {
-        addMessageText(QString::number(ticksXTime.elapsed()) + " BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
+        addMessageText(" BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
         return;
     }
     yaspGraph* yGraph = getGraph(plotId);
-//    qDebug() << "NEW DATA : " << plotId << " --> " << newData;
     if (true) {
         int dataListSize = newData.size();                                                    // Get size of received list
+//        qDebug() << "NEW DATA : " << plotId << " / " << dataListSize << " --> " << newData;
         dataPointNumber++;
         if (dataListSize > 1) {
-            double val = newData[1].toDouble();
+            lastDataTtime = newData[1].toDouble()/1000000.0;
+            double val = newData[2].toDouble();
             val *= yGraph->mult();
             val += yGraph->offset();
             // Add data to graphs according plot Id
@@ -566,10 +570,12 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             info +=  + " mult: ";
             info += QString::number(yGraph->mult());
             updateLabel(plotId, info);
-            plot->addData(dataPointNumber, val );
-//             qDebug() << "ADD DATA : " << plotId << " --> " << dataPointNumber << " / " << ticksXTime.elapsed();
-            pointTime.insert(dataPointNumber, ticksXTime.elapsed());
+            plot->addData(lastDataTtime, val );
+//            qDebug() << "ADD DATA : " << plotId << " --> " << time << " / " << val;
+//            pointTime.insert(dataPointNumber, ticksXTime.elapsed());
             yGraph->updateRefLine(dataPointNumber);
+            ui->statusBar->showMessage("Points: " + QString::number(dataPointNumber));
+
             if (logFile != nullptr) {
                 //                if (plot->isDisplayed()) {
                 //                    streamLog << plot->getName() << ";" << dataPointNumber << ";" << val << ";" << time << "\n";
@@ -751,7 +757,7 @@ void MainWindow::on_resetPlotButton_clicked() {
     numberOfPoints = NUMBER_OF_POINTS_DEF;
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
     ui->spinPoints->setValue(numberOfPoints);
-    ticksXTimer.setInterval(numberOfPoints / 10);
+//    ticksXTimer.setInterval(numberOfPoints / 10);
     selectionChangedByUserInPlot();
 }
 
@@ -760,7 +766,7 @@ void MainWindow::on_resetPlotButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_spinPoints_valueChanged(int arg1) {
     numberOfPoints = arg1;
-    ticksXTimer.setInterval(numberOfPoints / 10);
+//    ticksXTimer.setInterval(numberOfPoints / 10);
     ui->plot->xAxis->setRange(dataPointNumber - numberOfPoints, dataPointNumber);
     ui->plot->replot();
 }
@@ -928,7 +934,6 @@ void MainWindow::saveDataPlot(yaspGraph* yGraph) {
     infoModeLabel->setColor(yGraph->plot()->pen().color());
 //    plotting = false;
     qDebug() << "saveDataPlot Graph Data: " << g->data();
-    int nop = dataPointNumber;
 //    QCPDataMap* map = g->data();
 //    // Iterate over Plot Data
 //    if (map->size()) {
@@ -951,7 +956,7 @@ void MainWindow::saveDataPlot(yaspGraph* yGraph) {
             }
             qDebug() << "Log DATA Opened : " << logData->fileName();
             streamData.setDevice(logData);
-            yGraph->save(streamData, pointTime, nop);
+//            yGraph->save(streamData, pointTime, nop);
         }
        qDebug() << "Close Log DATA : " << logData->fileName();
        logData->close();
@@ -1017,8 +1022,8 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
         if (measureInProgress == false) {
             double xx = ui->plot->xAxis->pixelToCoord(event->x());
             double yy = ui->plot->yAxis->pixelToCoord(event->y());
-            QString coordinates("X: %1 Y: %2");
-            coordinates = coordinates.arg(xx).arg(yy);
+            QString coordinates("X: %1 Y: %2 Points:%3");
+            coordinates = coordinates.arg(xx).arg(yy).arg(dataPointNumber);
             ui->statusBar->setStyleSheet("background-color: SkyBlue;");
             ui->statusBar->showMessage(coordinates);
         } else {

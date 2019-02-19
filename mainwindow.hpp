@@ -73,7 +73,7 @@ protected:
 
 private slots:
     void replot();
-    void addTickX();
+//    void addTickX();
     // Slot for repainting the plot
     void onNewDataArrived(QStringList newData);                                           // Slot for new data from serial port
     void onNewPlotDataArrived(QStringList newData);                                       // Slot for new data from serial port
@@ -141,7 +141,8 @@ private:
     Qt::MouseButton mouseButtonState;
     QSharedPointer<QCPAxisTickerText> textTicker;
     QMap<int, yaspGraph*> graphs;
-    QMap<int, int> pointTime;
+//    QMap<int, int> pointTime;
+    double lastDataTtime;
     yaspGraph* getGraph(int id);
     QVector<qreal> plotDashPattern;
     QVector<qreal> rLineDashPattern;
@@ -150,8 +151,8 @@ private:
     bool plotting;                                                                        // Status plotting variable
     int dataPointNumber;                                                                  // Keep track of data points
     QTimer updateTimer;
-    QTimer ticksXTimer;
-    QTime ticksXTime;
+//    QTimer ticksXTimer;
+//    QTime ticksXTime;
     // Timer used for replotting the plot
     int numberOfAxes;                                                                     // Number of axes for the plot
     double timeBetweenSamples;                                                            // Store time between samples
