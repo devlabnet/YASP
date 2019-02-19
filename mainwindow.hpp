@@ -91,11 +91,11 @@ private slots:
     void onMousePressInPlot(QMouseEvent *event);
     void onMouseDoubleClickInPlot(QMouseEvent* event);
     void plotContextMenuRequest(QPoint pos);
-    void selectionChangedByUserInPlot();
+//    void selectionChangedByUserInPlot();
 //    void legendSelectionChanged(QCPLegend::SelectableParts l);
     void saveSelectedGraph();
     void saveAllGraphs();
-    void doMeasure();
+//    void doMeasure();
 //    void doShift();
     void cleanTracer();
     void doMenuPlotShiftAction();
@@ -175,6 +175,7 @@ private:
 
     QMenu* contextMenu = nullptr;
     QAction* plotShowHideAction;
+    QAction* plotMeasureAction;
     QRubberBand* rubberBand = nullptr;
     QPointF rubberOrigin;
     QCPItemTracer *tracer = nullptr;
