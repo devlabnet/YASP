@@ -101,6 +101,7 @@ private slots:
     void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
     void doMenuPlotScaleAction();
+    void doMenuPlotMeasureAction();
     void doMenuPlotShowHideAction();
     void on_actionHow_to_use_triggered();
     void on_sendLine_returnPressed();
@@ -132,7 +133,8 @@ private:
                      };
     WheelAction wheelState = wheelZoom;
     enum mouseAction { mouseMove   = 0x01,
-                       mouseShift   = 0x02
+                       mouseShift   = 0x02,
+                       mouseDoMesure = 0x03
                      };
     mouseAction mouseState = mouseMove;
     void resetMouseWheelState();
@@ -178,7 +180,7 @@ private:
     QCPItemTracer *tracer = nullptr;
     bool measureInProgress = false;
     int measureMult;
-    double traceerStartKey;
+    double tracerStartKey;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     yaspGraph *addGraph(int id);
