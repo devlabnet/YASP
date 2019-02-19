@@ -969,7 +969,7 @@ void MainWindow::saveDataPlot(yaspGraph* yGraph) {
             }
             qDebug() << "Log DATA Opened : " << logData->fileName();
             streamData.setDevice(logData);
-//            yGraph->save(streamData, pointTime, nop);
+            yGraph->save(streamData);
         }
        qDebug() << "Close Log DATA : " << logData->fileName();
        logData->close();
