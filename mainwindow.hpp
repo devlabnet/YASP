@@ -36,7 +36,7 @@
 //#include "tabwidget.h"
 #include <QTextEdit>
 #include <QTime>
-#include <QRubberBand>
+//#include <QRubberBand>
 #include "yaspgraph.h"
 
 #define START_MSG      0x10
@@ -97,7 +97,7 @@ private slots:
     void saveAllGraphs();
 //    void doMeasure();
 //    void doShift();
-    void cleanTracer();
+    void cleanTracer(QString str);
     void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
     void doMenuPlotScaleAction();
@@ -128,11 +128,13 @@ private:
                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                           QColor("#ff00aa")};
 
-    enum WheelAction { wheelZoom        = 0x01,
+    enum WheelAction { wheelNone        = 0x00,
+                       wheelZoom        = 0x01,
                        wheelScalePlot   = 0x02
                      };
     WheelAction wheelState = wheelZoom;
-    enum mouseAction { mouseMove   = 0x01,
+    enum mouseAction { mouseNone   = 0x00,
+                       mouseMove   = 0x01,
                        mouseShift   = 0x02,
                        mouseDoMesure = 0x03
                      };
@@ -176,11 +178,11 @@ private:
     QMenu* contextMenu = nullptr;
     QAction* plotShowHideAction;
     QAction* plotMeasureAction;
-    QRubberBand* rubberBand = nullptr;
-    QPointF rubberOrigin;
+//    QRubberBand* rubberBand = nullptr;
+//    QPointF rubberOrigin;
     QCPItemTracer *tracer = nullptr;
     bool measureInProgress = false;
-    int measureMult;
+    double measureMult;
     double tracerStartKey;
     QCPItemLine* traceLineBottom;
     QCPItemLine* traceLineTop;
@@ -190,6 +192,7 @@ private:
     void enableControls(bool enable);                                                     // Enable/disable controls
     yaspGraph *addGraph(int id);
     void updateLabel(int id, QString info = "");
+    void doContextMenuHeader(yaspGraph* yGraph);
     bool isColor(QString str);
     // Setup the QCustomPlot
     void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
@@ -203,6 +206,7 @@ private:
     void saveDataPlot(yaspGraph* yGraph);
     void shiftPlot(int pY);
     void scalePlot(int numDeg);
+    void unselectGraphs();
     bool startShiftPlot = false;
     bool startScalePlot = false;
     double lastPosY = 0;
