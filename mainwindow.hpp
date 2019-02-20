@@ -89,7 +89,7 @@ private slots:
     void onMouseReleaseInPlot(QMouseEvent *event);
     void onMouseWheelInPlot(QWheelEvent *event);
     void onMousePressInPlot(QMouseEvent *event);
-    void onMouseDoubleClickInPlot(QMouseEvent* event);
+//    void onMouseDoubleClickInPlot(QMouseEvent* event);
     void plotContextMenuRequest(QPoint pos);
 //    void selectionChangedByUserInPlot();
 //    void legendSelectionChanged(QCPLegend::SelectableParts l);
@@ -182,6 +182,10 @@ private:
     bool measureInProgress = false;
     int measureMult;
     double tracerStartKey;
+    QCPItemLine* traceLineBottom;
+    QCPItemLine* traceLineTop;
+    QCPItemLine* refLine;
+
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     yaspGraph *addGraph(int id);

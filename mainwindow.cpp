@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
-    connect(ui->plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(onMouseDoubleClickInPlot(QMouseEvent*)));
+//    connect(ui->plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(onMouseDoubleClickInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseReleaseInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(onMouseWheelInPlot(QWheelEvent*)));
@@ -219,6 +219,7 @@ yaspGraph* MainWindow::addGraph(int id) {
         textLabel->setSelectable(true);
         textLabel->setPadding(QMargins(2,2,2,2));
         connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
+
         QCPItemLine* axisLine = new QCPItemLine(ui->plot);
         QPen pen = QPen(colours[id], 0.5);
         rLineDashPattern = QVector<qreal>() << 64 << 4 ;
@@ -480,6 +481,10 @@ void MainWindow::on_stopPlotButton_clicked() {
 //        ticksXTimer.stop();
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
+        ui->plot->deselectAll();
+        cleanTracer();
+        resetMouseWheelState();
+        plotLabelSelected(false);
 //        plotLabelSelected(false);
     } else {
         // Start plotting
@@ -489,11 +494,12 @@ void MainWindow::on_stopPlotButton_clicked() {
 //        ticksXTime.restart();
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
-        if (mouseState == mouseDoMesure) {
+//        if (mouseState == mouseDoMesure) {
+            ui->plot->deselectAll();
             cleanTracer();
             resetMouseWheelState();
             plotLabelSelected(false);
-        }
+//        }
     }
 }
 
@@ -1147,6 +1153,7 @@ void MainWindow::resetMouseWheelState() {
     qreal pixelsWide = fm.width(infoModeLabel->text());
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
+    ui->plot->replot();
 }
 
 ///******************************************************************************************************************/
@@ -1185,24 +1192,24 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     }
 }
 
-/******************************************************************************************************************/
-void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
-    if (mouseState == mouseDoMesure) {
-        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
-        tracer->setGraphKey(coordX);
-        tracer->updatePosition();
-        rubberOrigin = tracer->position->pixelPosition().toPoint();
-        if (rubberBand) {
-            delete rubberBand;
-            rubberBand = nullptr;
-        }
-        tracerStartKey = tracer->position->key();
-        rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->plot);
-        rubberBand->setGeometry(QRectF(rubberOrigin, QSize()).toRect());
-        rubberBand->show();
-        ui->plot->replot();
-    }
-}
+///******************************************************************************************************************/
+//void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
+//    if (mouseState == mouseDoMesure) {
+//        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
+//        tracer->setGraphKey(coordX);
+//        tracer->updatePosition();
+//        rubberOrigin = tracer->position->pixelPosition().toPoint();
+//        if (rubberBand) {
+//            delete rubberBand;
+//            rubberBand = nullptr;
+//        }
+//        tracerStartKey = tracer->position->key();
+//        rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->plot);
+//        rubberBand->setGeometry(QRectF(rubberOrigin, QSize()).toRect());
+//        rubberBand->show();
+//        ui->plot->replot();
+//    }
+//}
 
 /******************************************************************************************************************/
 void MainWindow::onMousePressInPlot(QMouseEvent *event) {
@@ -1357,11 +1364,12 @@ void MainWindow::contextMenuTriggered(QAction* act) {
 /******************************************************************************************************************/
 void MainWindow::plotLabelSelected(bool b) {
     qDebug() << "plotLabelSelected : " << b;
+    qDebug() << "ui->plot->selectedItems() size: " << ui->plot->selectedItems().size();
 //    resetMouseWheelState();
 //    if (mouseState != mouseDoMesure) {
 //        cleanTracer();
 //    }
-    if (b) {
+    if (ui->plot->selectedItems().size()) {
         //Q_ASSERT(ui->plot->selectedItems().size() == 1);
         qDebug() << "plotLabelSelected : " << ui->plot->selectedItems().size();
         QCPAbstractItem* item = ui->plot->selectedItems().at(0);
