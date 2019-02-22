@@ -459,7 +459,6 @@ void MainWindow:: closePort() {
 /******************************************************************************************************************/
 void MainWindow::replot() {
     if(connected) {
-//        ui->plot->xAxis->setRange(dataPointNumber - plotTimeInSeconds, dataPointNumber);
         ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
         ui->plot->replot();
     }
@@ -811,10 +810,7 @@ void MainWindow::on_resetPlotButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_spinDisplayTime_valueChanged(double arg1) {
     plotTimeInSeconds = arg1;
-//    ticksXTimer.setInterval(plotTimeInSeconds / 10);
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
-
-//    ui->plot->xAxis->setRange(dataPointNumber - plotTimeInSeconds, dataPointNumber);
     ui->plot->replot();
 }
 
