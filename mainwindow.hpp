@@ -207,10 +207,10 @@ private:
     void updateTracer(int pX);
     void saveDataPlot(yaspGraph* yGraph);
     void shiftPlot(int pY);
-    void scalePlot(int numDeg);
+    void scalePlot(double scale);
     void unselectGraphs();
     bool startShiftPlot = false;
-    bool startScalePlot = false;
+//    bool startScalePlot = false;
     double lastPosY = 0;
     int lastY = 0;
     double scaleMult = 1.0;

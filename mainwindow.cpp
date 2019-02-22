@@ -84,35 +84,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->xAxis->setTickLength(15);
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(const QCPRange&)), this, SLOT(xAxisRangeChanged(const QCPRange&)));
 
-    tracer = new QCPItemTracer(ui->plot);
-    tracer->setVisible(false);
-    tracer->blockSignals(true);
-    tracer->setSize(2);
-    QColor linesColor;
-    if (bgColor.lightness() > 128) {
-        linesColor = Qt::black;
-    } else {
-        linesColor = Qt::white;
-    }
-    QPen pen = QPen(linesColor, 2);
-    pen.setStyle(Qt::DotLine);
-    tracer->setPen(pen);
-    tracer->setSelectable(false);
-
-    traceLineBottom = new QCPItemLine(ui->plot);
-//    rLineDashPattern = QVector<qreal>() << 64 << 4 ;
-    pen.setColor(Qt::green);
-    traceLineBottom->setPen(pen);
-    traceLineBottom->start->setCoords(0,0);
-    traceLineBottom->end->setCoords(100000000, 0);
-    traceLineBottom->setVisible(false);
-    traceLineTop = new QCPItemLine(ui->plot);
-    pen.setColor(Qt::red);
-    traceLineTop->setPen(pen);
-    traceLineTop->start->setCoords(0,0);
-    traceLineTop->end->setCoords(100000000, 0);
-    traceLineTop->setVisible(false);
-
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
 //    connect(ui->plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(onMouseDoubleClickInPlot(QMouseEvent*)));
@@ -384,17 +355,41 @@ void MainWindow::portOpenedSuccess() {
     qreal pixelsWide = fm.width(infoModeLabel->text());
     qDebug() << "pixelsWide " << pixelsWide;
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
-//    plotLabelSelected(false);
 //    qDebug() << "ui->plot->geometry: " << ui->plot->geometry();
     updateTimer.start();
-    lastDataTtime = 0;
+    tracer = new QCPItemTracer(ui->plot);
+    tracer->setVisible(false);
+    tracer->blockSignals(true);
+    tracer->setSize(2);
+    QColor linesColor;
+    if (bgColor.lightness() > 128) {
+        linesColor = Qt::black;
+    } else {
+        linesColor = Qt::white;
+    }
+    QPen pen = QPen(linesColor, 2);
+    pen.setStyle(Qt::DotLine);
+    tracer->setPen(pen);
+    tracer->setSelectable(false);
+
+    traceLineBottom = new QCPItemLine(ui->plot);
+//    rLineDashPattern = QVector<qreal>() << 64 << 4 ;
+    pen.setColor(Qt::green);
+    traceLineBottom->setPen(pen);
+//    traceLineBottom->setVisible(false);
+//    traceLineBottom->start->setCoords(0, DBL_MAX);
+//    traceLineBottom->end->setCoords(DBL_MAX, DBL_MAX);
+    traceLineTop = new QCPItemLine(ui->plot);
+    pen.setColor(Qt::red);
+    traceLineTop->setPen(pen);
+//    traceLineTop->setVisible(false);
+//    traceLineTop->start->setCoords(0, -DBL_MAX);
+//    traceLineTop->end->setCoords(DBL_MAX, -DBL_MAX);
+    cleanTracer("init");
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
 
-//    ui->plot->xAxis->setRange(lastDataTtime - 20, lastDataTtime);
-
-//    ticksXTimer.start();
-//    ticksXTime.restart();
+    lastDataTtime = 0;
 }
 
 /******************************************************************************************************************/
@@ -503,7 +498,6 @@ void MainWindow::on_stopPlotButton_clicked() {
     unselectGraphs();
     cleanTracer("on_stopPlotButton_clicked");
     resetMouseWheelState();
-//    plotLabelSelected(false);
 }
 
 /******************************************************************************************************************/
@@ -612,13 +606,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
 //            qDebug() << "ADD DATA : " << plotId << " --> " << time << " / " << val;
 //            pointTime.insert(dataPointNumber, ticksXTime.elapsed());
 //            yGraph->updateRefLine(dataPointNumber);
-            ui->statusBar->showMessage("Points: " + QString::number(dataPointNumber));
-
-            if (logFile != nullptr) {
-                //                if (plot->isDisplayed()) {
-                //                    streamLog << plot->getName() << ";" << dataPointNumber << ";" << val << ";" << time << "\n";
-                //                }
-            }
+//            ui->statusBar->showMessage("Points: " + QString::number(dataPointNumber));
         } else {
             qDebug() << "------------> BAD DATA : " << plotId << " / " << dataListSize << " --> " << newData;
         }
@@ -801,8 +789,6 @@ void MainWindow::on_resetPlotButton_clicked() {
     ui->spinDisplayTime->setValue(plotTimeInSeconds);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     cleanTracer("on_resetPlotButton_clicked");
-//    ticksXTimer.setInterval(plotTimeInSeconds / 10);
-//    selectionChangedByUserInPlot();
 }
 
 /******************************************************************************************************************/
@@ -824,7 +810,7 @@ void MainWindow::shiftPlot(int pY) {
         startShiftPlot = false;
     } else {
         double offset = posY - lastPosY;
-        workingGraph->setOffset(dataPointNumber, offset);
+        workingGraph->setOffset(offset);
         ui->plot->replot();
         lastPosY = posY;
         lastY = pY;
@@ -832,31 +818,31 @@ void MainWindow::shiftPlot(int pY) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::scalePlot(int numDeg) {
-    if (numDeg == 0) return;
+void MainWindow::scalePlot(double scale) {
+//    if (scale == 0) return;
 //    if (startScalePlot) {
 //        scaleMult = 1.0;
 //        startScalePlot = false;
 //    }
     Q_ASSERT(workingGraph);
-    double scale = 1 + ((double)numDeg / 1000.0);
-    workingGraph->setMult(dataPointNumber, scale);
+//    double scale = 1 + ((double)numDeg / 1000.0);
+    workingGraph->setMult(scale);
     ui->plot->replot();
 }
 
 /******************************************************************************************************************/
 void MainWindow::cleanTracer(QString str) {
     qDebug() << "========================== cleanTracer: " << str;
-    if (mouseState == mouseDoMesure) {
+//    if (mouseState == mouseDoMesure) {
         ui->plot->setCursor(Qt::ArrowCursor);
         tracer->setVisible(false);
-        traceLineBottom->start->setCoords(0,0);
-        traceLineBottom->end->setCoords(0, 0);
+        traceLineBottom->start->setCoords(0, DBL_MAX);
+        traceLineBottom->end->setCoords(DBL_MAX, DBL_MAX);
         traceLineBottom->setVisible(false);
         traceLineTop->setVisible(false);
-        traceLineTop->start->setCoords(0,0);
-        traceLineTop->end->setCoords(0, 0);
-    }
+        traceLineTop->start->setCoords(0, -DBL_MAX);
+        traceLineTop->end->setCoords(DBL_MAX, -DBL_MAX);
+//    }
     resetMouseWheelState();
 }
 
@@ -904,7 +890,6 @@ void MainWindow::doMenuPlotMeasureAction() {
         tracer->setVisible(true);
         tracer->setGraph(workingGraph->plot());
     }
-//    plotLabelSelected(true);
 }
 
 /******************************************************************************************************************/
@@ -953,7 +938,7 @@ void MainWindow::doMenuPlotScaleAction() {
     qreal pixelsWide = fm.width(infoModeLabel->text());
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
     wheelState = wheelScalePlot;
-    startScalePlot = true;
+//    startScalePlot = true;
     ui->plot->setInteraction(QCP::iRangeZoom, false);
 }
 
@@ -1037,41 +1022,30 @@ void MainWindow::messageSent(QString str) {
 
 /******************************************************************************************************************/
 void MainWindow::updateTracer(int pX) {
-//    qDebug() << "updateTracer " << tracer << " / " << pX;
+    qDebug() << "updateTracer " << tracer << " / " << pX;
     if (mouseState == mouseDoMesure) {
         Q_ASSERT(tracer);
         double coordX = ui->plot->xAxis->pixelToCoord(pX);
         // get tracer origin
         tracer->setGraphKey(tracerStartKey);
         tracer->updatePosition();
-//        rubberOrigin = tracer->position->pixelPosition();
         double startX = tracer->position->key();
         double startY = tracer->position->value() / measureMult;
         tracer->setGraphKey(coordX);
         tracer->updatePosition();
         QPointF tracerPos = tracer->position->pixelPosition();
-//        if (rubberBand) {
-//            QPointF pp = tracer->position->pixelPosition();
-//            rubberBand->setGeometry(QRectF(rubberOrigin, pp).normalized().toRect());
-//            rubberBand->repaint();
-//        }
         double endX = tracer->position->key();
-//        double endY = tracer->position->value() / measureMult;
         double endY = tracer->position->value();
         traceLineBottom->setVisible(true);
         traceLineTop->setVisible(true);
-//        qDebug() << "measureMult: " << measureMult;
-//        qDebug() << "tPos: " << tracerPos;
-//        qDebug() <<  "endX: " << endX <<  "endY: " << endY ; //<< "tY: " << traceLineBottom->start->coords().y();
         if (traceLineBottom->start->coords().y() > endY) {
             traceLineBottom->start->setCoords(0, endY);
-            traceLineBottom->end->setCoords(100000000, endY);
+            traceLineBottom->end->setCoords(DBL_MAX, endY);
         }
         if (traceLineTop->start->coords().y() < endY) {
             traceLineTop->start->setCoords(0, endY);
-            traceLineTop->end->setCoords(100000000, endY);
+            traceLineTop->end->setCoords(DBL_MAX, endY);
         }
-
         QString coordinates("X: %1 Y: %2 DELTAX: %3 ms --> DELTAY: %4 (Mult: %5 )");
         coordinates = coordinates.arg(startX).arg(startY).arg(endX - startX).arg(endY - startY).arg(measureMult);
         ui->statusBar->setStyleSheet("background-color: lightgreen;");
@@ -1084,23 +1058,28 @@ void MainWindow::updateTracer(int pX) {
 /* Prints coordinates of mouse pointer in status bar on mouse release */
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
+    double xx = ui->plot->xAxis->pixelToCoord(event->x());
+    double yy = ui->plot->yAxis->pixelToCoord(event->y());
+    QString coordinates("X: %1 Y: %2 Points:%3");
+    coordinates = coordinates.arg(xx).arg(yy).arg(dataPointNumber);
+    ui->statusBar->setStyleSheet("background-color: SkyBlue;");
     switch (mouseState) {
         case mouseMove: {
             if (wheelState == wheelZoom) {
                 ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
             }
-            double xx = ui->plot->xAxis->pixelToCoord(event->x());
-            double yy = ui->plot->yAxis->pixelToCoord(event->y());
-            QString coordinates("X: %1 Y: %2 Points:%3");
-            coordinates = coordinates.arg(xx).arg(yy).arg(dataPointNumber);
-            ui->statusBar->setStyleSheet("background-color: SkyBlue;");
             ui->statusBar->showMessage(coordinates);
             }
             break;
-        case mouseShift:
+    case mouseShift: {
             if (mouseButtonState == Qt::LeftButton) {
                 ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
                 shiftPlot(event->y());
+                QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(event->y() - lastPosY);
+                ui->statusBar->showMessage(msg);
+            } else {
+                ui->statusBar->showMessage(coordinates);
+            }
             }
             break;
         case mouseDoMesure:
@@ -1108,6 +1087,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
             updateTracer(event->pos().x());
             break;
         default:
+            ui->statusBar->showMessage(coordinates);
             break;
     }
 
@@ -1152,7 +1132,7 @@ void MainWindow::resetMouseWheelState() {
     qDebug() << "resetMouseWheelState: " << mouseState;
     mouseState = mouseNone;
     wheelState = wheelNone;
-    startScalePlot = false;
+//    startScalePlot = false;
     startShiftPlot = false;
     mouseButtonState = Qt::NoButton;
 
@@ -1194,7 +1174,13 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
             // do only selected plot
             qDebug() << "WG";
             QPoint numDegrees = event->angleDelta();
-            scalePlot(numDegrees.y());
+            int nY = numDegrees.y();
+            if (nY != 0) {
+            double scale = 1 + ((double)(nY) / 1000.0);
+            scalePlot(scale);
+            QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult());
+            ui->statusBar->showMessage(msg);
+            }
             event->accept();
         }
     }
@@ -1202,21 +1188,6 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 
 ///******************************************************************************************************************/
 //void MainWindow::onMouseDoubleClickInPlot(QMouseEvent* event) {
-//    if (mouseState == mouseDoMesure) {
-//        double coordX = ui->plot->xAxis->pixelToCoord(event->pos().x());
-//        tracer->setGraphKey(coordX);
-//        tracer->updatePosition();
-//        rubberOrigin = tracer->position->pixelPosition().toPoint();
-//        if (rubberBand) {
-//            delete rubberBand;
-//            rubberBand = nullptr;
-//        }
-//        tracerStartKey = tracer->position->key();
-//        rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->plot);
-//        rubberBand->setGeometry(QRectF(rubberOrigin, QSize()).toRect());
-//        rubberBand->show();
-//        ui->plot->replot();
-//    }
 //}
 
 /******************************************************************************************************************/
@@ -1403,17 +1374,9 @@ void MainWindow::plotLabelSelected(bool b) {
         workingGraph = yGraph;
         yGraph->setSelected(true);
         contextMenu->setProperty("id", plotId);
-//            contextMenu = new QMenu(this);
-//            connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuTriggered(QAction*)));
         selectedPlotId = plotId.toInt();
         doContextMenuHeader(yGraph);
         if (mouseState != mouseDoMesure) {
-//            QPen pen = yGraph->plot()->pen();
-//            pen.setWidth(1);
-//            pen.setDashPattern(plotDashPattern);
-//            yGraph->plot()->setPen(pen);
-//            yGraph->info()->setSelectedPen(pen);
-//            yGraph->info()->setSelectedColor(pen.color());
             QAction* action = contextMenu->addAction("Color", this, SLOT(doMenuPlotColorAction()));
             action->setIcon(QIcon(":/Icons/Icons/icons8-paint-palette-48.png"));
             plotShowHideAction = contextMenu->addAction("Hide", this, SLOT(doMenuPlotShowHideAction()));
@@ -1447,19 +1410,6 @@ void MainWindow::plotLabelSelected(bool b) {
         }
         ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     } else {
-//        if (contextMenu) {
-//            QVariant plotId = contextMenu->property("id");
-//            yaspGraph* yGraph = graphs[plotId.toInt()];
-//            Q_ASSERT(yGraph);
-//            QPen pen = yGraph->plot()->pen();
-//            pen.setWidth(1);
-//            pen.setStyle(Qt::SolidLine);
-//            yGraph->plot()->setPen(pen);
-//            yGraph->info()->setSelectedColor(pen.color());
-//            yGraph->info()->setSelectedPen(Qt::NoPen);
-//        }
-//        delete contextMenu;
-//        contextMenu = nullptr;
         selectedPlotId = -1;
         workingGraph = nullptr;
         ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
@@ -1469,11 +1419,8 @@ void MainWindow::plotLabelSelected(bool b) {
 
 /******************************************************************************************************************/
 void MainWindow::xAxisRangeChanged(const QCPRange& range) {
-//    qDebug() << "xAxisRangeChanged: " << oldRange << " -> " << newRange;
-//    qDebug() << "xAxisRangeChanged: " << oldRange.upper - oldRange.lower << " -> " << newRange.upper - newRange.lower;
     double val = range.upper - range.lower;
     if (!qFuzzyCompare(val, ui->spinDisplayTime->value())) {
-//        qDebug() << "fixedTicker->tickStep: " << val;
         ui->spinDisplayTime->setValue(val);
     }
 }

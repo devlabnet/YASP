@@ -9,13 +9,14 @@ public:
     QCPItemLine* rLine();
     QCPGraph* plot();
     void save(QTextStream& streamData);
-    void setOffset(int dpn, double o);
+    void setOffset(double o);
     double offset();
-    void setMult(int dpn, double m);
+    void setMult(double m);
     double mult();
-    void updateLabel(QString info, double lastX, int margin);
+    void updateLabel(QString info, double lX, int margin);
 //    void updateRefLine(int dpn);
     void setSelected(bool sel);
+    void reset();
 private:
     int id;
     QVector<qreal> plotDashPattern;
@@ -23,6 +24,7 @@ private:
     QCPGraph* infoGraph;
     QCPItemText* infoText;
     QCPItemLine* refLine;
+    double lastX;
     double yOffset;
     double yMult;
 };

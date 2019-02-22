@@ -1,6 +1,7 @@
 #include "yaspgraph.h"
 
-yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine, QString plotStr, QColor color, double plotTimeInSeconds)
+yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine, QString plotStr,
+                     QColor color, double plotTimeInSeconds)
     : id(id), infoGraph(g), infoText(info), refLine(rLine) {
     yOffset = 0;
     yMult = 1.0;
@@ -28,6 +29,12 @@ yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine,
 }
 
 //-----------------------------------------------------------------------------------------
+void yaspGraph::reset() {
+    yOffset = 0;
+    yMult = 1.0;
+}
+
+//-----------------------------------------------------------------------------------------
 void yaspGraph::setSelected(bool sel) {
      qDebug() << "yaspGraph::setSelected: " << sel;
     QPen pen = infoGraph->pen();
@@ -49,7 +56,8 @@ void yaspGraph::setSelected(bool sel) {
 }
 
 //-----------------------------------------------------------------------------------------
-void yaspGraph::updateLabel(QString info, double lastX, int margin) {
+void yaspGraph::updateLabel(QString info, double lX, int margin) {
+    lastX = lX;
     info = infoGraph->name() + " -> " + info;
     QColor color = infoGraph->pen().color();
     QFont font;
@@ -107,7 +115,7 @@ void yaspGraph::save(QTextStream& streamData) {
     }
 }
 //-----------------------------------------------------------------------------------------
-void yaspGraph::setOffset(int dpn, double o) {
+void yaspGraph::setOffset(double o) {
 //        qDebug() << "yOffset " << yOffset << " o-> " << o;
     QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
     for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
@@ -118,14 +126,14 @@ void yaspGraph::setOffset(int dpn, double o) {
     }
     yOffset += o;
     refLine->start->setCoords(0, yOffset);
-    refLine->end->setCoords(dpn, yOffset);
+    refLine->end->setCoords(lastX, yOffset);
 }
 //-----------------------------------------------------------------------------------------
 double yaspGraph::offset() {
     return yOffset;
 }
 //-----------------------------------------------------------------------------------------
-void yaspGraph::setMult(int dpn, double m) {
+void yaspGraph::setMult(double m) {
     double nm = yMult * m;
 //        qDebug() << "yMult " << yMult << " m-> " << m;
     QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
@@ -139,7 +147,7 @@ void yaspGraph::setMult(int dpn, double m) {
     }
     yMult = nm;
     refLine->start->setCoords(0, yOffset);
-    refLine->end->setCoords(dpn, yOffset);
+    refLine->end->setCoords(lastX, yOffset);
 }
 //-----------------------------------------------------------------------------------------
 double yaspGraph::mult() {
