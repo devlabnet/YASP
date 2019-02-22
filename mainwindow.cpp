@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent) :
     tracer->setSelectable(false);
 
     traceLineBottom = new QCPItemLine(ui->plot);
-    rLineDashPattern = QVector<qreal>() << 64 << 4 ;
+//    rLineDashPattern = QVector<qreal>() << 64 << 4 ;
     pen.setColor(Qt::green);
     traceLineBottom->setPen(pen);
     traceLineBottom->start->setCoords(0,0);
@@ -142,6 +142,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
     ui->tabWidget->removeTab(1);
+
+//    groupBoxPlotSelectionHbox = new QHBoxLayout;
+//    ui->groupBoxPlotSelection->setLayout(groupBoxPlotSelectionHbox);
+//    selectButtonsGroup = new QButtonGroup();
+//    selectButtonsGroup->setExclusive(true);
 
     contextMenu = new QMenu(this);
     connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuTriggered(QAction*)));
@@ -231,25 +236,25 @@ yaspGraph* MainWindow::addGraph(int id) {
 //        ui->plot->xAxis->setRange(0, plotTimeInSeconds);                                      // Set x axis range for specified number of points
         QString plotStr = "Plot " + QString::number(id);
         QCPGraph* graph = ui->plot->addGraph();
-        plotDashPattern = QVector<qreal>() << 16 << 4 << 8 << 4;
-        graph->setName(plotStr);
+//        plotDashPattern = QVector<qreal>() << 16 << 4 << 8 << 4;
+//        graph->setName(plotStr);
+//        graph->setPen(QPen(colours[id]));
         QCPItemText* textLabel = new QCPItemText(ui->plot);
         textLabel->setProperty("id", id);
-        textLabel->setColor(colours[id]);
-        textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
-        textLabel->position->setType(QCPItemPosition::ptAbsolute );
-        textLabel->setSelectable(true);
-        textLabel->setPadding(QMargins(2,2,2,2));
+//        textLabel->setColor(colours[id]);
+//        textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
+//        textLabel->position->setType(QCPItemPosition::ptAbsolute );
+//        textLabel->setSelectable(true);
+//        textLabel->setPadding(QMargins(2,2,2,2));
         connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
-
         QCPItemLine* axisLine = new QCPItemLine(ui->plot);
-        QPen pen = QPen(colours[id], 0.5);
+//        QPen pen = QPen(colours[id], 0.5);
 //        rLineDashPattern = QVector<qreal>() << 64 << 4 ;
-        pen.setDashPattern(rLineDashPattern);
-        axisLine->setPen(pen);
-        axisLine->start->setCoords(0,0);
-        axisLine->end->setCoords(plotTimeInSeconds, 0);
-        yaspGraph* g = new yaspGraph(id, graph, textLabel, axisLine);
+//        pen.setDashPattern(rLineDashPattern);
+//        axisLine->setPen(pen);
+//        axisLine->start->setCoords(0,0);
+//        axisLine->end->setCoords(plotTimeInSeconds, 0);
+        yaspGraph* g = new yaspGraph(id, graph, textLabel, axisLine, plotStr, colours[id], plotTimeInSeconds);
         graphs.insert(id, g);
         return g;
 }
@@ -258,31 +263,7 @@ yaspGraph* MainWindow::addGraph(int id) {
 void MainWindow::updateLabel(int id, QString info) {
     yaspGraph* yGraph = graphs[id];
     Q_ASSERT(yGraph);
-    info = yGraph->plot()->name() + " -> " + info;
-    QColor color = yGraph->plot()->pen().color();
-    QFont font;
-    font.setPointSize(7);
-    font.setStyleHint(QFont::Monospace);
-    font.setWeight(QFont::Medium);
-    font.setStyle(QFont::StyleItalic);
-    QFontMetricsF fm(font);
-    qreal pixelsWide = fm.width(info);
-    qreal pixelsHigh = fm.height();
-    QCPItemText* textLabel =  yGraph->info();
-    Q_ASSERT(textLabel != nullptr);
-    QPoint labelPos;
-    labelPos.setX(pixelsWide + textLabel->padding().left()+ textLabel->padding().right() + ui->plot->yAxis->axisRect()->left() + 70 );
-    labelPos.setY( (id+1) * (5 + (pixelsHigh + textLabel->padding().top() + textLabel->padding().bottom())));
-    textLabel->setColor(color);
-    textLabel->setSelectedColor(color);
-    textLabel->setSelectedPen(yGraph->plot()->pen());
-
-    textLabel->position->setCoords(labelPos.x(), labelPos.y());
-    textLabel->setText(info);
-    QPen pen(color, 0.5);
-    pen.setDashPattern(rLineDashPattern);
-    yGraph->rLine()->setPen(pen);
-    yGraph->info()->pen().setColor(color);
+    yGraph->updateLabel(info, ui->plot->yAxis->axisRect()->left());
     if (selectedPlotId == id) {
         infoModeLabel->setColor(yGraph->plot()->pen().color());
     }
@@ -494,14 +475,10 @@ void MainWindow::replot() {
 /******************************************************************************************************************/
 void MainWindow::unselectGraphs() {
 //    if (ui->plot->selectedItems().size()) {
+    resetMouseWheelState();
     foreach (yaspGraph* yGraph, graphs) {
         Q_ASSERT(yGraph);
-        QPen pen = yGraph->plot()->pen();
-        pen.setWidth(1);
-        pen.setStyle(Qt::SolidLine);
-        yGraph->plot()->setPen(pen);
-        yGraph->info()->setSelectedColor(pen.color());
-        yGraph->info()->setSelectedPen(Qt::NoPen);
+        yGraph->setSelected(false);
     }
     ui->plot->deselectAll();
 }
@@ -884,7 +861,6 @@ void MainWindow::cleanTracer(QString str) {
         traceLineTop->end->setCoords(0, 0);
     }
     resetMouseWheelState();
-    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -951,15 +927,15 @@ void MainWindow::doMenuPlotColorAction() {
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
     QColor color = QColorDialog::getColor(Qt::white, nullptr, "plot color");
     if (color.isValid()) {
-//        qDebug() << "doMenuPlotColorAction: " << color;
+        qDebug() << "doMenuPlotColorAction: " << color;
         QPen pen = workingGraph->plot()->pen();
         pen.setColor(color);
         workingGraph->plot()->setPen(pen);
-        workingGraph->info()->setColor(color);
-        workingGraph->info()->setSelectedPen(QPen(color));
-        workingGraph->info()->setSelectedColor(color);
-        workingGraph->rLine()->setPen(QPen(pen.color()));
-        ui->plot->replot();
+        workingGraph->setSelected(true);
+//        workingGraph->info()->setColor(color);
+//        workingGraph->info()->setSelectedPen(QPen(color));
+//        workingGraph->info()->setSelectedColor(color);
+//        workingGraph->rLine()->setPen(QPen(pen.color()));
     }
     resetMouseWheelState();
 }
@@ -1428,18 +1404,19 @@ void MainWindow::plotLabelSelected(bool b) {
         yaspGraph* yGraph = graphs[plotId.toInt()];
         Q_ASSERT(yGraph);
         workingGraph = yGraph;
+        yGraph->setSelected(true);
         contextMenu->setProperty("id", plotId);
 //            contextMenu = new QMenu(this);
 //            connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuTriggered(QAction*)));
         selectedPlotId = plotId.toInt();
         doContextMenuHeader(yGraph);
         if (mouseState != mouseDoMesure) {
-            QPen pen = yGraph->plot()->pen();
-            pen.setWidth(1);
-            pen.setDashPattern(plotDashPattern);
-            yGraph->plot()->setPen(pen);
-            yGraph->info()->setSelectedPen(pen);
-            yGraph->info()->setSelectedColor(pen.color());
+//            QPen pen = yGraph->plot()->pen();
+//            pen.setWidth(1);
+//            pen.setDashPattern(plotDashPattern);
+//            yGraph->plot()->setPen(pen);
+//            yGraph->info()->setSelectedPen(pen);
+//            yGraph->info()->setSelectedColor(pen.color());
             QAction* action = contextMenu->addAction("Color", this, SLOT(doMenuPlotColorAction()));
             action->setIcon(QIcon(":/Icons/Icons/icons8-paint-palette-48.png"));
             plotShowHideAction = contextMenu->addAction("Hide", this, SLOT(doMenuPlotShowHideAction()));
@@ -1489,6 +1466,7 @@ void MainWindow::plotLabelSelected(bool b) {
         selectedPlotId = -1;
         workingGraph = nullptr;
         ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
+        unselectGraphs();
     }
 }
 

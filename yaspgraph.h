@@ -4,7 +4,7 @@
 
 class yaspGraph {
 public:
-    yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine);
+    yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine, QString plotStr, QColor color, double plotTimeInSeconds);
     QCPItemText* info();
     QCPItemLine* rLine();
     QCPGraph* plot();
@@ -13,9 +13,13 @@ public:
     double offset();
     void setMult(int dpn, double m);
     double mult();
+    void updateLabel(QString info, int margin);
     void updateRefLine(int dpn);
+    void setSelected(bool sel);
 private:
     int id;
+    QVector<qreal> plotDashPattern;
+    QVector<qreal> rLineDashPattern;
     QCPGraph* infoGraph;
     QCPItemText* infoText;
     QCPItemLine* refLine;

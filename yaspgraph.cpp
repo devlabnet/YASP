@@ -1,12 +1,81 @@
 #include "yaspgraph.h"
 
-yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine)
+yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine, QString plotStr, QColor color, double plotTimeInSeconds)
     : id(id), infoGraph(g), infoText(info), refLine(rLine) {
     yOffset = 0;
     yMult = 1.0;
+    plotDashPattern = QVector<qreal>() << 16 << 4 << 8 << 4;
+    rLineDashPattern = QVector<qreal>() << 64 << 4 ;
+
+    QPen pen = QPen(color);
+    infoGraph->setPen(pen);
+    infoGraph->setName(plotStr);
+//    info->layer()->setMode(QCPLayer::lmBuffered);
+    info->setColor(color);
+    info->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
+    info->position->setType(QCPItemPosition::ptAbsolute );
+    info->setSelectable(true);
+    info->setPadding(QMargins(2,2,2,2));
+    pen.setWidthF(0.5);
+    pen.setDashPattern(rLineDashPattern);
+//    rLine->layer()->setMode(QCPLayer::lmBuffered);
+    rLine->setPen(pen);
+    rLine->start->setCoords(0,0);
+    rLine->end->setCoords(plotTimeInSeconds, 0);
+
    // textTicker = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText());
 //    dataContainer = QSharedPointer<QCPGraphDataContainer>(new QCPGraphDataContainer());
 }
+
+//-----------------------------------------------------------------------------------------
+void yaspGraph::setSelected(bool sel) {
+     qDebug() << "yaspGraph::setSelected: " << sel;
+    QPen pen = infoGraph->pen();
+    pen.setWidth(1);
+    if (sel) {
+        pen.setDashPattern(plotDashPattern);
+        infoGraph->setPen(pen);
+        infoText->setSelectedPen(pen);
+        infoText->setSelectedColor(pen.color());
+    } else {
+        pen.setStyle(Qt::SolidLine);
+        infoGraph->setPen(pen);
+        infoText->setSelectedPen(Qt::NoPen);
+        infoText->setSelectedColor(pen.color());
+    }
+    pen.setDashPattern(rLineDashPattern);
+    pen.setWidthF(0.5);
+    refLine->setPen(pen);
+}
+
+//-----------------------------------------------------------------------------------------
+void yaspGraph::updateLabel(QString info, int margin) {
+    info = infoGraph->name() + " -> " + info;
+    QColor color = infoGraph->pen().color();
+    QFont font;
+    font.setPointSize(7);
+    font.setStyleHint(QFont::Monospace);
+    font.setWeight(QFont::Medium);
+    font.setStyle(QFont::StyleItalic);
+    QFontMetricsF fm(font);
+    qreal pixelsWide = fm.width(info);
+    qreal pixelsHigh = fm.height();
+    QPoint labelPos;
+    labelPos.setX(pixelsWide + infoText->padding().left()+ infoText->padding().right() + margin + 70 );
+    labelPos.setY( (id+1) * (5 + (pixelsHigh + infoText->padding().top() + infoText->padding().bottom())));
+    infoText->setColor(color);
+    infoText->setSelectedColor(color);
+    infoText->setSelectedPen(infoGraph->pen());
+    infoText->position->setCoords(labelPos.x(), labelPos.y());
+    infoText->setText(info);
+//    infoText->layer()->replot();
+    QPen pen(color, 0.5);
+    pen.setDashPattern(rLineDashPattern);
+    refLine->setPen(pen);
+    refLine->pen().setColor(color);
+//    refLine->layer()->replot();
+}
+
 //-----------------------------------------------------------------------------------------
 QCPItemText* yaspGraph::info() {
     return infoText;

@@ -151,8 +151,8 @@ private:
 //    QMap<int, int> pointTime;
     double lastDataTtime;
     yaspGraph* getGraph(int id);
-    QVector<qreal> plotDashPattern;
-    QVector<qreal> rLineDashPattern;
+//    QVector<qreal> plotDashPattern;
+//    QVector<qreal> rLineDashPattern;
     int selectedPlotId = -1;
     int numberOfAxes;                                                                     // Number of axes for the plot
     int STATE;                                                                            // State of recieiving message from port
@@ -174,7 +174,8 @@ private:
     QTextStream streamLog;
     QFile* logData = nullptr;
     QTextStream streamData;
-
+//    QHBoxLayout* groupBoxPlotSelectionHbox;
+//    QButtonGroup* selectButtonsGroup;
     QMenu* contextMenu = nullptr;
     QAction* plotShowHideAction;
     QAction* plotMeasureAction;
