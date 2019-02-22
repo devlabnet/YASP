@@ -49,7 +49,7 @@ void yaspGraph::setSelected(bool sel) {
 }
 
 //-----------------------------------------------------------------------------------------
-void yaspGraph::updateLabel(QString info, int margin) {
+void yaspGraph::updateLabel(QString info, double lastX, int margin) {
     info = infoGraph->name() + " -> " + info;
     QColor color = infoGraph->pen().color();
     QFont font;
@@ -73,6 +73,9 @@ void yaspGraph::updateLabel(QString info, int margin) {
     pen.setDashPattern(rLineDashPattern);
     refLine->setPen(pen);
     refLine->pen().setColor(color);
+    refLine->start->setCoords(0, yOffset);
+    refLine->end->setCoords(lastX, yOffset);
+
 //    refLine->layer()->replot();
 }
 
@@ -142,8 +145,8 @@ void yaspGraph::setMult(int dpn, double m) {
 double yaspGraph::mult() {
     return yMult;
 }
-//-----------------------------------------------------------------------------------------
-void yaspGraph::updateRefLine(int dpn) {
-    refLine->start->setCoords(0, yOffset);
-    refLine->end->setCoords(dpn, yOffset);
-}
+////-----------------------------------------------------------------------------------------
+//void yaspGraph::updateRefLine(int dpn) {
+//    refLine->start->setCoords(0, yOffset);
+//    refLine->end->setCoords(dpn, yOffset);
+//}

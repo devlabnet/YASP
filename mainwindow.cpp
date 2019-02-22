@@ -260,10 +260,10 @@ yaspGraph* MainWindow::addGraph(int id) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::updateLabel(int id, QString info) {
+void MainWindow::updateLabel(int id) {
     yaspGraph* yGraph = graphs[id];
     Q_ASSERT(yGraph);
-    yGraph->updateLabel(info, ui->plot->yAxis->axisRect()->left());
+    yGraph->updateLabel(plotInfoStr, lastDataTtime, ui->plot->yAxis->axisRect()->left());
     if (selectedPlotId == id) {
         infoModeLabel->setColor(yGraph->plot()->pen().color());
     }
@@ -576,6 +576,7 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
 //        qDebug() << "param1 : " << param1;
 //        qDebug() << "param2 : " << param2;
         updateLabel(plotId);
+        ui->plot->replot();
     }
 }
 
@@ -601,17 +602,17 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             val += yGraph->offset();
             // Add data to graphs according plot Id
             QCPGraph* plot = yGraph->plot();
-            QString info = " val: ";
-            info += QString::number(val);
-            info +=  + " offset: ";
-            info += QString::number(yGraph->offset());
-            info +=  + " mult: ";
-            info += QString::number(yGraph->mult());
-            updateLabel(plotId, info);
+            plotInfoStr = " val: ";
+            plotInfoStr += QString::number(val);
+            plotInfoStr +=  + " offset: ";
+            plotInfoStr += QString::number(yGraph->offset());
+            plotInfoStr +=  + " mult: ";
+            plotInfoStr += QString::number(yGraph->mult());
+            updateLabel(plotId);
             plot->addData(lastDataTtime, val );
 //            qDebug() << "ADD DATA : " << plotId << " --> " << time << " / " << val;
 //            pointTime.insert(dataPointNumber, ticksXTime.elapsed());
-            yGraph->updateRefLine(dataPointNumber);
+//            yGraph->updateRefLine(dataPointNumber);
             ui->statusBar->showMessage("Points: " + QString::number(dataPointNumber));
 
             if (logFile != nullptr) {

@@ -13,8 +13,8 @@ public:
     double offset();
     void setMult(int dpn, double m);
     double mult();
-    void updateLabel(QString info, int margin);
-    void updateRefLine(int dpn);
+    void updateLabel(QString info, double lastX, int margin);
+//    void updateRefLine(int dpn);
     void setSelected(bool sel);
 private:
     int id;

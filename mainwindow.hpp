@@ -150,6 +150,7 @@ private:
     QMap<int, yaspGraph*> graphs;
 //    QMap<int, int> pointTime;
     double lastDataTtime;
+    QString plotInfoStr;
     yaspGraph* getGraph(int id);
 //    QVector<qreal> plotDashPattern;
 //    QVector<qreal> rLineDashPattern;
@@ -192,7 +193,7 @@ private:
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     yaspGraph *addGraph(int id);
-    void updateLabel(int id, QString info = "");
+    void updateLabel(int id);
     void doContextMenuHeader(yaspGraph* yGraph);
     bool isColor(QString str);
     // Setup the QCustomPlot
