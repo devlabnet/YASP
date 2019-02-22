@@ -13,7 +13,10 @@ public:
     double offset();
     void setMult(double m);
     double mult();
-    void updateLabel(QString info, double lX, int margin);
+    QString infoStr() {
+        return plotInfoStr;
+    }
+    void updateLabel(QString str, double lX, int margin);
 //    void updateRefLine(int dpn);
     void setSelected(bool sel);
     void reset();
@@ -27,6 +30,7 @@ private:
     double lastX;
     double yOffset;
     double yMult;
+    QString plotInfoStr;
 };
 
 #endif // YASPGRAPH_H

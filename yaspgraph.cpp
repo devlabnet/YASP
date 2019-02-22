@@ -49,13 +49,17 @@ void yaspGraph::setSelected(bool sel) {
     if (sel) {
         pen.setDashPattern(plotDashPattern);
         infoGraph->setPen(pen);
+        infoText->setPen(pen);
         infoText->setSelectedPen(pen);
         infoText->setSelectedColor(pen.color());
+        infoText->setColor(pen.color());
     } else {
         pen.setStyle(Qt::SolidLine);
         infoGraph->setPen(pen);
+        infoText->setPen(Qt::NoPen);
         infoText->setSelectedPen(Qt::NoPen);
         infoText->setSelectedColor(pen.color());
+        infoText->setColor(pen.color());
     }
     pen.setDashPattern(rLineDashPattern);
     pen.setWidthF(0.5);
@@ -63,9 +67,10 @@ void yaspGraph::setSelected(bool sel) {
 }
 
 //-----------------------------------------------------------------------------------------
-void yaspGraph::updateLabel(QString info, double lX, int margin) {
+void yaspGraph::updateLabel(QString str, double lX, int margin) {
     lastX = lX;
-    info = infoGraph->name() + " -> " + info;
+    plotInfoStr = str;
+    QString info = infoGraph->name() + " -> " + plotInfoStr;
     QColor color = infoGraph->pen().color();
     QFont font;
     font.setPointSize(7);
@@ -79,6 +84,7 @@ void yaspGraph::updateLabel(QString info, double lX, int margin) {
     labelPos.setX(pixelsWide + infoText->padding().left()+ infoText->padding().right() + margin + 70 );
     labelPos.setY( (id+1) * (5 + (pixelsHigh + infoText->padding().top() + infoText->padding().bottom())));
     infoText->setColor(color);
+//    infoText->setPen(infoGraph->pen());
     infoText->setSelectedColor(color);
     infoText->setSelectedPen(infoGraph->pen());
     infoText->position->setCoords(labelPos.x(), labelPos.y());

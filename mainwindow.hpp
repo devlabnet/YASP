@@ -123,6 +123,13 @@ signals:
 
 private:
     Ui::MainWindow *ui;
+    bool connected;                                                                       // Status connection variable
+    bool plotting;                                                                        // Status plotting variable
+    int dataPointNumber;                                                                  // Keep track of data points
+    int numberOfAxes;                                                                     // Number of axes for the plot
+    int STATE;                                                                            // State of recieiving message from port
+    double plotTimeInSeconds;
+
     QColor bgColor = QColor(20,20,20);
     QColor colours[10] = {QColor("#EEEEEE"), QColor("#ffff00"), QColor("#aaffaf"),
                           QColor("#ffaa00"), QColor("#ffaaff"), QColor("#00ffff"),
@@ -147,21 +154,14 @@ private:
     Qt::MouseButton mouseButtonState;
 //    QSharedPointer<QCPAxisTickerText> textTicker;
     QSharedPointer<QCPAxisTickerFixed> fixedTicker;
-
     QMap<int, yaspGraph*> graphs;
 //    QMap<int, int> pointTime;
     double lastDataTtime;
-    QString plotInfoStr;
+//    QString plotInfoStr;
     yaspGraph* getGraph(int id);
 //    QVector<qreal> plotDashPattern;
 //    QVector<qreal> rLineDashPattern;
     int selectedPlotId = -1;
-    int numberOfAxes;                                                                     // Number of axes for the plot
-    int STATE;                                                                            // State of recieiving message from port
-    double plotTimeInSeconds;
-    bool connected;                                                                       // Status connection variable
-    bool plotting;                                                                        // Status plotting variable
-    int dataPointNumber;                                                                  // Keep track of data points
     QTimer updateTimer;
 //    QTimer ticksXTimer;
 //    QTime ticksXTime;
@@ -194,7 +194,7 @@ private:
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     yaspGraph *addGraph(int id);
-    void updateLabel(int id);
+    void updateLabel(int id, QString plotInfoStr);
     void doContextMenuHeader(yaspGraph* yGraph);
     bool isColor(QString str);
     // Setup the QCustomPlot
