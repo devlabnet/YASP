@@ -876,6 +876,8 @@ void MainWindow::doMenuPlotMeasureAction() {
     Q_ASSERT(workingGraph);
     if (mouseState == mouseDoMesure) {
         cleanTracer("doMenuPlotMeasureAction mouseDoMesure");
+        mouseState = mouseNone;
+        plotLabelSelected(true);
     } else {
         qDebug() << "Init Tracer !";
         mouseState = mouseDoMesure;
@@ -883,6 +885,7 @@ void MainWindow::doMenuPlotMeasureAction() {
         ui->plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag );
         infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE MODE");
         infoModeLabel->setColor(workingGraph->plot()->pen().color());
+        plotLabelSelected(true);
         QFontMetricsF fm(infoModeLabel->font());
         qreal pixelsWide = fm.width(infoModeLabel->text());
         infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
@@ -1030,7 +1033,7 @@ void MainWindow::messageSent(QString str) {
 
 /******************************************************************************************************************/
 void MainWindow::updateTracer(int pX) {
-    qDebug() << "updateTracer " << tracer << " / " << pX;
+//    qDebug() << "updateTracer " << tracer << " / " << pX;
     if (mouseState == mouseDoMesure) {
         Q_ASSERT(tracer);
         double coordX = ui->plot->xAxis->pixelToCoord(pX);
