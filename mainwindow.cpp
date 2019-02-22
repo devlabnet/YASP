@@ -468,6 +468,7 @@ void MainWindow::replot() {
 
 /******************************************************************************************************************/
 void MainWindow::unselectGraphs() {
+    qDebug() << "<<<<<<<<<<<<< unselectGraphs >>>>>>>>>>>>>>";
 //    if (ui->plot->selectedItems().size()) {
     resetMouseWheelState();
     foreach (yaspGraph* yGraph, graphs) {
@@ -1396,19 +1397,19 @@ void MainWindow::plotLabelSelected(bool b) {
             QVariant plotId = item->property("id");
             yaspGraph* yGraph = graphs[plotId.toInt()];
             Q_ASSERT(yGraph);
-            if (workingGraph) {
-                if (workingGraph != yGraph) {
-                    qDebug() << ">>>>>>>>>>>>>>>>> plotLabelSelected --> " << workingGraph << " / " << yGraph;
-                    workingGraph->setSelected(false);
-                } else {
-                    workingGraph->setSelected(false);
-    //                selectedPlotId = -1;
-    //                workingGraph = nullptr;
-    //                ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
-                    unselectGraphs();
-                    return;
-                }
-            }
+//            if (workingGraph) {
+//                if (workingGraph != yGraph) {
+//                    qDebug() << ">>>>>>>>>>>>>>>>> plotLabelSelected --> " << workingGraph << " / " << yGraph;
+//                    workingGraph->setSelected(false);
+//                } else {
+//                    workingGraph->setSelected(false);
+//    //                selectedPlotId = -1;
+//    //                workingGraph = nullptr;
+//    //                ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
+//                    unselectGraphs();
+//                    return;
+//                }
+//            }
             workingGraph = yGraph;
             contextMenu->setProperty("id", plotId);
             selectedPlotId = plotId.toInt();
@@ -1452,11 +1453,13 @@ void MainWindow::plotLabelSelected(bool b) {
         }
         ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     } else {
-        if (workingGraph) {
-            qDebug() << "plotLabelSelected NOTHING !!!!";
-            workingGraph->setSelected(true);
-            return;
-        }
+//        if (workingGraph) {
+//            qDebug() << "plotLabelSelected NOTHING !!!!";
+//            workingGraph->setSelected(true);
+//            return;
+//        } else {
+//            unselectGraphs();
+//        }
 //        selectedPlotId = -1;
 //        workingGraph = nullptr;
 //        ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
