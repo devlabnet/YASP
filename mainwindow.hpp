@@ -101,6 +101,7 @@ private slots:
     void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
     void doMenuPlotScaleAction();
+    void doMenuPlotResetAction();
     void doMenuPlotMeasureAction();
     void doMenuPlotShowHideAction();
     void on_actionHow_to_use_triggered();

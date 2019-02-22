@@ -923,6 +923,14 @@ void MainWindow::doMenuPlotColorAction() {
 }
 
 /******************************************************************************************************************/
+void MainWindow::doMenuPlotResetAction() {
+    qDebug() << "doMenuPlotScaleAction: " << contextMenu->property("id");
+    resetMouseWheelState();
+    Q_ASSERT(workingGraph);
+    workingGraph->reset();
+}
+
+/******************************************************************************************************************/
 void MainWindow::doMenuPlotScaleAction() {
 //    Q_ASSERT(contextMenu);
     qDebug() << "doMenuPlotScaleAction: " << contextMenu->property("id");
@@ -1075,7 +1083,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
             if (mouseButtonState == Qt::LeftButton) {
                 ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
                 shiftPlot(event->y());
-                QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(event->y() - lastPosY);
+                QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->offset());
                 ui->statusBar->showMessage(msg);
             } else {
                 ui->statusBar->showMessage(coordinates);
@@ -1156,7 +1164,7 @@ void MainWindow::resetMouseWheelState() {
 
 /******************************************************************************************************************/
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
-    qDebug() << "onMouseWheelInPlot: " << mouseButtonState;
+//    qDebug() << "onMouseWheelInPlot: " << mouseButtonState;
     if (mouseButtonState == Qt::RightButton) {
         // change spinDisplayTime
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
@@ -1171,8 +1179,6 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
     } else {
         ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
         if (workingGraph) {
-            // do only selected plot
-            qDebug() << "WG";
             QPoint numDegrees = event->angleDelta();
             int nY = numDegrees.y();
             if (nY != 0) {
@@ -1384,16 +1390,18 @@ void MainWindow::plotLabelSelected(bool b) {
                 plotShowHideAction->setText("Hide");
                 infoModeLabel->setText(yGraph->plot()->name() + " --> SHOW MODE");
                 infoModeLabel->setColor(yGraph->plot()->pen().color());
-                action->setIcon(QIcon(":/Icons/Icons/icons8-hide-48.png"));
+                plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-hide-48.png"));
             } else {
                 plotShowHideAction->setText("Show");
                 infoModeLabel->setText(yGraph->plot()->name() + " --> HIDE MODE");
                 infoModeLabel->setColor(yGraph->plot()->pen().color());
-                action->setIcon(QIcon(":/Icons/Icons/icons8-eye-48.png"));
+                plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-eye-48.png"));
             }
             QFontMetricsF fm(infoModeLabel->font());
             qreal pixelsWide = fm.width(infoModeLabel->text());
             infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+            action = contextMenu->addAction("Reset", this, SLOT(doMenuPlotResetAction()));
+            action->setIcon(QIcon(":/Icons/Icons/icons8-available-updates-40.png"));
             action = contextMenu->addAction("Scale", this, SLOT(doMenuPlotScaleAction()));
             action->setIcon(QIcon(":/Icons/Icons/icons8-height-48.png"));
             action = contextMenu->addAction("Shift", this, SLOT(doMenuPlotShiftAction()));

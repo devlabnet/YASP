@@ -30,6 +30,13 @@ yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine,
 
 //-----------------------------------------------------------------------------------------
 void yaspGraph::reset() {
+    QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
+    for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
+        double val = it->value;
+        val -= yOffset;
+        val /= yMult;
+        it->value = val;
+    }
     yOffset = 0;
     yMult = 1.0;
 }

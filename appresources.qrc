@@ -15,6 +15,7 @@
         <file>Icons/icons8-search-480.png</file>
         <file>Icons/icons8-save-48.png</file>
         <file>Icons/icons8-caliper-48.png</file>
+        <file>Icons/icons8-available-updates-40.png</file>
     </qresource>
     <qresource prefix="/StyleSheet">
         <file>StyleSheet/style.qss</file>
