@@ -425,6 +425,21 @@ void MainWindow::portOpenedSuccess() {
     tracerArrowAmplitudeBottomTxt->setBrush(QBrush(QColor(150, 255, 150)));
     tracerArrowAmplitudeBottomTxt->setPadding(QMargins(8, 4, 8, 4));
 
+    tracerArrowFromRef = new QCPItemLine(ui->plot);
+    tracerArrowFromRefTxt = new QCPItemText(ui->plot);
+    tracerArrowFromRef->setHead(QCPLineEnding::esSpikeArrow);
+    tracerArrowFromRef->setTail(QCPLineEnding::esSpikeArrow);
+    tracerArrowFromRef->setPen(QPen(QColor(255, 255, 150), 4));
+    tracerArrowFromRefTxt = new QCPItemText(ui->plot);
+    tracerArrowFromRefTxt->setPositionAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    tracerArrowFromRefTxt->setTextAlignment(Qt::AlignLeft);
+    tracerArrowFromRefTxt->brush().setStyle(Qt::SolidPattern);
+    tracerArrowFromRefTxt->setFont(font);
+    tracerArrowFromRefTxt->setPen(QPen(bgColor));
+    tracerArrowFromRefTxt->setColor(bgColor);
+    tracerArrowFromRefTxt->setBrush(QBrush(QColor(255, 255, 150)));
+    tracerArrowFromRefTxt->setPadding(QMargins(8, 4, 8, 4));
+
 //    traceLineTop->setVisible(false);
 //    traceLineTop->start->setCoords(0, -DBL_MAX);
 //    traceLineTop->end->setCoords(DBL_MAX, -DBL_MAX);
@@ -897,6 +912,8 @@ void MainWindow::cleanTracer() {
         tracerArrowAmplitudeTxt->setVisible(false);
         tracerArrowAmplitudeTopTxt->setVisible(false);
         tracerArrowAmplitudeBottomTxt->setVisible(false);
+        tracerArrowFromRef->setVisible(false);
+        tracerArrowFromRefTxt->setVisible(false);
 //    }
     resetMouseWheelState();
 }
@@ -1114,6 +1131,8 @@ void MainWindow::updateTracer(int pX) {
         double amplitude = traceLineTop->start->coords().y() - traceLineBottom->start->coords().y();
         double deltaTop = traceLineTop->start->coords().y() - endY;
         double deltaBottom = endY - traceLineBottom->start->coords().y();
+        double ref = workingGraph->rLine()->start->coords().y();
+        double deltaFromRef = endY - ref;
 //        qDebug() << "amplitude: " << amplitude << " deltaTop: " << deltaTop << " deltaBottom: " << deltaBottom;
         tracerInfo =  tracerInfo.arg(endY)
                 .arg(deltaTop)
@@ -1126,8 +1145,8 @@ void MainWindow::updateTracer(int pX) {
 //        coordinates = coordinates.arg(startX).arg(startY).arg(endX - startX).arg(endY - startY).arg(measureMult);
         ui->statusBar->setStyleSheet("background-color: lightgreen;");
         ui->statusBar->showMessage(tracerInfo);
-        double space = ui->plot->xAxis->range().size() / 80;
-//        double ampTracerArrowX = coordX - 2*space;
+        double space = ui->plot->xAxis->range().size() / 800;
+//        double ampTracerArrowX = coordX - 20.0*space;
         double ampTracerArrowSY = traceLineBottom->start->coords().y();
         double ampTracerArrowEY = traceLineTop->end->coords().y();
         double mult = workingGraph->mult();
@@ -1137,8 +1156,8 @@ void MainWindow::updateTracer(int pX) {
             tracerArrowAmplitudeTxt->setVisible(false);
         } else {
             tracerArrowAmplitude->setVisible(true);
-            tracerArrowAmplitude->start->setCoords(coordX - 2*space, ampTracerArrowSY);
-            tracerArrowAmplitude->end->setCoords(coordX - 2*space, ampTracerArrowEY);
+            tracerArrowAmplitude->start->setCoords(coordX - 10.0*space, ampTracerArrowSY);
+            tracerArrowAmplitude->end->setCoords(coordX - 10.0*space, ampTracerArrowEY);
             tracerArrowAmplitudeTxt->setFont(QFont(font().family(), 9));
             tracerArrowAmplitudeTxt->setVisible(true);
             if (qFuzzyCompare(mult, 1.0)) {
@@ -1147,7 +1166,7 @@ void MainWindow::updateTracer(int pX) {
                 tracerArrowAmplitudeTxt->setText(QString::number(amplitude) + " ["
                                                  + QString::number(amplitude/mult) + "]");
             }
-            tracerArrowAmplitudeTxt->position->setCoords(coordX - 3*space,
+            tracerArrowAmplitudeTxt->position->setCoords(coordX - 30.0*space,
                                                          (ampTracerArrowSY + ampTracerArrowEY)/2.0);
         }
         if (qFuzzyCompare(deltaTop, 0)) {
@@ -1155,8 +1174,8 @@ void MainWindow::updateTracer(int pX) {
             tracerArrowAmplitudeTopTxt->setVisible(false);
         } else {
             tracerArrowAmplitudeTop->setVisible(true);
-            tracerArrowAmplitudeTop->start->setCoords(coordX + 2*space, endY);
-            tracerArrowAmplitudeTop->end->setCoords(coordX + 2*space, ampTracerArrowEY);
+            tracerArrowAmplitudeTop->start->setCoords(coordX + 10.0*space, endY);
+            tracerArrowAmplitudeTop->end->setCoords(coordX + 10.0*space, ampTracerArrowEY);
             tracerArrowAmplitudeTopTxt->setFont(QFont(font().family(), 9));
             tracerArrowAmplitudeTopTxt->setVisible(true);
 //            tracerArrowAmplitudeTopTxt->position->setCoords(ampTracerArrowX - space,
@@ -1167,7 +1186,7 @@ void MainWindow::updateTracer(int pX) {
                 tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop) + " ["
                                                  + QString::number(deltaTop/mult) + "]");
             }
-            tracerArrowAmplitudeTopTxt->position->setCoords(coordX + 3*space,
+            tracerArrowAmplitudeTopTxt->position->setCoords(coordX + 20.0*space,
                                                          (endY + ampTracerArrowEY)/2.0);
         }
         if (qFuzzyCompare(deltaBottom, 0)) {
@@ -1175,8 +1194,8 @@ void MainWindow::updateTracer(int pX) {
             tracerArrowAmplitudeBottomTxt->setVisible(false);
         } else {
             tracerArrowAmplitudeBottom->setVisible(true);
-            tracerArrowAmplitudeBottom->start->setCoords(coordX + 2*space, ampTracerArrowSY);
-            tracerArrowAmplitudeBottom->end->setCoords(coordX + 2*space, endY);
+            tracerArrowAmplitudeBottom->start->setCoords(coordX + 10.0*space, ampTracerArrowSY);
+            tracerArrowAmplitudeBottom->end->setCoords(coordX + 10.0*space, endY);
             tracerArrowAmplitudeBottomTxt->setFont(QFont(font().family(), 9));
             tracerArrowAmplitudeBottomTxt->setVisible(true);
             if (qFuzzyCompare(mult, 1.0)) {
@@ -1185,10 +1204,28 @@ void MainWindow::updateTracer(int pX) {
                 tracerArrowAmplitudeBottomTxt->setText(QString::number(deltaBottom) + " ["
                                                  + QString::number(deltaBottom/mult) + "]");
             }
-            tracerArrowAmplitudeBottomTxt->position->setCoords(coordX + 3*space,
+            tracerArrowAmplitudeBottomTxt->position->setCoords(coordX + 20.0*space,
                                                          (ampTracerArrowSY + endY)/2.0);
         }
 
+        if (qFuzzyCompare(deltaFromRef, 0)) {
+            tracerArrowFromRef->setVisible(false);
+            tracerArrowFromRefTxt->setVisible(false);
+        } else {
+            tracerArrowFromRef->setVisible(true);
+            tracerArrowFromRef->start->setCoords(coordX - 20.0*space, ref);
+            tracerArrowFromRef->end->setCoords(coordX - 20.0*space, endY);
+            tracerArrowFromRefTxt->setFont(QFont(font().family(), 9));
+            tracerArrowFromRefTxt->setVisible(true);
+            if (qFuzzyCompare(mult, 1.0)) {
+                tracerArrowFromRefTxt->setText(QString::number(deltaFromRef));
+            } else {
+                tracerArrowFromRefTxt->setText(QString::number(deltaFromRef) + " ["
+                                                 + QString::number(deltaFromRef/mult) + "]");
+            }
+            tracerArrowFromRefTxt->position->setCoords(coordX - 30.0*space,
+                                                         (ref + endY)/2.0);
+        }
 
 //        // add arrow pointing at phase tracer, coming from label:
 //        tracerArrowAmplitudeTop->setVisible(true);
@@ -1212,18 +1249,18 @@ void MainWindow::updateTracer(int pX) {
 //                                                         (ampTracerArrowSY + ampTracerArrowEY)/2.0);
 //            tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop) + " ["
 //                                                + QString::number(deltaTop/mult) + "]");
-//            tracerArrowAmplitudeTopTxt->position->setCoords(ampTracerArrowX + 2*space,
+//            tracerArrowAmplitudeTopTxt->position->setCoords(ampTracerArrowX + 20.0*space,
 //                                                         (endY + ampTracerArrowEY)/2.0);
 //            tracerArrowAmplitudeBottomTxt->setText(QString::number(deltaBottom) + " ["
 //                                                   + QString::number(deltaBottom/mult) + "]");
-//            tracerArrowAmplitudeBottomTxt->position->setCoords(ampTracerArrowX + 2*space,
+//            tracerArrowAmplitudeBottomTxt->position->setCoords(ampTracerArrowX + 20.0*space,
 //                                                         (ampTracerArrowSY + endY)/2.0);
 //        } else {
 //            tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop));
-//            tracerArrowAmplitudeTopTxt->position->setCoords(ampTracerArrowX + 2*space,
+//            tracerArrowAmplitudeTopTxt->position->setCoords(ampTracerArrowX + 20.0*space,
 //                                                         (endY + ampTracerArrowEY)/2.0);
 //            tracerArrowAmplitudeBottomTxt->setText(QString::number(deltaBottom));
-//            tracerArrowAmplitudeBottomTxt->position->setCoords(ampTracerArrowX + 2*space,
+//            tracerArrowAmplitudeBottomTxt->position->setCoords(ampTracerArrowX + 20.0*space,
 //                                                         (ampTracerArrowSY + endY)/2.0);
 //        }
         ui->plot->replot();

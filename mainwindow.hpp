@@ -199,6 +199,8 @@ private:
     QCPItemText* tracerArrowAmplitudeTopTxt;
     QCPItemLine* tracerArrowAmplitudeBottom;
     QCPItemText* tracerArrowAmplitudeBottomTxt;
+    QCPItemLine* tracerArrowFromRef;
+    QCPItemText* tracerArrowFromRefTxt;
 
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
