@@ -121,6 +121,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     contextMenu = new QMenu(this);
     connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuTriggered(QAction*)));
+    connect(contextMenu, SIGNAL(aboutToHide()), this, SLOT(menuAboutToHide()));
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     // Clear the terminal
     on_clearTermButton_clicked();
@@ -385,7 +386,7 @@ void MainWindow::portOpenedSuccess() {
 //    traceLineTop->setVisible(false);
 //    traceLineTop->start->setCoords(0, -DBL_MAX);
 //    traceLineTop->end->setCoords(DBL_MAX, -DBL_MAX);
-    cleanTracer("init");
+    cleanTracer();
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
 
@@ -470,6 +471,7 @@ void MainWindow::replot() {
 void MainWindow::unselectGraphs() {
     qDebug() << "<<<<<<<<<<<<< unselectGraphs >>>>>>>>>>>>>>";
 //    if (ui->plot->selectedItems().size()) {
+    cleanTracer();
     resetMouseWheelState();
     foreach (yaspGraph* yGraph, graphs) {
         Q_ASSERT(yGraph);
@@ -836,8 +838,8 @@ void MainWindow::scalePlot(double scale) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::cleanTracer(QString str) {
-    qDebug() << "========================== cleanTracer: " << str;
+void MainWindow::cleanTracer() {
+    qDebug() << "========================== cleanTracer ==========================";
 //    if (mouseState == mouseDoMesure) {
         ui->plot->setCursor(Qt::ArrowCursor);
         tracer->setVisible(false);
@@ -875,7 +877,7 @@ void MainWindow::doMenuPlotMeasureAction() {
     Q_ASSERT(contextMenu);
     Q_ASSERT(workingGraph);
     if (mouseState == mouseDoMesure) {
-        cleanTracer("doMenuPlotMeasureAction mouseDoMesure");
+        cleanTracer();
         mouseState = mouseNone;
         plotLabelSelected(true);
     } else {
@@ -893,6 +895,11 @@ void MainWindow::doMenuPlotMeasureAction() {
         tracer->setVisible(true);
         tracer->setGraph(workingGraph->plot());
     }
+}
+
+/******************************************************************************************************************/
+void MainWindow::doMenuCloseAction(bool) {
+    qDebug() << "doMenuCloseAction: " << contextMenu->property("id");
 }
 
 /******************************************************************************************************************/
@@ -1214,7 +1221,9 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 
 /******************************************************************************************************************/
 void MainWindow::onMousePressInPlot(QMouseEvent *event) {
-    qDebug() << "onMousePressInPlot " << event->button() << " mouseState: " << mouseState;
+    qDebug() << "onMousePressInPlot " << event->button()
+             << " mouseState: " << mouseState
+             << " menu: " << contextMenu->isVisible();
     mouseButtonState = event->button();
     switch (mouseState) {
     case mouseShift:
@@ -1363,25 +1372,88 @@ void MainWindow::on_logPlotButton_clicked() {
 void MainWindow::contextMenuTriggered(QAction* act) {
     qDebug() << "contextMenuTriggered : " << act;
 }
-
 /******************************************************************************************************************/
+void MainWindow::menuAboutToHide() {
+    qDebug() << "menuAboutToHide";
+}
+
+
 void MainWindow::doContextMenuHeader(yaspGraph* yGraph) {
-//    contextMenu->setTearOffEnabled(true);
     contextMenu->setAttribute(Qt::WA_TranslucentBackground);
     contextMenu->setStyleSheet("QMenu {border-radius:16px;}");
-    QLabel* menuTitle = new QLabel("plot " + yGraph->plot()->name(), contextMenu);
-    menuTitle->setAlignment(Qt::AlignCenter);
+    QWidget* menuTitleWidget = new QWidget();
+    QLabel* menuTitleLabel = new QLabel("plot " + yGraph->plot()->name(), contextMenu);
+    menuTitleLabel->setAlignment(Qt::AlignCenter);
+    QLabel* menuIcon = new QLabel();
+//    menuIcon->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png").scaledToWidth(200));
+    menuIcon->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png"));
+    QVBoxLayout* headerLayout = new QVBoxLayout;
+    headerLayout->setAlignment(Qt::AlignCenter);
+    headerLayout->addWidget(menuTitleLabel);
+    headerLayout->addWidget(menuIcon);
+    menuTitleWidget->setLayout(headerLayout);
+    //menuTitle->setAlignment(Qt::AlignCenter);
     QString styleTitle = "color:" + yGraph->plot()->pen().color().name() + ";"
+//            + "background-color:grey;"
             + "background-color:" + bgColor.name() + ";"
             + "font:bold;"
             + "padding:8px;";
-//                + "border-radius:8px;";
-//        + "border-width:2px;border-style:solid;border-color:black;font:bold;padding:2px;";
-    menuTitle->setStyleSheet(styleTitle);
+    //                + "border-radius:8px;";
+    //        + "border-width:2px;border-style:solid;border-color:black;font:bold;padding:2px;";
+    menuTitleWidget->setStyleSheet(styleTitle);
     QWidgetAction *LabelAction= new QWidgetAction(contextMenu);
-    LabelAction->setDefaultWidget(menuTitle);
+    LabelAction->setDefaultWidget(menuTitleWidget);
     contextMenu->addAction(LabelAction);
 }
+
+///******************************************************************************************************************/
+//void MainWindow::doContextMenuHeader(yaspGraph* yGraph) {
+////    contextMenu->setTearOffEnabled(true);
+//    contextMenu->setAttribute(Qt::WA_TranslucentBackground);
+//    contextMenu->setStyleSheet("QMenu {border-radius:16px;}");
+//    QLabel* menuTitle = new QLabel("plot " + yGraph->plot()->name(), contextMenu);
+//////    menuTitle->setTextFormat(Qt::RichText);
+//    menuTitle->setAlignment(Qt::AlignCenter);
+//    QString styleTitle = "color:" + yGraph->plot()->pen().color().name() + ";"
+//            + "background-color:" + bgColor.name() + ";"
+//            + "font:bold;"
+//            + "padding:8px;";
+////                + "border-radius:8px;";
+////        + "border-width:2px;border-style:solid;border-color:black;font:bold;padding:2px;";
+//    menuTitle->setStyleSheet(styleTitle);
+
+////    QLabel* menuTitle = new QLabel(contextMenu);
+////    menuTitle->setText("<img src=\":/Icons/Icons/icons8-save-48.png\"> plot " + yGraph->plot()->name());
+////    menuTitle->setAttribute(Qt::WA_TranslucentBackground);
+////    menuTitle->setStyleSheet(styleTitle);
+//    QWidgetAction *LabelAction= new QWidgetAction(contextMenu);
+//    LabelAction->setDefaultWidget(menuTitle);
+//    contextMenu->addAction(LabelAction);
+//}
+
+//void MainWindow::doContextMenuHeader(yaspGraph* yGraph) {
+////    contextMenu->setTearOffEnabled(true);
+//    contextMenu->setAttribute(Qt::WA_TranslucentBackground);
+//    contextMenu->setStyleSheet("QMenu {border-radius:16px;}");
+////    QLabel* menuTitle = new QLabel("plot " + yGraph->plot()->name(), contextMenu);
+//    QLabel* menuTitle = new QLabel(contextMenu);
+//    menuTitle->setTextFormat(Qt::RichText);
+////    menuTitle->setText("<img src='qrc:/Icons/Icons/oscillo.ico'> plot " + yGraph->plot()->name());
+//    menuTitle->setText("plot " + yGraph->plot()->name());
+
+//    menuTitle->setAlignment(Qt::AlignCenter);
+//    QString styleTitle = "color:" + yGraph->plot()->pen().color().name() + ";"
+//            + "background-color:" + bgColor.name() + ";"
+//            + "font:bold;"
+//            + "padding:8px;";
+////                + "border-radius:8px;";
+////        + "border-width:2px;border-style:solid;border-color:black;font:bold;padding:2px;";
+//    menuTitle->setStyleSheet(styleTitle);
+//    QWidgetAction *LabelAction= new QWidgetAction(contextMenu);
+//    LabelAction->setDefaultWidget(menuTitle);
+//    contextMenu->addAction(LabelAction);
+//    connect(LabelAction, SIGNAL(toggled(bool)), this, SLOT(doMenuCloseAction(bool)));
+//}
 
 /******************************************************************************************************************/
 void MainWindow::plotLabelSelected(bool b) {

@@ -97,7 +97,8 @@ private slots:
     void saveAllGraphs();
 //    void doMeasure();
 //    void doShift();
-    void cleanTracer(QString str);
+    void cleanTracer();
+    void doMenuCloseAction(bool);
     void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
     void doMenuPlotScaleAction();
@@ -110,6 +111,7 @@ private slots:
     void on_actionShowWidgets_triggered();
     void on_bgColorButton_pressed();
     void contextMenuTriggered(QAction*);
+    void menuAboutToHide();
     void on_scrollButton_clicked(bool checked);
     void on_logPlotButton_clicked();
     void plotLabelSelected(bool b);
