@@ -369,10 +369,10 @@ void MainWindow::portOpenedSuccess() {
         linesColor = Qt::white;
     }
     QPen pen = QPen(linesColor, 2);
-    pen.setStyle(Qt::DotLine);
     tracer->setPen(pen);
     tracer->setSelectable(false);
 
+    pen.setStyle(Qt::DotLine);
     traceLineBottom = new QCPItemLine(ui->plot);
     pen.setColor(Qt::green);
     traceLineBottom->setPen(pen);
