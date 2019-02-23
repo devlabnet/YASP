@@ -381,6 +381,19 @@ void MainWindow::portOpenedSuccess() {
 //    traceLineBottom->start->setCoords(0, DBL_MAX);
 //    traceLineBottom->end->setCoords(DBL_MAX, DBL_MAX);
     traceLineTop = new QCPItemLine(ui->plot);
+    tracerArrowAmplitude = new QCPItemLine(ui->plot);
+    tracerArrowAmplitude->setPen(QPen(Qt::white, 4));
+    tracerArrowAmplitudeTxt = new QCPItemText(ui->plot);
+    tracerArrowAmplitudeTxt->setPositionAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    tracerArrowAmplitudeTxt->setTextAlignment(Qt::AlignLeft);
+    tracerArrowAmplitudeTxt->brush().setStyle(Qt::SolidPattern);
+    font.setPixelSize(9);
+    tracerArrowAmplitudeTxt->setFont(font);
+    tracerArrowAmplitudeTxt->setPen(QPen(linesColor));
+    tracerArrowAmplitudeTxt->setColor(linesColor);
+    tracerArrowAmplitudeTxt->setBrush(QBrush(Qt::blue));
+    tracerArrowAmplitudeTxt->setPadding(QMargins(4, 2, 4, 2));
+
     pen.setColor(Qt::red);
     traceLineTop->setPen(pen);
 //    traceLineTop->setVisible(false);
@@ -849,6 +862,8 @@ void MainWindow::cleanTracer() {
         traceLineTop->setVisible(false);
         traceLineTop->start->setCoords(0, -DBL_MAX);
         traceLineTop->end->setCoords(DBL_MAX, -DBL_MAX);
+        tracerArrowAmplitude->setVisible(false);
+        tracerArrowAmplitudeTxt->setVisible(false);
 //    }
     resetMouseWheelState();
 }
@@ -1075,6 +1090,23 @@ void MainWindow::updateTracer(int pX) {
 //        coordinates = coordinates.arg(startX).arg(startY).arg(endX - startX).arg(endY - startY).arg(measureMult);
         ui->statusBar->setStyleSheet("background-color: lightgreen;");
         ui->statusBar->showMessage(tracerInfo);
+
+        // add arrow pointing at phase tracer, coming from label:
+        tracerArrowAmplitude->setVisible(true);
+        tracerArrowAmplitudeTxt->setVisible(true);
+        double ampTracerArrowX = coordX - (ui->plot->xAxis->range().size() / 20);
+        double ampTracerArrowSY = traceLineBottom->start->coords().y();
+        double ampTracerArrowEY = traceLineTop->end->coords().y();
+        tracerArrowAmplitude->setHead(QCPLineEnding::esSpikeArrow);
+        tracerArrowAmplitude->setTail(QCPLineEnding::esSpikeArrow);
+        tracerArrowAmplitude->start->setCoords(ampTracerArrowX, ampTracerArrowSY);
+        tracerArrowAmplitude->end->setCoords(ampTracerArrowX, ampTracerArrowEY);
+        qDebug() << "ampTracerArrow: " << tracerArrowAmplitude->start->coords()
+                 << " / " << tracerArrowAmplitude->end->coords();
+        tracerArrowAmplitudeTxt->setText(QString::number(amplitude));
+        tracerArrowAmplitudeTxt->position->setCoords(ampTracerArrowX - (ui->plot->xAxis->range().size() / 100),
+                                                     (ampTracerArrowSY + ampTracerArrowEY)/2.0);
+        tracerArrowAmplitudeTxt->setFont(QFont(font().family(), 9));
         ui->plot->replot();
     }
 }
@@ -1321,8 +1353,14 @@ void MainWindow::on_bgColorButton_pressed() {
         if (tracer) {
             if (bgColor.lightness() > 128) {
                 tracer->setPen(QPen(Qt::black));
+//                tracerArrowAmplitudeTxt->setPen(QPen(Qt::black));
+//                tracerArrowAmplitudeTxt->setColor(Qt::black);
+                tracerArrowAmplitude->setPen(QPen(Qt::black, 4));
             } else {
                 tracer->setPen(QPen(Qt::white));
+//                tracerArrowAmplitudeTxt->setPen(QPen(Qt::white));
+//                tracerArrowAmplitudeTxt->setColor(Qt::white);
+                tracerArrowAmplitude->setPen(QPen(Qt::white, 4));
             }
         }
         ui->plot->replot();

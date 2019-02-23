@@ -185,6 +185,7 @@ private:
     QAction* plotMeasureAction;
 //    QRubberBand* rubberBand = nullptr;
 //    QPointF rubberOrigin;
+    // Tracer
     QCPItemTracer *tracer = nullptr;
     bool measureInProgress = false;
     double measureMult;
@@ -192,6 +193,8 @@ private:
     QCPItemLine* traceLineBottom;
     QCPItemLine* traceLineTop;
     QCPItemLine* refLine;
+    QCPItemLine* tracerArrowAmplitude;
+    QCPItemText* tracerArrowAmplitudeTxt;
 
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
