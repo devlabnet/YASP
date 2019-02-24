@@ -187,9 +187,12 @@ private:
 //    QPointF rubberOrigin;
     // Tracer
     QCPItemTracer *tracer = nullptr;
+    QCPItemRect* tracerRect;
     bool measureInProgress = false;
     double measureMult;
     double tracerStartKey;
+    double lastTracerXValueRef;
+    double lastTracerXValueTracer;
     QCPItemLine* traceLineBottom;
     QCPItemLine* traceLineTop;
     QCPItemLine* refLine;
@@ -201,7 +204,7 @@ private:
     QCPItemText* tracerArrowAmplitudeBottomTxt;
     QCPItemLine* tracerArrowFromRef;
     QCPItemText* tracerArrowFromRefTxt;
-
+    QList<QCPItemLine*> tracerHLines;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     yaspGraph *addGraph(int id);
@@ -227,6 +230,10 @@ private:
     int lastY = 0;
     double scaleMult = 1.0;
     yaspGraph* workingGraph = nullptr;
+
+    bool compareDouble(double value1, double value2, quint8 precision) {
+        return std::abs(value1 - value2) < std::pow(10, -precision);
+    }
 
 //    double round(long double number, int precision) {
 //      int decimals = std::pow(10, precision);

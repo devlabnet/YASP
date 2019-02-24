@@ -372,6 +372,10 @@ void MainWindow::portOpenedSuccess() {
     tracer->setPen(pen);
     tracer->setSelectable(false);
 
+    tracerRect =  new QCPItemRect(ui->plot);
+    tracerRect->setVisible(false);
+    tracerRect->setPen(pen);
+    tracerRect->setBrush(QBrush(QColor(200, 200, 200, 25)));
     pen.setStyle(Qt::DotLine);
     traceLineBottom = new QCPItemLine(ui->plot);
     pen.setColor(Qt::green);
@@ -394,7 +398,7 @@ void MainWindow::portOpenedSuccess() {
     tracerArrowAmplitudeTxt->setFont(font);
     tracerArrowAmplitudeTxt->setPen(QPen(bgColor));
     tracerArrowAmplitudeTxt->setColor(bgColor);
-    tracerArrowAmplitudeTxt->setBrush(QBrush(QColor(150, 255, 255)));
+    tracerArrowAmplitudeTxt->setBrush(QBrush(QColor(200, 255, 255)));
     tracerArrowAmplitudeTxt->setPadding(QMargins(8, 4, 8, 4));
 
     tracerArrowAmplitudeTop = new QCPItemLine(ui->plot);
@@ -860,8 +864,8 @@ void MainWindow::on_resetPlotButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_spinDisplayTime_valueChanged(double arg1) {
     plotTimeInSeconds = arg1;
-//    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
-//    ui->plot->replot();
+    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -914,6 +918,15 @@ void MainWindow::cleanTracer() {
         tracerArrowAmplitudeBottomTxt->setVisible(false);
         tracerArrowFromRef->setVisible(false);
         tracerArrowFromRefTxt->setVisible(false);
+        tracerRect->setVisible(false);
+        QList<QCPItemLine*>::iterator lI;
+        lI = tracerHLines.end();
+        while(lI != tracerHLines.begin()) {
+          --lI;
+//            QCPItemLine* item = dynamic_cast<QCPItemLine*>(lI)
+          ui->plot->removeItem(*lI);
+        }
+
 //    }
     resetMouseWheelState();
 }
@@ -1108,6 +1121,21 @@ void MainWindow::updateTracer(int pX) {
 //    qDebug() << "updateTracer " << tracer << " / " << pX;
     if (mouseState == mouseDoMesure) {
         Q_ASSERT(tracer);
+//        cleanTracer();
+        QList<QCPItemLine*>::iterator lI;
+        lI = tracerHLines.end();
+        while(lI != tracerHLines.begin()) {
+          --lI;
+//            QCPItemLine* item = dynamic_cast<QCPItemLine*>(lI)
+          ui->plot->removeItem(*lI);
+        }
+        tracerHLines.clear();
+        double plotWidth = ui->plot->xAxis->range().size();
+        double plotHeight = ui->plot->yAxis->range().size();
+        double plotVCenter = ui->plot->yAxis->range().center();
+        double plotTop = ui->plot->yAxis->range().upper;
+        double plotBottom = ui->plot->yAxis->range().lower;
+        double space = plotWidth / 800;
         double coordX = ui->plot->xAxis->pixelToCoord(pX);
         // get tracer origin
         tracer->setGraphKey(tracerStartKey);
@@ -1115,10 +1143,12 @@ void MainWindow::updateTracer(int pX) {
         tracer->setGraphKey(coordX);
         tracer->updatePosition();
 //        QPointF tracerPos = tracer->position->pixelPosition();
-//        double endX = tracer->position->key();
+        double endX = tracer->position->key();
         double endY = tracer->position->value();
         traceLineBottom->setVisible(true);
         traceLineTop->setVisible(true);
+        tracerRect->setVisible(true);
+
         if (traceLineBottom->start->coords().y() > endY) {
             traceLineBottom->start->setCoords(0, endY);
             traceLineBottom->end->setCoords(DBL_MAX, endY);
@@ -1127,13 +1157,22 @@ void MainWindow::updateTracer(int pX) {
             traceLineTop->start->setCoords(0, endY);
             traceLineTop->end->setCoords(DBL_MAX, endY);
         }
-        QString tracerInfo("Ref: %1 Delta+: %2 Delta-: %3 Min: %4 Max: %5 Amplitude: %6 Raw Amplitude: %7");
+        double rh = plotHeight * 0.4;
+        double tracerRectTop = plotVCenter + rh;
+        double tracerRectBottom = plotVCenter - rh;
+        double tracerRectLeft = endX - (plotWidth/4);
+        double tracerRectRight = endX + (plotWidth/4);
+        tracerRect->topLeft->setCoords(tracerRectLeft, tracerRectTop);
+        tracerRect->bottomRight->setCoords(tracerRectRight, tracerRectBottom);
+
+        // Vertical measures
         double amplitude = traceLineTop->start->coords().y() - traceLineBottom->start->coords().y();
         double deltaTop = traceLineTop->start->coords().y() - endY;
         double deltaBottom = endY - traceLineBottom->start->coords().y();
         double ref = workingGraph->rLine()->start->coords().y();
         double deltaFromRef = endY - ref;
-//        qDebug() << "amplitude: " << amplitude << " deltaTop: " << deltaTop << " deltaBottom: " << deltaBottom;
+
+        QString tracerInfo("Ref: %1 Delta+: %2 Delta-: %3 Min: %4 Max: %5 Amplitude: %6 Raw Amplitude: %7");
         tracerInfo =  tracerInfo.arg(endY)
                 .arg(deltaTop)
                 .arg(deltaBottom)
@@ -1141,12 +1180,9 @@ void MainWindow::updateTracer(int pX) {
                 .arg(traceLineTop->start->coords().y())
                 .arg(amplitude)
                 .arg(amplitude / workingGraph->mult());
-//        QString coordinates("X: %1 Y: %2 DELTAX: %3 ms --> DELTAY: %4 (Mult: %5 )");
-//        coordinates = coordinates.arg(startX).arg(startY).arg(endX - startX).arg(endY - startY).arg(measureMult);
         ui->statusBar->setStyleSheet("background-color: lightgreen;");
         ui->statusBar->showMessage(tracerInfo);
-        double space = ui->plot->xAxis->range().size() / 800;
-//        double ampTracerArrowX = coordX - 20.0*space;
+
         double ampTracerArrowSY = traceLineBottom->start->coords().y();
         double ampTracerArrowEY = traceLineTop->end->coords().y();
         double mult = workingGraph->mult();
@@ -1178,8 +1214,6 @@ void MainWindow::updateTracer(int pX) {
             tracerArrowAmplitudeTop->end->setCoords(coordX + 10.0*space, ampTracerArrowEY);
             tracerArrowAmplitudeTopTxt->setFont(QFont(font().family(), 9));
             tracerArrowAmplitudeTopTxt->setVisible(true);
-//            tracerArrowAmplitudeTopTxt->position->setCoords(ampTracerArrowX - space,
-//                                                         (ampTracerArrowSY + ampTracerArrowEY)/2.0);
             if (qFuzzyCompare(mult, 1.0)) {
                 tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop));
             } else {
@@ -1226,43 +1260,44 @@ void MainWindow::updateTracer(int pX) {
             tracerArrowFromRefTxt->position->setCoords(coordX - 30.0*space,
                                                          (ref + endY)/2.0);
         }
-
-//        // add arrow pointing at phase tracer, coming from label:
-//        tracerArrowAmplitudeTop->setVisible(true);
-//        tracerArrowAmplitudeBottom->setVisible(true);
-//        tracerArrowAmplitudeTopTxt->setVisible(true);
-//        tracerArrowAmplitudeTopTxt->setFont(QFont(font().family(), 9));
-//        tracerArrowAmplitudeBottomTxt->setVisible(true);
-//        tracerArrowAmplitudeBottomTxt->setFont(QFont(font().family(), 9));
-//        tracerArrowAmplitude->start->setCoords(ampTracerArrowX, ampTracerArrowSY);
-//        tracerArrowAmplitude->end->setCoords(ampTracerArrowX, ampTracerArrowEY);
-//        tracerArrowAmplitudeTop->start->setCoords(ampTracerArrowX + space, endY);
-//        tracerArrowAmplitudeTop->end->setCoords(ampTracerArrowX + space, ampTracerArrowEY);
-//        tracerArrowAmplitudeBottom->start->setCoords(ampTracerArrowX + space, ampTracerArrowSY);
-//        tracerArrowAmplitudeBottom->end->setCoords(ampTracerArrowX + space, endY);
-//        qDebug() << "ampTracerArrow: " << tracerArrowAmplitude->start->coords()
-//                 << " / " << tracerArrowAmplitude->end->coords();
-//        if (mult != 1.0) {
-//            tracerArrowAmplitudeTxt->setText(QString::number(amplitude) + " ["
-//                                             + QString::number(amplitude/mult) + "]");
-//            tracerArrowAmplitudeTxt->position->setCoords(ampTracerArrowX - space,
-//                                                         (ampTracerArrowSY + ampTracerArrowEY)/2.0);
-//            tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop) + " ["
-//                                                + QString::number(deltaTop/mult) + "]");
-//            tracerArrowAmplitudeTopTxt->position->setCoords(ampTracerArrowX + 20.0*space,
-//                                                         (endY + ampTracerArrowEY)/2.0);
-//            tracerArrowAmplitudeBottomTxt->setText(QString::number(deltaBottom) + " ["
-//                                                   + QString::number(deltaBottom/mult) + "]");
-//            tracerArrowAmplitudeBottomTxt->position->setCoords(ampTracerArrowX + 20.0*space,
-//                                                         (ampTracerArrowSY + endY)/2.0);
-//        } else {
-//            tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop));
-//            tracerArrowAmplitudeTopTxt->position->setCoords(ampTracerArrowX + 20.0*space,
-//                                                         (endY + ampTracerArrowEY)/2.0);
-//            tracerArrowAmplitudeBottomTxt->setText(QString::number(deltaBottom));
-//            tracerArrowAmplitudeBottomTxt->position->setCoords(ampTracerArrowX + 20.0*space,
-//                                                         (ampTracerArrowSY + endY)/2.0);
-//        }
+        // Horizontal measures
+        QSharedPointer<QCPGraphDataContainer> gData = workingGraph->plot()->data();
+        QCPDataContainer<QCPGraphData>::const_iterator itStart = gData->findBegin(tracerRectLeft, true);
+        QCPDataContainer<QCPGraphData>::const_iterator itEnd = gData->findBegin(tracerRectRight, true);
+        qDebug() << "-----------------------------";
+        lastTracerXValueRef = itStart->key;
+        lastTracerXValueTracer = itStart->key;
+        double deltaMin = space * 20;
+        qDebug() << "itStart: " <<  itStart->key << " itEnd: " <<  itEnd->key
+                 << " lastTracerXValue: " << lastTracerXValueRef << " deltaMin: " << deltaMin;
+        for (QCPDataContainer<QCPGraphData>::const_iterator it = itStart; it != itEnd; ++it) {
+            if (compareDouble( it->value, ref, 0)) {
+                double deltaRef = it->key - lastTracerXValueRef;
+//                qDebug() << "deltaRef: " << deltaRef;
+                if (deltaRef > deltaMin) {
+                    QCPItemLine* line = new QCPItemLine(ui->plot);
+                    tracerHLines.append(line);
+                    line->setPen(QPen(QColor(255,0,255)));
+                    line->start->setCoords(it->key, it->value);
+                    line->end->setCoords(it->key, tracerRectBottom);
+                    qDebug() << "ref: " << it->key << " / " << it->value;
+                }
+                lastTracerXValueRef = it->key;
+            }
+            if (compareDouble( it->value, endY, 0)) {
+                double deltaTracer = it->key - lastTracerXValueTracer;
+//                qDebug() << "deltaTracer: " << deltaTracer;
+                if (deltaTracer > deltaMin) {
+                    qDebug() << "tracer: " << it->key << " / " << it->value << " deltaMin: " << deltaMin;
+                    QCPItemLine* line = new QCPItemLine(ui->plot);
+                    tracerHLines.append(line);
+                    line->setPen(QPen(QColor(0,255,255)));
+                    line->start->setCoords(it->key, it->value);
+                    line->end->setCoords(it->key, tracerRectTop);
+                }
+                lastTracerXValueTracer = it->key;
+            }
+        }
         ui->plot->replot();
     }
 }
@@ -1378,13 +1413,12 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
             ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
         } else {
             double newSpd = ui->spinDisplayTime->value();
-
             double ratio = newSpd/spd;
             QCPRange newRange = range * ratio;
 //            qDebug() << xx << " = " << spd << " / " << newSpd << " -> " << ratio << " -> " <<  range << " / " << newRange;
             ui->plot->xAxis->setRange(newRange);
+            ui->plot->replot();
         }
-        ui->plot->replot();
     } else {
         ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
         if (wheelState == wheelScalePlot) {
