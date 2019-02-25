@@ -919,6 +919,8 @@ void MainWindow::cleanTracer() {
 //    if (mouseState == mouseDoMesure) {
         ui->plot->setCursor(Qt::ArrowCursor);
         tracer->setVisible(false);
+        ShowPlotsExceptWG(true);
+
         traceLineBottom->start->setCoords(0, DBL_MAX);
         traceLineBottom->end->setCoords(DBL_MAX, DBL_MAX);
         traceLineBottom->setVisible(false);
@@ -972,6 +974,16 @@ void MainWindow::doMenuPlotShiftAction() {
 }
 
 /******************************************************************************************************************/
+void MainWindow::ShowPlotsExceptWG(bool show) {
+    if (workingGraph == nullptr) return;
+    foreach (yaspGraph* yGraph, graphs) {
+        Q_ASSERT(yGraph);
+        if (workingGraph == yGraph) continue;
+        yGraph->toggleTracerVisibility(show);
+    }
+}
+
+/******************************************************************************************************************/
 void MainWindow::doMenuPlotMeasureAction() {
     qDebug() << "doMenuPlotMeasureAction: " << contextMenu->property("id") << " mouseState: " << mouseState;
     Q_ASSERT(contextMenu);
@@ -983,6 +995,7 @@ void MainWindow::doMenuPlotMeasureAction() {
     } else {
         qDebug() << "Init Tracer !";
         mouseState = mouseDoMesure;
+        ShowPlotsExceptWG(false);
         measureMult = workingGraph->mult();
         ui->plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag );
         infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE MODE");

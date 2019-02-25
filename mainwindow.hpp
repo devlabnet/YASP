@@ -227,6 +227,7 @@ private:
     void scalePlot(double scale);
     void unselectGraphs();
     void cleanGraphsBefore(double d);
+    void ShowPlotsExceptWG(bool show);
     bool startShiftPlot = false;
 //    bool startScalePlot = false;
     double lastPosY = 0;

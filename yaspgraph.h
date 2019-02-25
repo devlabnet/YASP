@@ -20,6 +20,7 @@ public:
 //    void updateRefLine(int dpn);
     void setSelected(bool sel);
     void reset();
+    void toggleTracerVisibility(bool show);
 private:
     int id;
     QVector<qreal> plotDashPattern;
@@ -31,6 +32,7 @@ private:
     double yOffset;
     double yMult;
     QString plotInfoStr;
+    bool tracerVisibleDef;
 };
 
 #endif // YASPGRAPH_H

@@ -23,7 +23,7 @@ yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine,
     rLine->setPen(pen);
     rLine->start->setCoords(0,0);
     rLine->end->setCoords(plotTimeInSeconds, 0);
-
+    tracerVisibleDef = true;
    // textTicker = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText());
 //    dataContainer = QSharedPointer<QCPGraphDataContainer>(new QCPGraphDataContainer());
 }
@@ -39,6 +39,16 @@ void yaspGraph::reset() {
     }
     yOffset = 0;
     yMult = 1.0;
+}
+
+//-----------------------------------------------------------------------------------------
+void yaspGraph::toggleTracerVisibility(bool show) {
+    if (show) {
+        infoGraph->setVisible(tracerVisibleDef);
+    } else {
+        tracerVisibleDef = infoGraph->visible();
+        infoGraph->setVisible(false);
+    }
 }
 
 //-----------------------------------------------------------------------------------------
