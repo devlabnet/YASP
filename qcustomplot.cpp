@@ -15415,6 +15415,7 @@ void QCustomPlot::processPointSelection(QMouseEvent *event)
 {
   QVariant details;
   QCPLayerable *clickedLayerable = layerableAt(event->pos(), true, &details);
+  if (!clickedLayerable) return;
   bool selectionStateChanged = false;
   bool additive = mInteractions.testFlag(QCP::iMultiSelect) && event->modifiers().testFlag(mMultiSelectModifier);
   // deselect all other layerables if not additive selection:

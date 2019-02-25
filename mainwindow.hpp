@@ -207,6 +207,8 @@ private:
     QCPItemText* tracerArrowFromRefTxt;
     QList<QCPItemLine*> tracerHLinesRef;
     QList<QCPItemLine*> tracerHLinesTracer;
+    QList<QCPItemText*> tracerHLinesRefInfo;
+    QList<QCPItemText*> tracerHLinesTracerInfo;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     yaspGraph *addGraph(int id);
