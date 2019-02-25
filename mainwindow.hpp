@@ -1,8 +1,7 @@
 /***************************************************************************
-**  This file is part of Serial Port Plotter                              **
+**  This file is part of Yet Another Serial Plotter                       **
 **                                                                        **
-**                                                                        **
-**  Serial Port Plotter is a program for plotting integer data from       **
+**  Serial Port Plotter is a program for plotting data from               **
 **  serial port using Qt and QCustomPlot                                  **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
@@ -19,9 +18,9 @@
 **  along with this program.  If not, see http://www.gnu.org/licenses/.   **
 **                                                                        **
 ****************************************************************************
-**           Author: Borislav                                             **
-**           Contact: b.kereziev@gmail.com                                **
-**           Date: 29.12.14                                               **
+**           Author:    Cricri042                                         **
+**           Contact: cricri042@devlabnet.eu                              **
+**           Date: 25/02/2019                                             **
 ****************************************************************************/
 
 #ifndef MAINWINDOW_HPP
@@ -33,10 +32,8 @@
 #include "helpwindow.hpp"
 #include "dialogwidgets.h"
 #include <QToolBox>
-//#include "tabwidget.h"
 #include <QTextEdit>
 #include <QTime>
-//#include <QRubberBand>
 #include "yaspgraph.h"
 
 #define START_MSG      0x10
@@ -52,7 +49,7 @@
 #define DEF_YAXIS_RANGE 1500
 #define PLOT_TIME_DEF 15            // Default time Displayed in Plot in Seconds
 #define PLOT_TIME_MIN_DEF 10.0      // Seconds
-#define PLOT_TIME_MAX_DEF 600.0    // Seconds
+#define PLOT_TIME_MAX_DEF 600.0     // Seconds
 #define PLOT_TIME_STEP_DEF 10.0     // Seconds
 
 namespace Ui {
@@ -73,32 +70,24 @@ protected:
 
 private slots:
     void replot();
-//    void addTickX();
-    // Slot for repainting the plot
-    void onNewDataArrived(QStringList newData);                                           // Slot for new data from serial port
-    void onNewPlotDataArrived(QStringList newData);                                       // Slot for new data from serial port
-    void readData();                                                                      // Slot for inside serial port
+    void onNewDataArrived(QStringList newData);                    // Slot for new data from serial port
+    void onNewPlotDataArrived(QStringList newData);                // Slot for new data from serial port
+    void readData();                                               // Slot for inside serial port
     void dataTerminalReadyChanged(bool dtr);
     void messageSent(QString str);
-    void on_comboPort_currentIndexChanged(const QString &arg1);                           // Slot displays message on status bar
-    void on_connectButton_clicked();                                                      // Manages connect/disconnect
-    void on_stopPlotButton_clicked();                                                     // Starts and stops plotting
-    void on_saveJPGButton_clicked();                                                      // Button for saving JPG
-    void on_resetPlotButton_clicked();                                                    // Resets plot to initial zoom and coordinates
-    void onMouseMoveInPlot(QMouseEvent *event);                                           // Displays coordinates of mouse pointer when clicked in plot in status bar
+    void on_comboPort_currentIndexChanged(const QString &arg1);    // Slot displays message on status bar
+    void on_connectButton_clicked();                               // Manages connect/disconnect
+    void on_stopPlotButton_clicked();                              // Starts and stops plotting
+    void on_saveJPGButton_clicked();                               // Button for saving JPG
+    void on_resetPlotButton_clicked();                             // Resets plot to initial zoom and coordinates
+    void onMouseMoveInPlot(QMouseEvent *event);                    // Displays coordinates of mouse pointer when clicked in plot in status bar
     void onMouseReleaseInPlot(QMouseEvent *event);
     void onMouseWheelInPlot(QWheelEvent *event);
     void onMousePressInPlot(QMouseEvent *event);
-//    void onMouseDoubleClickInPlot(QMouseEvent* event);
     void plotContextMenuRequest(QPoint pos);
-//    void selectionChangedByUserInPlot();
-//    void legendSelectionChanged(QCPLegend::SelectableParts l);
     void saveSelectedGraph();
     void saveAllGraphs();
-//    void doMeasure();
-//    void doShift();
     void cleanTracer();
-//    void doMenuCloseAction(bool);
     void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
     void doMenuPlotScaleAction();
@@ -110,14 +99,11 @@ private slots:
     void on_clearTermButton_clicked();
     void on_actionShowWidgets_triggered();
     void on_bgColorButton_pressed();
-    void contextMenuTriggered(QAction*);
-    void menuAboutToHide();
     void on_scrollButton_clicked(bool checked);
     void on_logPlotButton_clicked();
     void plotLabelSelectionChanged(bool b);
     void xAxisRangeChanged(const QCPRange& range);
     void on_spinDisplayTime_valueChanged(double arg1);
-//    void selectionChangedByUserInPlot();
     void infoModeLabelSelectionChanged(bool b);
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
@@ -152,27 +138,17 @@ private:
     mouseAction mouseState = mouseMove;
     void resetMouseWheelState();
     QCPItemText* infoModeLabel = nullptr;
-//    QCP::Interactions plotInteractions;
-//    bool mousePressed = false;
     Qt::MouseButton mouseButtonState;
-//    QSharedPointer<QCPAxisTickerText> textTicker;
     QSharedPointer<QCPAxisTickerFixed> fixedTicker;
     QMap<int, yaspGraph*> graphs;
-//    QMap<int, int> pointTime;
     double lastDataTtime;
     double cleanDataTtime;
-//    QString plotInfoStr;
     yaspGraph* getGraph(int id);
-//    QVector<qreal> plotDashPattern;
-//    QVector<qreal> rLineDashPattern;
     int selectedPlotId = -1;
     QTimer updateTimer;
-//    QTimer ticksXTimer;
-//    QTime ticksXTime;
-    // Timer used for replotting the plot
-    QSerialPort *serialPort;                                                              // Serial port; runs in this thread
-    QString receivedData;                                                                 // Used for reading from the port
-    QString noMsgReceivedData;                                                                 // Used for reading from the port
+    QSerialPort *serialPort;        // Serial port; runs in this thread
+    QString receivedData;           // Used for reading from the port
+    QString noMsgReceivedData;      // Used for reading from the port
     QByteArray data;
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
@@ -180,13 +156,9 @@ private:
     QTextStream streamLog;
     QFile* logData = nullptr;
     QTextStream streamData;
-//    QHBoxLayout* groupBoxPlotSelectionHbox;
-//    QButtonGroup* selectButtonsGroup;
     QMenu* contextMenu = nullptr;
     QAction* plotShowHideAction;
     QAction* plotMeasureAction;
-//    QRubberBand* rubberBand = nullptr;
-//    QPointF rubberOrigin;
     // Tracer
     QCPItemTracer *tracer = nullptr;
     QCPItemRect* tracerRect;
@@ -210,18 +182,17 @@ private:
     QList<QCPItemLine*> tracerHLinesTracer;
     QList<QCPItemText*> tracerHLinesRefInfo;
     QList<QCPItemText*> tracerHLinesTracerInfo;
-    void createUI();                                                                      // Populate the controls
-    void enableControls(bool enable);                                                     // Enable/disable controls
+    void createUI();
+    void enableControls(bool enable);
     void initTracer();
     yaspGraph *addGraph(int id);
     void updateLabel(int id, QString plotInfoStr);
     void doContextMenuHeader(yaspGraph* yGraph);
     bool isColor(QString str);
-    // Setup the QCustomPlot
-    void cleanGraphs();                                                                                          // Open the inside serial port with these parameters
+    void cleanGraphs();
     void openPort();
-    void portOpenedSuccess();                                                             // Called when port opens OK
-    void closePort();                                                                  // Called when closing the port
+    void portOpenedSuccess();
+    void closePort();
     void addMessageText(QString data, QString color = "black");
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
@@ -233,12 +204,10 @@ private:
     void cleanGraphsBefore(double d);
     void ShowPlotsExceptWG(bool show);
     bool startShiftPlot = false;
-//    bool startScalePlot = false;
     double lastPosY = 0;
     int lastY = 0;
     double scaleMult = 1.0;
     yaspGraph* workingGraph = nullptr;
-
     bool compareDouble(double value1, double value2, quint8 precision) {
         return std::abs(value1 - value2) < std::pow(10, -precision);
     }
@@ -251,4 +220,4 @@ private:
 };
 
 
-#endif                                                                                    // MAINWINDOW_HPP
+#endif // MAINWINDOW_HPP
