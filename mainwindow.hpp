@@ -48,7 +48,7 @@
 
 #define DEF_YAXIS_RANGE 1500
 #define PLOT_TIME_DEF 15            // Default time Displayed in Plot in Seconds
-#define PLOT_TIME_MIN_DEF 10.0      // Seconds
+#define PLOT_TIME_MIN_DEF 2.0      // Seconds
 #define PLOT_TIME_MAX_DEF 600.0     // Seconds
 #define PLOT_TIME_STEP_DEF 10.0     // Seconds
 

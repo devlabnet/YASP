@@ -1634,6 +1634,8 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
             Q_ASSERT(yGraph);
             if (workingGraph && (workingGraph != yGraph)) {
                 workingGraph->setSelected(false);
+                cleanTracer();
+                resetMouseWheelState();
             }
             workingGraph = yGraph;
             contextMenu->setProperty("id", plotId);
