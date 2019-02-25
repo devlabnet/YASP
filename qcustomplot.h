@@ -6256,7 +6256,8 @@ public:
   void setSelectedPen(const QPen &pen);
   void setBrush(const QBrush &brush);
   void setSelectedBrush(const QBrush &brush);
-  
+  void setRoundCorners(int r);
+
   // reimplemented virtual methods:
   virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details=0) const Q_DECL_OVERRIDE;
   
@@ -6275,7 +6276,8 @@ protected:
   // property members:
   QPen mPen, mSelectedPen;
   QBrush mBrush, mSelectedBrush;
-  
+  int rCorners = 0;
+
   // reimplemented virtual methods:
   virtual void draw(QCPPainter *painter) Q_DECL_OVERRIDE;
   virtual QPointF anchorPixelPosition(int anchorId) const Q_DECL_OVERRIDE;
@@ -6342,7 +6344,7 @@ public:
   void setTextAlignment(Qt::Alignment alignment);
   void setRotation(double degrees);
   void setPadding(const QMargins &padding);
-  
+  void setRoundCorners(int r);
   // reimplemented virtual methods:
   virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details=0) const Q_DECL_OVERRIDE;
   
@@ -6369,7 +6371,7 @@ protected:
   Qt::Alignment mTextAlignment;
   double mRotation;
   QMargins mPadding;
-  
+  int rCorners = 0;
   // reimplemented virtual methods:
   virtual void draw(QCPPainter *painter) Q_DECL_OVERRIDE;
   virtual QPointF anchorPixelPosition(int anchorId) const Q_DECL_OVERRIDE;

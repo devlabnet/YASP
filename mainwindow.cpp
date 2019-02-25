@@ -222,6 +222,9 @@ yaspGraph* MainWindow::addGraph(int id) {
 //        graph->setName(plotStr);
 //        graph->setPen(QPen(colours[id]));
         QCPItemText* textLabel = new QCPItemText(ui->plot);
+        textLabel->setRoundCorners(5);
+        textLabel->setPadding(QMargins(8, 4, 8, 4));
+
         textLabel->setProperty("id", id);
 //        textLabel->setColor(colours[id]);
 //        textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
@@ -353,9 +356,13 @@ void MainWindow::portOpenedSuccess() {
     ui->tabWidget->setCurrentIndex(1);
 
     infoModeLabel = new QCPItemText(ui->plot);
-    infoModeLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignLeft);
+    infoModeLabel->setRoundCorners(15);
+    infoModeLabel->setBrush(QBrush(QColor(105,105,105)));
+    infoModeLabel->setPadding(QMargins(8, 8, 8, 8));
+
+    infoModeLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
     infoModeLabel->position->setType(QCPItemPosition::ptAbsolute );
-    infoModeLabel->setPadding(QMargins(2,2,2,2));
+//    infoModeLabel->setPadding(QMargins(2,2,2,2));
     QFont font;
     font.setPointSize(12);
     font.setStyleHint(QFont::Monospace);
@@ -363,9 +370,10 @@ void MainWindow::portOpenedSuccess() {
     font.setStyle(QFont::StyleItalic);
     infoModeLabel->setFont(font);
     QFontMetricsF fm(font);
-    qreal pixelsWide = fm.width(infoModeLabel->text());
-    qDebug() << "pixelsWide " << pixelsWide;
-    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//    qreal pixelsWide = fm.width(infoModeLabel->text());
+//    qDebug() << "pixelsWide " << pixelsWide;
+//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 64, 16);
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
 //    qDebug() << "ui->plot->geometry: " << ui->plot->geometry();
     updateTimer.start();
     tracer = new QCPItemTracer(ui->plot);
@@ -383,6 +391,7 @@ void MainWindow::portOpenedSuccess() {
     tracer->setSelectable(false);
 
     tracerRect =  new QCPItemRect(ui->plot);
+    tracerRect->setRoundCorners(25);
     tracerRect->setVisible(false);
     tracerRect->setPen(pen);
     tracerRect->setBrush(QBrush(QColor(200, 200, 200, 25)));
@@ -402,6 +411,8 @@ void MainWindow::portOpenedSuccess() {
     tracerArrowAmplitude->setTail(QCPLineEnding::esSpikeArrow);
     tracerArrowAmplitude->setPen(QPen(QColor(150, 255, 255), 4));
     tracerArrowAmplitudeTxt = new QCPItemText(ui->plot);
+    tracerArrowAmplitudeTxt->setRoundCorners(5);
+
     tracerArrowAmplitudeTxt->setPositionAlignment(Qt::AlignRight|Qt::AlignVCenter);
     tracerArrowAmplitudeTxt->setTextAlignment(Qt::AlignLeft);
     tracerArrowAmplitudeTxt->brush().setStyle(Qt::SolidPattern);
@@ -416,6 +427,7 @@ void MainWindow::portOpenedSuccess() {
     tracerArrowAmplitudeTop->setTail(QCPLineEnding::esSpikeArrow);
     tracerArrowAmplitudeTop->setPen(QPen(QColor(255, 150, 150), 4));
     tracerArrowAmplitudeTopTxt = new QCPItemText(ui->plot);
+    tracerArrowAmplitudeTopTxt->setRoundCorners(5);
     tracerArrowAmplitudeTopTxt->setPositionAlignment(Qt::AlignLeft|Qt::AlignVCenter);
     tracerArrowAmplitudeTopTxt->setTextAlignment(Qt::AlignRight);
     tracerArrowAmplitudeTopTxt->brush().setStyle(Qt::SolidPattern);
@@ -430,6 +442,7 @@ void MainWindow::portOpenedSuccess() {
     tracerArrowAmplitudeBottom->setTail(QCPLineEnding::esSpikeArrow);
     tracerArrowAmplitudeBottom->setPen(QPen(QColor(150, 255, 150), 4));
     tracerArrowAmplitudeBottomTxt = new QCPItemText(ui->plot);
+    tracerArrowAmplitudeBottomTxt->setRoundCorners(5);
     tracerArrowAmplitudeBottomTxt->setPositionAlignment(Qt::AlignLeft|Qt::AlignVCenter);
     tracerArrowAmplitudeBottomTxt->setTextAlignment(Qt::AlignRight);
     tracerArrowAmplitudeBottomTxt->brush().setStyle(Qt::SolidPattern);
@@ -440,11 +453,11 @@ void MainWindow::portOpenedSuccess() {
     tracerArrowAmplitudeBottomTxt->setPadding(QMargins(8, 4, 8, 4));
 
     tracerArrowFromRef = new QCPItemLine(ui->plot);
-    tracerArrowFromRefTxt = new QCPItemText(ui->plot);
     tracerArrowFromRef->setHead(QCPLineEnding::esSpikeArrow);
     tracerArrowFromRef->setTail(QCPLineEnding::esSpikeArrow);
     tracerArrowFromRef->setPen(QPen(QColor(255, 255, 150), 4));
     tracerArrowFromRefTxt = new QCPItemText(ui->plot);
+    tracerArrowFromRefTxt->setRoundCorners(5);
     tracerArrowFromRefTxt->setPositionAlignment(Qt::AlignRight|Qt::AlignVCenter);
     tracerArrowFromRefTxt->setTextAlignment(Qt::AlignLeft);
     tracerArrowFromRefTxt->brush().setStyle(Qt::SolidPattern);
@@ -471,7 +484,9 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
    if (infoModeLabel) {
        QFontMetricsF fm(infoModeLabel->font());
        qreal pixelsWide = fm.width(infoModeLabel->text());
-       infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//       infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//       infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 64, 16);
+       infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
    }
 }
 
@@ -981,10 +996,12 @@ void MainWindow::doMenuPlotShiftAction() {
     Q_ASSERT(workingGraph);
     mouseState = mouseShift;
     infoModeLabel->setText(workingGraph->plot()->name() + " -> SHIFT MODE");
+    infoModeLabel->setVisible(true);
     infoModeLabel->setColor(workingGraph->plot()->pen().color());
-    QFontMetricsF fm(infoModeLabel->font());
-    qreal pixelsWide = fm.width(infoModeLabel->text());
-    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//    QFontMetricsF fm(infoModeLabel->font());
+//    qreal pixelsWide = fm.width(infoModeLabel->text());
+//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
 }
 
 /******************************************************************************************************************/
@@ -1013,11 +1030,13 @@ void MainWindow::doMenuPlotMeasureAction() {
         measureMult = workingGraph->mult();
         ui->plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag );
         infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE MODE");
+        infoModeLabel->setVisible(true);
         infoModeLabel->setColor(workingGraph->plot()->pen().color());
         plotLabelSelected(true);
-        QFontMetricsF fm(infoModeLabel->font());
-        qreal pixelsWide = fm.width(infoModeLabel->text());
-        infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//        QFontMetricsF fm(infoModeLabel->font());
+//        qreal pixelsWide = fm.width(infoModeLabel->text());
+//        infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+        infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
         ui->plot->setCursor(Qt::CrossCursor);
         tracer->setVisible(true);
         tracer->setGraph(workingGraph->plot());
@@ -1040,10 +1059,12 @@ void MainWindow::doMenuPlotColorAction() {
 //    qDebug() << "doMenuPlotColorAction: " << plotId;
     Q_ASSERT(workingGraph);
     infoModeLabel->setText(workingGraph->plot()->name() + " --> COLOR MODE");
+    infoModeLabel->setVisible(true);
     infoModeLabel->setColor(workingGraph->plot()->pen().color());
-    QFontMetricsF fm(infoModeLabel->font());
-    qreal pixelsWide = fm.width(infoModeLabel->text());
-    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//    QFontMetricsF fm(infoModeLabel->font());
+//    qreal pixelsWide = fm.width(infoModeLabel->text());
+//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
     QColor color = QColorDialog::getColor(Qt::white, nullptr, "plot color");
     if (color.isValid()) {
         qDebug() << "doMenuPlotColorAction: " << color;
@@ -1078,10 +1099,12 @@ void MainWindow::doMenuPlotScaleAction() {
 //    workingGraph = yGraph;
     Q_ASSERT(workingGraph);
     infoModeLabel->setText(workingGraph->plot()->name() + " --> SCALE MODE");
+    infoModeLabel->setVisible(true);
     infoModeLabel->setColor(workingGraph->plot()->pen().color());
-    QFontMetricsF fm(infoModeLabel->font());
-    qreal pixelsWide = fm.width(infoModeLabel->text());
-    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//    QFontMetricsF fm(infoModeLabel->font());
+//    qreal pixelsWide = fm.width(infoModeLabel->text());
+//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
     wheelState = wheelScalePlot;
 //    startScalePlot = true;
     ui->plot->setInteraction(QCP::iRangeZoom, false);
@@ -1102,6 +1125,7 @@ void MainWindow::doMenuPlotShowHideAction() {
         plotShowHideAction->setText("show");
         plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-eye-48.png"));
         infoModeLabel->setText(workingGraph->plot()->name() + " --> HIDE MODE");
+        infoModeLabel->setVisible(true);
         infoModeLabel->setColor(workingGraph->plot()->pen().color());
     } else {
         workingGraph->plot()->setVisible(true);
@@ -1109,11 +1133,13 @@ void MainWindow::doMenuPlotShowHideAction() {
         plotShowHideAction->setText("Hide");
         plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-hide-48.png"));
         infoModeLabel->setText(workingGraph->plot()->name() + " --> SHOW MODE");
+        infoModeLabel->setVisible(true);
         infoModeLabel->setColor(workingGraph->plot()->pen().color());
     }
-    QFontMetricsF fm(infoModeLabel->font());
-    qreal pixelsWide = fm.width(infoModeLabel->text());
-    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//    QFontMetricsF fm(infoModeLabel->font());
+//    qreal pixelsWide = fm.width(infoModeLabel->text());
+//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
     ui->plot->replot();
 }
 
@@ -1122,6 +1148,7 @@ void MainWindow::saveDataPlot(yaspGraph* yGraph) {
     QCPGraph* g = yGraph->plot();
     if (!g->visible()) return;
     infoModeLabel->setText(yGraph->plot()->name() + " --> SAVE MODE");
+    infoModeLabel->setVisible(true);
     infoModeLabel->setColor(yGraph->plot()->pen().color());
     QString plotName = g->name();
     if (logData == nullptr) {
@@ -1366,6 +1393,7 @@ void MainWindow::updateTracer(int pX) {
                         info->setPositionAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
                         info->setTextAlignment(Qt::AlignCenter);
                         info->setRotation(45);
+                        info->setRoundCorners(5);
                         info->setPen(QPen(Qt::black));
                         info->setColor(Qt::black);
                         info->setBrush(QBrush(col));
@@ -1401,6 +1429,7 @@ void MainWindow::updateTracer(int pX) {
                         info->setPositionAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
                         info->setTextAlignment(Qt::AlignCenter);
                         info->setRotation(-45);
+                        info->setRoundCorners(5);
                         info->setPen(QPen(Qt::black));
                         info->setColor(Qt::black);
                         info->setBrush(QBrush(col));
@@ -1499,10 +1528,12 @@ void MainWindow::resetMouseWheelState() {
     startShiftPlot = false;
     mouseButtonState = Qt::NoButton;
     infoModeLabel->setText("");
+    infoModeLabel->setVisible(false);
     infoModeLabel->setColor(QColor(0, 255, 255));
-    QFontMetricsF fm(infoModeLabel->font());
-    qreal pixelsWide = fm.width(infoModeLabel->text());
-    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//    QFontMetricsF fm(infoModeLabel->font());
+//    qreal pixelsWide = fm.width(infoModeLabel->text());
+//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
     ui->plot->replot();
 }
@@ -1840,17 +1871,20 @@ void MainWindow::plotLabelSelected(bool b) {
             if (workingGraph->plot()->visible()) {
                 plotShowHideAction->setText("Hide");
                 infoModeLabel->setText(workingGraph->plot()->name() + " --> SHOW MODE");
+                infoModeLabel->setVisible(true);
                 infoModeLabel->setColor(workingGraph->plot()->pen().color());
                 plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-hide-48.png"));
             } else {
                 plotShowHideAction->setText("Show");
                 infoModeLabel->setText(workingGraph->plot()->name() + " --> HIDE MODE");
+                infoModeLabel->setVisible(true);
                 infoModeLabel->setColor(workingGraph->plot()->pen().color());
                 plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-eye-48.png"));
             }
-            QFontMetricsF fm(infoModeLabel->font());
-            qreal pixelsWide = fm.width(infoModeLabel->text());
-            infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//            QFontMetricsF fm(infoModeLabel->font());
+//            qreal pixelsWide = fm.width(infoModeLabel->text());
+//            infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+            infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
             action = contextMenu->addAction("Reset", this, SLOT(doMenuPlotResetAction()));
             action->setIcon(QIcon(":/Icons/Icons/icons8-available-updates-40.png"));
             action = contextMenu->addAction("Scale", this, SLOT(doMenuPlotScaleAction()));

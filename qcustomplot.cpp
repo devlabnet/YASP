@@ -28686,6 +28686,10 @@ QCPItemRect::~QCPItemRect()
 {
 }
 
+void QCPItemRect::setRoundCorners(int r) {
+    rCorners = r;
+}
+
 /*!
   Sets the pen that will be used to draw the line of the rectangle
   
@@ -28754,7 +28758,13 @@ void QCPItemRect::draw(QCPPainter *painter)
   {
     painter->setPen(mainPen());
     painter->setBrush(mainBrush());
-    painter->drawRect(rect);
+    if (rCorners) {
+        QPainterPath path;
+        path.addRoundedRect(rect, rCorners, rCorners);
+        painter->drawPath(path);
+    } else {
+        painter->drawRect(rect);
+    }
   }
 }
 
@@ -28928,6 +28938,14 @@ void QCPItemText::setFont(const QFont &font)
 }
 
 /*!
+  Sets rounded corners value.
+
+*/
+void QCPItemText::setRoundCorners(int r) {
+    rCorners = r;
+}
+
+/*!
   Sets the font of the text that will be used when the item is selected.
   
   \see setFont
@@ -29041,7 +29059,13 @@ void QCPItemText::draw(QCPPainter *painter)
     {
       painter->setPen(mainPen());
       painter->setBrush(mainBrush());
-      painter->drawRect(textBoxRect);
+      if (rCorners) {
+          QPainterPath path;
+          path.addRoundedRect(textBoxRect, rCorners, rCorners);
+          painter->drawPath(path);
+      } else {
+          painter->drawRect(textBoxRect);
+      }
     }
     painter->setBrush(Qt::NoBrush);
     painter->setPen(QPen(mainColor()));
