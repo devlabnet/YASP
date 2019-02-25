@@ -54,7 +54,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->setNotAntialiasedElements(QCP::aeAll);                                      // used for higher performance (see QCustomPlot real time example)
     // Y Axes
     ui->plot->yAxis->setTickLabelColor(gridColor);                              // See QCustomPlot examples / styled demo
+    ui->plot->yAxis->setSelectedParts(QCPAxis::spNone);
     ui->plot->xAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
+    ui->plot->xAxis->setSelectedParts(QCPAxis::spNone);
     ui->plot->yAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
     ui->plot->xAxis->grid()->setSubGridPen(QPen(subGridColor, 1, Qt::DotLine));
     ui->plot->yAxis->grid()->setSubGridPen(QPen(subGridColor, 1, Qt::DotLine));
@@ -94,6 +96,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //    // setup policy and connect slot for context menu popup:
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     connect(ui->plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
+    ui->plot->setInteraction(QCP::iSelectAxes, false);
+    ui->plot->setInteraction(QCP::iSelectPlottables, false);
+    ui->plot->setInteraction(QCP::iSelectOther, false);
+
     serialPort = nullptr;
     // Connect update timer to replot slot
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));
@@ -121,8 +127,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     contextMenu = new QMenu(this);
     connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuTriggered(QAction*)));
-    connect(contextMenu, SIGNAL(aboutToHide()), this, SLOT(menuAboutToHide()));
+//    connect(contextMenu, SIGNAL(aboutToHide()), this, SLOT(menuAboutToHide()));
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
+
+    initTracer();
     // Clear the terminal
     on_clearTermButton_clicked();
 //    ticksXTime.start();
@@ -199,7 +207,7 @@ void MainWindow::cleanGraphs() {
     ui->plot->clearGraphs();
     ui->plot->hide();
     graphs.clear();
-    infoModeLabel = nullptr;
+//    infoModeLabel = nullptr;
 }
 
 /******************************************************************************************************************/
@@ -218,10 +226,12 @@ yaspGraph* MainWindow::addGraph(int id) {
 //        ui->plot->xAxis->setRange(0, plotTimeInSeconds);                                      // Set x axis range for specified number of points
         QString plotStr = "Plot " + QString::number(id);
         QCPGraph* graph = ui->plot->addGraph();
+        graph->setSelectable(QCP::stNone);
 //        plotDashPattern = QVector<qreal>() << 16 << 4 << 8 << 4;
 //        graph->setName(plotStr);
 //        graph->setPen(QPen(colours[id]));
         QCPItemText* textLabel = new QCPItemText(ui->plot);
+        textLabel->setSelectable(true);
         textLabel->setRoundCorners(5);
         textLabel->setPadding(QMargins(8, 4, 8, 4));
 
@@ -231,8 +241,9 @@ yaspGraph* MainWindow::addGraph(int id) {
 //        textLabel->position->setType(QCPItemPosition::ptAbsolute );
 //        textLabel->setSelectable(true);
 //        textLabel->setPadding(QMargins(2,2,2,2));
-        connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelected(bool)));
+        connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelectionChanged(bool)));
         QCPItemLine* axisLine = new QCPItemLine(ui->plot);
+        axisLine->setSelectable(false);
 //        QPen pen = QPen(colours[id], 0.5);
 //        rLineDashPattern = QVector<qreal>() << 64 << 4 ;
 //        pen.setDashPattern(rLineDashPattern);
@@ -325,56 +336,24 @@ void MainWindow::on_connectButton_clicked() {
 }
 
 /******************************************************************************************************************/
-/* Slot for port opened successfully */
-/******************************************************************************************************************/
-void MainWindow::portOpenedSuccess() {
-
-    connect(serialPort, SIGNAL(dataTerminalReadyChanged(bool)), this, SLOT(dataTerminalReadyChanged(bool)));
-    serialPort->setDataTerminalReady(false);
-    ui->menuWidgets->menuAction()->setVisible(true);
-    if ((widgets != nullptr)) {
-        widgets->setSerialPort(serialPort);
-    }
-    ui->connectButton->setText("Disconnect");                                             // Change buttons
-    ui->statusBar->setStyleSheet("background-color: SpringGreen ;");
-    ui->statusBar->showMessage("Connected!");
-    enableControls(false);                                                                // Disable controls if port is open
-    ui->stopPlotButton->setText("Stop Plot");                                             // Enable button for stopping plot
-    ui->stopPlotButton->setEnabled(true);
-    ui->saveJPGButton->setEnabled(true);                                                  // Enable button for saving plot
-    // Slot is refreshed 20 times per second
-    connected = true;                                                                     // Set flags
-    plotting = true;
-    ui->tabWidget->setCurrentIndex(1);
-    // Reset the Device via DTR
-    serialPort->setDataTerminalReady(true);
-    connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
-    connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
-    QWidget* tabW = ui->tabWidget->findChild<QWidget *>("tabPlots");
-    qDebug() << "tabW : " << tabW;
-    ui->tabWidget->insertTab(1, tabW, "Plots");
-    ui->tabWidget->setCurrentIndex(1);
-
+void MainWindow::initTracer() {
     infoModeLabel = new QCPItemText(ui->plot);
+    connect(infoModeLabel, SIGNAL(selectionChanged (bool)), this, SLOT(infoModeLabelSelectionChanged(bool)));
+    infoModeLabel->setVisible(false);
+    infoModeLabel->setSelectable(true);
     infoModeLabel->setRoundCorners(15);
     infoModeLabel->setBrush(QBrush(QColor(105,105,105)));
     infoModeLabel->setPadding(QMargins(8, 8, 8, 8));
-
+    infoModeLabel->setSelectedColor(Qt::white);
     infoModeLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
     infoModeLabel->position->setType(QCPItemPosition::ptAbsolute );
-//    infoModeLabel->setPadding(QMargins(2,2,2,2));
     QFont font;
     font.setPointSize(12);
     font.setStyleHint(QFont::Monospace);
     font.setWeight(QFont::Bold);
     font.setStyle(QFont::StyleItalic);
     infoModeLabel->setFont(font);
-    QFontMetricsF fm(font);
-//    qreal pixelsWide = fm.width(infoModeLabel->text());
-//    qDebug() << "pixelsWide " << pixelsWide;
-//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 64, 16);
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
-//    qDebug() << "ui->plot->geometry: " << ui->plot->geometry();
     updateTimer.start();
     tracer = new QCPItemTracer(ui->plot);
     tracer->setVisible(false);
@@ -402,9 +381,6 @@ void MainWindow::portOpenedSuccess() {
     traceLineTop = new QCPItemLine(ui->plot);
     pen.setColor(Qt::red);
     traceLineTop->setPen(pen);
-//    traceLineBottom->setVisible(false);
-//    traceLineBottom->start->setCoords(0, DBL_MAX);
-//    traceLineBottom->end->setCoords(DBL_MAX, DBL_MAX);
     font.setPixelSize(12);
     tracerArrowAmplitude = new QCPItemLine(ui->plot);
     tracerArrowAmplitude->setHead(QCPLineEnding::esSpikeArrow);
@@ -466,10 +442,39 @@ void MainWindow::portOpenedSuccess() {
     tracerArrowFromRefTxt->setColor(bgColor);
     tracerArrowFromRefTxt->setBrush(QBrush(QColor(255, 255, 150)));
     tracerArrowFromRefTxt->setPadding(QMargins(8, 4, 8, 4));
+}
 
-//    traceLineTop->setVisible(false);
-//    traceLineTop->start->setCoords(0, -DBL_MAX);
-//    traceLineTop->end->setCoords(DBL_MAX, -DBL_MAX);
+/******************************************************************************************************************/
+/* Slot for port opened successfully */
+/******************************************************************************************************************/
+void MainWindow::portOpenedSuccess() {
+
+    connect(serialPort, SIGNAL(dataTerminalReadyChanged(bool)), this, SLOT(dataTerminalReadyChanged(bool)));
+    serialPort->setDataTerminalReady(false);
+    ui->menuWidgets->menuAction()->setVisible(true);
+    if ((widgets != nullptr)) {
+        widgets->setSerialPort(serialPort);
+    }
+    ui->connectButton->setText("Disconnect");                                             // Change buttons
+    ui->statusBar->setStyleSheet("background-color: SpringGreen ;");
+    ui->statusBar->showMessage("Connected!");
+    enableControls(false);                                                                // Disable controls if port is open
+    ui->stopPlotButton->setText("Stop Plot");                                             // Enable button for stopping plot
+    ui->stopPlotButton->setEnabled(true);
+    ui->saveJPGButton->setEnabled(true);                                                  // Enable button for saving plot
+    // Slot is refreshed 20 times per second
+    connected = true;                                                                     // Set flags
+    plotting = true;
+    ui->tabWidget->setCurrentIndex(1);
+    // Reset the Device via DTR
+    serialPort->setDataTerminalReady(true);
+    connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
+    connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
+    QWidget* tabW = ui->tabWidget->findChild<QWidget *>("tabPlots");
+    qDebug() << "tabW : " << tabW;
+    ui->tabWidget->insertTab(1, tabW, "Plots");
+    ui->tabWidget->setCurrentIndex(1);
+
     cleanTracer();
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
@@ -481,9 +486,9 @@ void MainWindow::portOpenedSuccess() {
 /******************************************************************************************************************/
 void MainWindow::resizeEvent(QResizeEvent* event) {
    QMainWindow::resizeEvent(event);
-   if (infoModeLabel) {
-       QFontMetricsF fm(infoModeLabel->font());
-       qreal pixelsWide = fm.width(infoModeLabel->text());
+   if (infoModeLabel && infoModeLabel->visible()) {
+//       QFontMetricsF fm(infoModeLabel->font());
+//       qreal pixelsWide = fm.width(infoModeLabel->text());
 //       infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
 //       infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 64, 16);
        infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
@@ -935,7 +940,7 @@ void MainWindow::cleanTracer() {
         ui->plot->setCursor(Qt::ArrowCursor);
         tracer->setVisible(false);
         ShowPlotsExceptWG(true);
-
+        infoModeLabel->setVisible(false);
         traceLineBottom->start->setCoords(0, DBL_MAX);
         traceLineBottom->end->setCoords(DBL_MAX, DBL_MAX);
         traceLineBottom->setVisible(false);
@@ -1022,7 +1027,7 @@ void MainWindow::doMenuPlotMeasureAction() {
     if (mouseState == mouseDoMesure) {
         cleanTracer();
         mouseState = mouseNone;
-        plotLabelSelected(true);
+        plotLabelSelectionChanged(true);
     } else {
         qDebug() << "Init Tracer !";
         mouseState = mouseDoMesure;
@@ -1032,10 +1037,7 @@ void MainWindow::doMenuPlotMeasureAction() {
         infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE MODE");
         infoModeLabel->setVisible(true);
         infoModeLabel->setColor(workingGraph->plot()->pen().color());
-        plotLabelSelected(true);
-//        QFontMetricsF fm(infoModeLabel->font());
-//        qreal pixelsWide = fm.width(infoModeLabel->text());
-//        infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+        plotLabelSelectionChanged(true);
         infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
         ui->plot->setCursor(Qt::CrossCursor);
         tracer->setVisible(true);
@@ -1043,10 +1045,10 @@ void MainWindow::doMenuPlotMeasureAction() {
     }
 }
 
-/******************************************************************************************************************/
-void MainWindow::doMenuCloseAction(bool) {
-    qDebug() << "doMenuCloseAction: " << contextMenu->property("id");
-}
+///******************************************************************************************************************/
+//void MainWindow::doMenuCloseAction(bool) {
+//    qDebug() << "doMenuCloseAction: " << contextMenu->property("id");
+//}
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotColorAction() {
@@ -1447,6 +1449,11 @@ void MainWindow::updateTracer(int pX) {
     }
 }
 
+///******************************************************************************************************************/
+//void MainWindow::selectionChangedByUserInPlot() {
+//    qDebug() << "selectionChangedByUserInPlot: ";
+//}
+
 /******************************************************************************************************************/
 /* Prints coordinates of mouse pointer in status bar on mouse release */
 /******************************************************************************************************************/
@@ -1527,12 +1534,10 @@ void MainWindow::resetMouseWheelState() {
     wheelState = wheelNone;
     startShiftPlot = false;
     mouseButtonState = Qt::NoButton;
-    infoModeLabel->setText("");
-    infoModeLabel->setVisible(false);
-    infoModeLabel->setColor(QColor(0, 255, 255));
-//    QFontMetricsF fm(infoModeLabel->font());
-//    qreal pixelsWide = fm.width(infoModeLabel->text());
-//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
+//    infoModeLabel->setText("");
+//    infoModeLabel->setVisible(false);
+//    infoModeLabel->setColor(QColor(0, 255, 255));
+
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
     ui->plot->replot();
@@ -1598,32 +1603,9 @@ void MainWindow::onMousePressInPlot(QMouseEvent *event) {
     case mouseShift:
         startShiftPlot = true;
         break;
-//    case mouseDoMesure:
-////        tracer->blockSignals(true);
-//        break;
     default:
-//        if (contextMenu->isVisible()) {
-//            contextMenu->hide();
-//        }
         break;
     }
-//    if (tracer) {
-//
-//        if (event->button() == Qt::MiddleButton) {
-//        }
-//    }
-//    // if an axis is selected, only allow the direction of that axis to be dragged
-//    // if no axis is selected, both directions may be dragged
-//    if (ui->plot->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
-//        qDebug() << "xAxis";
-//        ui->plot->axisRect()->setRangeDrag(ui->plot->xAxis->orientation());
-//    } else if (ui->plot->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
-//        ui->plot->axisRect()->setRangeDrag(ui->plot->yAxis->orientation());
-//        qDebug() << "yAxis";
-//    } else {
-//        qDebug() << "xAxis yAxis";
-//        ui->plot->axisRect()->setRangeDrag(Qt::Horizontal|Qt::Vertical);
-//    }
 }
 
 /******************************************************************************************************************/
@@ -1831,32 +1813,33 @@ void MainWindow::doContextMenuHeader(yaspGraph* yGraph) {
 //}
 
 /******************************************************************************************************************/
-void MainWindow::plotLabelSelected(bool b) {
-    qDebug() << "plotLabelSelected : " << b << "mouseState: " << mouseState << " workingGraph: " << workingGraph;
-//    qDebug() << "ui->plot->selectedItems() size: " << ui->plot->selectedItems().size();
+void MainWindow::infoModeLabelSelectionChanged(bool b) {
+    qDebug() << "infoModeLabelSelectionChanged : " << ui->plot->selectedItems().size();
+    if (b) {
+        Q_ASSERT(workingGraph);
+        unselectGraphs();
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::plotLabelSelectionChanged(bool b) {
+//    qDebug() << "plotLabelSelectionChanged : " << b << "mouseState: " << mouseState << " workingGraph: " << workingGraph;
+    qDebug() << "plotLabelSelectionChanged selectedItems : " << ui->plot->selectedItems().size();
+//    qDebug() << "selectedAxes : " << ui->plot->selectedAxes().size();
+//    qDebug() << "selectedGraphs : " << ui->plot->selectedGraphs().size();
     if (b) {
         contextMenu->clear();
-        qDebug() << "plotLabelSelected : " << ui->plot->selectedItems().size();
         if (ui->plot->selectedItems().size()) {
             Q_ASSERT(ui->plot->selectedItems().size() == 1);
             QCPAbstractItem* item = ui->plot->selectedItems().at(0);
-            qDebug() << "plotLabelSelected : " << item << " property id " << item->property("id") << " / " << ui->plot->selectedItems().size();
+//            qDebug() << "plotLabelSelectionChanged : " << item << " property id " << item->property("id") << " / " << ui->plot->selectedItems().size();
             QVariant plotId = item->property("id");
             yaspGraph* yGraph = graphs[plotId.toInt()];
             Q_ASSERT(yGraph);
-//            if (workingGraph) {
-//                if (workingGraph != yGraph) {
-//                    qDebug() << ">>>>>>>>>>>>>>>>> plotLabelSelected --> " << workingGraph << " / " << yGraph;
-//                    workingGraph->setSelected(false);
-//                } else {
-//                    workingGraph->setSelected(false);
-//    //                selectedPlotId = -1;
-//    //                workingGraph = nullptr;
-//    //                ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
-//                    unselectGraphs();
-//                    return;
-//                }
-//            }
+            qDebug() << "workingGraph: " << workingGraph << " yGraph: " << yGraph;
+            if (workingGraph && (workingGraph != yGraph)) {
+                workingGraph->setSelected(false);
+            }
             workingGraph = yGraph;
             contextMenu->setProperty("id", plotId);
             selectedPlotId = plotId.toInt();
@@ -1881,9 +1864,6 @@ void MainWindow::plotLabelSelected(bool b) {
                 infoModeLabel->setColor(workingGraph->plot()->pen().color());
                 plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-eye-48.png"));
             }
-//            QFontMetricsF fm(infoModeLabel->font());
-//            qreal pixelsWide = fm.width(infoModeLabel->text());
-//            infoModeLabel->position->setCoords(ui->plot->geometry().width() - pixelsWide - 32, 16);
             infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
             action = contextMenu->addAction("Reset", this, SLOT(doMenuPlotResetAction()));
             action->setIcon(QIcon(":/Icons/Icons/icons8-available-updates-40.png"));
@@ -1903,17 +1883,7 @@ void MainWindow::plotLabelSelected(bool b) {
         }
         ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     } else {
-//        if (workingGraph) {
-//            qDebug() << "plotLabelSelected NOTHING !!!!";
-//            workingGraph->setSelected(true);
-//            return;
-//        } else {
-//            unselectGraphs();
-//        }
-//        selectedPlotId = -1;
-//        workingGraph = nullptr;
-//        ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
-        unselectGraphs();
+//        unselectGraphs();
     }
 }
 

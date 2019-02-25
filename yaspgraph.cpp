@@ -15,12 +15,13 @@ yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine,
     info->setColor(color);
     info->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
     info->position->setType(QCPItemPosition::ptAbsolute );
-    info->setSelectable(true);
+//    info->setSelectable(true);
     info->setPadding(QMargins(2,2,2,2));
     pen.setWidthF(0.5);
     pen.setDashPattern(rLineDashPattern);
 //    rLine->layer()->setMode(QCPLayer::lmBuffered);
     rLine->setPen(pen);
+//    rLine->setSelectable(false);
     rLine->start->setCoords(0,0);
     rLine->end->setCoords(plotTimeInSeconds, 0);
     tracerVisibleDef = true;
@@ -53,7 +54,7 @@ void yaspGraph::toggleTracerVisibility(bool show) {
 
 //-----------------------------------------------------------------------------------------
 void yaspGraph::setSelected(bool sel) {
-     qDebug() << "yaspGraph::setSelected: " << sel;
+//     qDebug() << "yaspGraph::setSelected: " << sel;
     QPen pen = infoGraph->pen();
     pen.setWidth(1);
     if (sel) {

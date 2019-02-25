@@ -98,7 +98,7 @@ private slots:
 //    void doMeasure();
 //    void doShift();
     void cleanTracer();
-    void doMenuCloseAction(bool);
+//    void doMenuCloseAction(bool);
     void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
     void doMenuPlotScaleAction();
@@ -114,10 +114,11 @@ private slots:
     void menuAboutToHide();
     void on_scrollButton_clicked(bool checked);
     void on_logPlotButton_clicked();
-    void plotLabelSelected(bool b);
+    void plotLabelSelectionChanged(bool b);
     void xAxisRangeChanged(const QCPRange& range);
     void on_spinDisplayTime_valueChanged(double arg1);
-
+//    void selectionChangedByUserInPlot();
+    void infoModeLabelSelectionChanged(bool b);
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
@@ -151,7 +152,7 @@ private:
     mouseAction mouseState = mouseMove;
     void resetMouseWheelState();
     QCPItemText* infoModeLabel = nullptr;
-    QCP::Interactions plotInteractions;
+//    QCP::Interactions plotInteractions;
 //    bool mousePressed = false;
     Qt::MouseButton mouseButtonState;
 //    QSharedPointer<QCPAxisTickerText> textTicker;
@@ -211,6 +212,7 @@ private:
     QList<QCPItemText*> tracerHLinesTracerInfo;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
+    void initTracer();
     yaspGraph *addGraph(int id);
     void updateLabel(int id, QString plotInfoStr);
     void doContextMenuHeader(yaspGraph* yGraph);
