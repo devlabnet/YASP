@@ -203,6 +203,16 @@ void MainWindow::cleanGraphs() {
 }
 
 /******************************************************************************************************************/
+void MainWindow::cleanGraphsBefore(double d) {
+    d -= PLOT_TIME_MAX_DEF/2;
+    foreach (yaspGraph* yGraph, graphs) {
+        Q_ASSERT(yGraph);
+        yGraph->plot()->data()->removeBefore(d);
+    }
+    cleanDataTtime += PLOT_TIME_MAX_DEF;
+}
+
+/******************************************************************************************************************/
 yaspGraph* MainWindow::addGraph(int id) {
         ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
 //        ui->plot->xAxis->setRange(0, plotTimeInSeconds);                                      // Set x axis range for specified number of points
@@ -452,6 +462,7 @@ void MainWindow::portOpenedSuccess() {
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
 
     lastDataTtime = 0;
+    cleanDataTtime = PLOT_TIME_MAX_DEF;
 }
 
 /******************************************************************************************************************/
@@ -658,6 +669,10 @@ void MainWindow::onNewDataArrived(QStringList newData) {
         dataPointNumber++;
         if (dataListSize == 3) {
             lastDataTtime = newData[1].toDouble()/1000000.0;
+            if (lastDataTtime > cleanDataTtime) {
+                // Clean graphs data
+                cleanGraphsBefore(lastDataTtime);
+            }
             double val = newData[2].toDouble();
             val *= yGraph->mult();
             val += yGraph->offset();
@@ -920,13 +935,20 @@ void MainWindow::cleanTracer() {
         tracerArrowFromRefTxt->setVisible(false);
         tracerRect->setVisible(false);
         QList<QCPItemLine*>::iterator lI;
-        lI = tracerHLines.end();
-        while(lI != tracerHLines.begin()) {
+        lI = tracerHLinesRef.end();
+        while(lI != tracerHLinesRef.begin()) {
           --lI;
 //            QCPItemLine* item = dynamic_cast<QCPItemLine*>(lI)
           ui->plot->removeItem(*lI);
         }
-
+        tracerHLinesRef.clear();
+        lI = tracerHLinesTracer.end();
+        while(lI != tracerHLinesTracer.begin()) {
+          --lI;
+//            QCPItemLine* item = dynamic_cast<QCPItemLine*>(lI)
+          ui->plot->removeItem(*lI);
+        }
+        tracerHLinesTracer.clear();
 //    }
     resetMouseWheelState();
 }
@@ -1123,18 +1145,25 @@ void MainWindow::updateTracer(int pX) {
         Q_ASSERT(tracer);
 //        cleanTracer();
         QList<QCPItemLine*>::iterator lI;
-        lI = tracerHLines.end();
-        while(lI != tracerHLines.begin()) {
+        lI = tracerHLinesRef.end();
+        while(lI != tracerHLinesRef.begin()) {
           --lI;
 //            QCPItemLine* item = dynamic_cast<QCPItemLine*>(lI)
           ui->plot->removeItem(*lI);
         }
-        tracerHLines.clear();
+        tracerHLinesRef.clear();
+        lI = tracerHLinesTracer.end();
+        while(lI != tracerHLinesTracer.begin()) {
+          --lI;
+//            QCPItemLine* item = dynamic_cast<QCPItemLine*>(lI)
+          ui->plot->removeItem(*lI);
+        }
+        tracerHLinesTracer.clear();
         double plotWidth = ui->plot->xAxis->range().size();
         double plotHeight = ui->plot->yAxis->range().size();
         double plotVCenter = ui->plot->yAxis->range().center();
-        double plotTop = ui->plot->yAxis->range().upper;
-        double plotBottom = ui->plot->yAxis->range().lower;
+//        double plotTop = ui->plot->yAxis->range().upper;
+//        double plotBottom = ui->plot->yAxis->range().lower;
         double space = plotWidth / 800;
         double coordX = ui->plot->xAxis->pixelToCoord(pX);
         // get tracer origin
@@ -1264,23 +1293,23 @@ void MainWindow::updateTracer(int pX) {
         QSharedPointer<QCPGraphDataContainer> gData = workingGraph->plot()->data();
         QCPDataContainer<QCPGraphData>::const_iterator itStart = gData->findBegin(tracerRectLeft, true);
         QCPDataContainer<QCPGraphData>::const_iterator itEnd = gData->findBegin(tracerRectRight, true);
-        qDebug() << "-----------------------------";
+//        qDebug() << "-----------------------------";
         lastTracerXValueRef = itStart->key;
         lastTracerXValueTracer = itStart->key;
         double deltaMin = space * 20;
-        qDebug() << "itStart: " <<  itStart->key << " itEnd: " <<  itEnd->key
-                 << " lastTracerXValue: " << lastTracerXValueRef << " deltaMin: " << deltaMin;
+//        qDebug() << "itStart: " <<  itStart->key << " itEnd: " <<  itEnd->key
+//                 << " lastTracerXValue: " << lastTracerXValueRef << " deltaMin: " << deltaMin;
         for (QCPDataContainer<QCPGraphData>::const_iterator it = itStart; it != itEnd; ++it) {
             if (compareDouble( it->value, ref, 0)) {
                 double deltaRef = it->key - lastTracerXValueRef;
 //                qDebug() << "deltaRef: " << deltaRef;
                 if (deltaRef > deltaMin) {
                     QCPItemLine* line = new QCPItemLine(ui->plot);
-                    tracerHLines.append(line);
+                    tracerHLinesRef.append(line);
                     line->setPen(QPen(QColor(255,0,255)));
                     line->start->setCoords(it->key, it->value);
                     line->end->setCoords(it->key, tracerRectBottom);
-                    qDebug() << "ref: " << it->key << " / " << it->value;
+//                    qDebug() << "ref: " << it->key << " / " << it->value;
                 }
                 lastTracerXValueRef = it->key;
             }
@@ -1288,9 +1317,9 @@ void MainWindow::updateTracer(int pX) {
                 double deltaTracer = it->key - lastTracerXValueTracer;
 //                qDebug() << "deltaTracer: " << deltaTracer;
                 if (deltaTracer > deltaMin) {
-                    qDebug() << "tracer: " << it->key << " / " << it->value << " deltaMin: " << deltaMin;
+//                    qDebug() << "tracer: " << it->key << " / " << it->value << " deltaMin: " << deltaMin;
                     QCPItemLine* line = new QCPItemLine(ui->plot);
-                    tracerHLines.append(line);
+                    tracerHLinesTracer.append(line);
                     line->setPen(QPen(QColor(0,255,255)));
                     line->start->setCoords(it->key, it->value);
                     line->end->setCoords(it->key, tracerRectTop);
@@ -1425,7 +1454,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
             QPoint numDegrees = event->angleDelta();
             int nY = numDegrees.y();
             if (nY != 0) {
-            double scale = 1 + ((double)(nY) / 1000.0);
+            double scale = 1 + (static_cast<double>(nY) / 1000.0);
             scalePlot(scale);
             QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult());
             ui->statusBar->showMessage(msg);

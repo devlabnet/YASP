@@ -50,10 +50,10 @@
 #define UNDEFINED       4
 
 #define DEF_YAXIS_RANGE 1500
-#define PLOT_TIME_DEF 15
-#define PLOT_TIME_MIN_DEF 0.001
-#define PLOT_TIME_MAX_DEF 100000
-#define PLOT_TIME_STEP_DEF 1
+#define PLOT_TIME_DEF 15            // Default time Displayed in Plot in Seconds
+#define PLOT_TIME_MIN_DEF 10.0      // Seconds
+#define PLOT_TIME_MAX_DEF 600.0    // Seconds
+#define PLOT_TIME_STEP_DEF 10.0     // Seconds
 
 namespace Ui {
 class MainWindow;
@@ -159,6 +159,7 @@ private:
     QMap<int, yaspGraph*> graphs;
 //    QMap<int, int> pointTime;
     double lastDataTtime;
+    double cleanDataTtime;
 //    QString plotInfoStr;
     yaspGraph* getGraph(int id);
 //    QVector<qreal> plotDashPattern;
@@ -204,7 +205,8 @@ private:
     QCPItemText* tracerArrowAmplitudeBottomTxt;
     QCPItemLine* tracerArrowFromRef;
     QCPItemText* tracerArrowFromRefTxt;
-    QList<QCPItemLine*> tracerHLines;
+    QList<QCPItemLine*> tracerHLinesRef;
+    QList<QCPItemLine*> tracerHLinesTracer;
     void createUI();                                                                      // Populate the controls
     void enableControls(bool enable);                                                     // Enable/disable controls
     yaspGraph *addGraph(int id);
@@ -224,6 +226,7 @@ private:
     void shiftPlot(int pY);
     void scalePlot(double scale);
     void unselectGraphs();
+    void cleanGraphsBefore(double d);
     bool startShiftPlot = false;
 //    bool startScalePlot = false;
     double lastPosY = 0;
