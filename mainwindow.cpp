@@ -1016,6 +1016,7 @@ void MainWindow::doMenuPlotResetAction() {
     resetMouseWheelState();
     Q_ASSERT(workingGraph);
     workingGraph->reset();
+    infoModeLabel->setText(workingGraph->plot()->name() + " --> MENU MODE");
 }
 
 /******************************************************************************************************************/
@@ -1041,6 +1042,7 @@ void MainWindow::doMenuPlotShowHideAction() {
         infoModeLabel->setColor(workingGraph->plot()->pen().color());
     }
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
+    plotLabelSelectionChanged(true);
     ui->plot->replot();
 }
 
@@ -1142,12 +1144,12 @@ void MainWindow::updateTracer() {
         traceLineTop->setVisible(true);
         tracerRect->setVisible(true);
         if (traceLineBottom->start->coords().y() > endY) {
-            qDebug() << "traceLineBottom "  << endY;
+//            qDebug() << "traceLineBottom "  << endY;
             traceLineBottom->start->setCoords(0, endY);
             traceLineBottom->end->setCoords(DBL_MAX, endY);
         }
         if (traceLineTop->start->coords().y() < endY) {
-            qDebug() << "traceLineTop "  << endY;
+//            qDebug() << "traceLineTop "  << endY;
             traceLineTop->start->setCoords(0, endY);
             traceLineTop->end->setCoords(DBL_MAX, endY);
         }
@@ -1643,9 +1645,13 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
         Q_ASSERT(workingGraph);
         workingGraph->setSelected(true);
         doContextMenuHeader(workingGraph);
+        QAction* action;
+        infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
         if (!measureInProgress) {
-            QAction* action = contextMenu->addAction("Color", this, SLOT(doMenuPlotColorAction()));
-            action->setIcon(QIcon(":/Icons/Icons/icons8-paint-palette-48.png"));
+            if (workingGraph->plot()->visible()) {
+                action = contextMenu->addAction("Color", this, SLOT(doMenuPlotColorAction()));
+                action->setIcon(QIcon(":/Icons/Icons/icons8-paint-palette-48.png"));
+            }
             plotShowHideAction = contextMenu->addAction("Hide", this, SLOT(doMenuPlotShowHideAction()));
             if (workingGraph->plot()->visible()) {
                 plotShowHideAction->setText("Hide");
@@ -1661,18 +1667,19 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
                 infoModeLabel->setColor(workingGraph->plot()->pen().color());
                 plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-eye-48.png"));
             }
-            infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
-            action = contextMenu->addAction("Reset", this, SLOT(doMenuPlotResetAction()));
-            action->setIcon(QIcon(":/Icons/Icons/icons8-available-updates-40.png"));
-//            action = contextMenu->addAction("Scale", this, SLOT(doMenuPlotScaleAction()));
-//            action->setIcon(QIcon(":/Icons/Icons/icons8-height-48.png"));
-//            action = contextMenu->addAction("Shift", this, SLOT(doMenuPlotShiftAction()));
-//            action->setIcon(QIcon(":/Icons/Icons/icons8-shift-48.png"));
-            action = contextMenu->addAction("Save", this, SLOT(saveSelectedGraph()));
-            action->setIcon(QIcon(":/Icons/Icons/icons8-save-48.png"));
-            if (plotting == false) {
-                plotMeasureAction = contextMenu->addAction("Start Measure", this, SLOT(doMenuPlotMeasureAction()));
-                plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-caliper-48.png"));
+            if (workingGraph->plot()->visible()) {
+                action = contextMenu->addAction("Reset", this, SLOT(doMenuPlotResetAction()));
+                action->setIcon(QIcon(":/Icons/Icons/icons8-available-updates-40.png"));
+    //            action = contextMenu->addAction("Scale", this, SLOT(doMenuPlotScaleAction()));
+    //            action->setIcon(QIcon(":/Icons/Icons/icons8-height-48.png"));
+    //            action = contextMenu->addAction("Shift", this, SLOT(doMenuPlotShiftAction()));
+    //            action->setIcon(QIcon(":/Icons/Icons/icons8-shift-48.png"));
+                action = contextMenu->addAction("Save", this, SLOT(saveSelectedGraph()));
+                action->setIcon(QIcon(":/Icons/Icons/icons8-save-48.png"));
+                if (plotting == false) {
+                    plotMeasureAction = contextMenu->addAction("Start Measure", this, SLOT(doMenuPlotMeasureAction()));
+                    plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-caliper-48.png"));
+                }
             }
         } else {
             plotMeasureAction = contextMenu->addAction("Stop Measure", this, SLOT(doMenuPlotMeasureAction()));
