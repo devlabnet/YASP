@@ -1335,8 +1335,6 @@ void MainWindow::updateTracer(int pX) {
 //}
 
 /******************************************************************************************************************/
-/* Prints coordinates of mouse pointer in status bar on mouse release */
-/******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     qDebug() << "onMouseMoveInPlot " << mouseState;
     double xx = ui->plot->xAxis->pixelToCoord(event->x());
@@ -1344,49 +1342,82 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     QString coordinates("X: %1 Y: %2 Points:%3");
     coordinates = coordinates.arg(xx).arg(yy).arg(dataPointNumber);
     ui->statusBar->setStyleSheet("background-color: SkyBlue;");
-    switch (mouseState) {
-        case mouseMove: {
-            if (wheelState == wheelZoom) {
-                ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
-            }
+    if (workingGraph && ((mouseState != mouseDoMesure))) {
+        // Just shift the selected plot
+        if (event->buttons() == Qt::LeftButton) {
+            ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
+            infoModeLabel->setText(workingGraph->plot()->name() + " -> SHIFT MODE");
+//            infoModeLabel->setVisible(true);
+            infoModeLabel->setColor(workingGraph->plot()->pen().color());
+            infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
+
+            shiftPlot(event->y());
+            QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->offset());
+            ui->statusBar->showMessage(msg);
+        } /*else {
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
             ui->statusBar->showMessage(coordinates);
-            }
-            break;
-        case mouseShift: {
-                if (event->buttons() == Qt::LeftButton) {
-                    ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
-                    shiftPlot(event->y());
-                    QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->offset());
-                    ui->statusBar->showMessage(msg);
-                } else {
-                    ui->statusBar->showMessage(coordinates);
-                }
-            }
-            break;
-        case mouseDoMesure:
-            updateTracer(event->pos().x());
-            break;
-        default:
-            ui->statusBar->showMessage(coordinates);
-            break;
+        }*/
+    } else {
+        // shift all plots
+        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+        ui->statusBar->showMessage(coordinates);
     }
+     updateTracer(event->pos().x());
+
+//    switch (mouseState) {
+//        case mouseMove: {
+//            if (wheelState == wheelZoom) {
+//                ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+//            }
+//            ui->statusBar->showMessage(coordinates);
+//            }
+//            break;
+//        case mouseShift: {
+//                if (event->buttons() == Qt::LeftButton) {
+//                    ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
+//                    shiftPlot(event->y());
+//                    QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->offset());
+//                    ui->statusBar->showMessage(msg);
+//                } else {
+//                    ui->statusBar->showMessage(coordinates);
+//                }
+//            }
+//            break;
+//        case mouseDoMesure:
+//            updateTracer(event->pos().x());
+//            break;
+//        default:
+//            ui->statusBar->showMessage(coordinates);
+//            break;
+//    }
 }
 
 /******************************************************************************************************************/
 void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     Q_UNUSED(event)
     ui->statusBar->showMessage("release");
-    switch (mouseState) {
-    case mouseDoMesure:
-        break;
-    case mouseShift:
-    case mouseMove:
+    if (workingGraph) {
         startShiftPlot = false;
+        infoModeLabel->setText(workingGraph->plot()->name() + " -> SHOW MODE");
+    //            infoModeLabel->setVisible(true);
+        infoModeLabel->setColor(workingGraph->plot()->pen().color());
+        infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
+    } else {
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
-        break;
-    default:
-        break;
     }
+
+//    switch (mouseState) {
+//    case mouseDoMesure:
+//        break;
+//    case mouseShift:
+//    case mouseMove:
+//        startShiftPlot = false;
+//        ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+//        break;
+//    default:
+//        break;
+//    }
 //    mouseButtonState = Qt::NoButton;
 }
 
@@ -1395,6 +1426,7 @@ void MainWindow::resetMouseWheelState() {
     qDebug() << "resetMouseWheelState: " << mouseState;
     mouseState = mouseNone;
     wheelState = wheelNone;
+
     startShiftPlot = false;
 //    mouseButtonState = Qt::NoButton;
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
@@ -1431,15 +1463,20 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
         }
     } else {
         ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
-        if (wheelState == wheelScalePlot) {
+        if (workingGraph && ((mouseState != mouseDoMesure))) {
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
+            infoModeLabel->setText(workingGraph->plot()->name() + " -> SCALE MODE");
+//            infoModeLabel->setVisible(true);
+            infoModeLabel->setColor(workingGraph->plot()->pen().color());
+            infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
             QPoint numDegrees = event->angleDelta();
             int nY = numDegrees.y();
             if (nY != 0) {
-            double scale = 1 + (static_cast<double>(nY) / 1000.0);
-            scalePlot(scale);
-            QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult());
-            ui->statusBar->showMessage(msg);
-            event->accept();
+                double scale = 1 + (static_cast<double>(nY) / 1000.0);
+                scalePlot(scale);
+                QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult());
+                ui->statusBar->showMessage(msg);
+//                event->accept();
             }
         } else {
             ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
@@ -1456,14 +1493,17 @@ void MainWindow::onMousePressInPlot(QMouseEvent *event) {
     qDebug() << "onMousePressInPlot " << event->button()
              << " mouseState: " << mouseState
              << " menu: " << contextMenu->isVisible();
-//    mouseButtonState = event->button();
-    switch (mouseState) {
-    case mouseShift:
+    if (workingGraph) {
         startShiftPlot = true;
-        break;
-    default:
-        break;
     }
+//    mouseButtonState = event->button();
+//    switch (mouseState) {
+//    case mouseShift:
+//        startShiftPlot = true;
+//        break;
+//    default:
+//        break;
+//    }
 }
 
 /******************************************************************************************************************/
@@ -1668,10 +1708,10 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
             infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
             action = contextMenu->addAction("Reset", this, SLOT(doMenuPlotResetAction()));
             action->setIcon(QIcon(":/Icons/Icons/icons8-available-updates-40.png"));
-            action = contextMenu->addAction("Scale", this, SLOT(doMenuPlotScaleAction()));
-            action->setIcon(QIcon(":/Icons/Icons/icons8-height-48.png"));
-            action = contextMenu->addAction("Shift", this, SLOT(doMenuPlotShiftAction()));
-            action->setIcon(QIcon(":/Icons/Icons/icons8-shift-48.png"));
+//            action = contextMenu->addAction("Scale", this, SLOT(doMenuPlotScaleAction()));
+//            action->setIcon(QIcon(":/Icons/Icons/icons8-height-48.png"));
+//            action = contextMenu->addAction("Shift", this, SLOT(doMenuPlotShiftAction()));
+//            action->setIcon(QIcon(":/Icons/Icons/icons8-shift-48.png"));
             action = contextMenu->addAction("Save", this, SLOT(saveSelectedGraph()));
             action->setIcon(QIcon(":/Icons/Icons/icons8-save-48.png"));
             if (plotting == false) {
