@@ -119,7 +119,6 @@ MainWindow::MainWindow(QWidget *parent) :
 //    connect(contextMenu, SIGNAL(aboutToHide()), this, SLOT(menuAboutToHide()));
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
 
-    initTracer();
     // Clear the terminal
     on_clearTermButton_clicked();
 //    ticksXTime.start();
@@ -414,6 +413,7 @@ void MainWindow::initTracer() {
     tracerArrowFromRefTxt->setColor(bgColor);
     tracerArrowFromRefTxt->setBrush(QBrush(QColor(255, 255, 150)));
     tracerArrowFromRefTxt->setPadding(QMargins(8, 4, 8, 4));
+    cleanTracer();
 }
 
 /******************************************************************************************************************/
@@ -446,7 +446,8 @@ void MainWindow::portOpenedSuccess() {
 //    qDebug() << "tabW : " << tabW;
     ui->tabWidget->insertTab(1, tabW, "Plots");
     ui->tabWidget->setCurrentIndex(1);
-    cleanTracer();
+    initTracer();
+//    cleanTracer();
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     lastDataTtime = 0;
