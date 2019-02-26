@@ -88,9 +88,9 @@ private slots:
     void saveSelectedGraph();
     void saveAllGraphs();
     void cleanTracer();
-    void doMenuPlotShiftAction();
+//    void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
-    void doMenuPlotScaleAction();
+//    void doMenuPlotScaleAction();
     void doMenuPlotResetAction();
     void doMenuPlotMeasureAction();
     void doMenuPlotShowHideAction();
@@ -105,6 +105,7 @@ private slots:
     void xAxisRangeChanged(const QCPRange& range);
     void on_spinDisplayTime_valueChanged(double arg1);
     void infoModeLabelSelectionChanged(bool b);
+    void mouseWheelTimerShoot();
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
@@ -125,18 +126,20 @@ private:
                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                           QColor("#ff00aa")};
 
-    enum WheelAction { wheelNone        = 0x00,
-                       wheelZoom        = 0x01,
-                       wheelScalePlot   = 0x02
-                     };
-    WheelAction wheelState = wheelZoom;
-    enum mouseAction { mouseNone   = 0x00,
-                       mouseMove   = 0x01,
-                       mouseShift   = 0x02,
-                       mouseDoMesure = 0x03
-                     };
-    mouseAction mouseState = mouseMove;
+//    enum WheelAction { wheelNone        = 0x00,
+//                       wheelZoom        = 0x01,
+//                       wheelScalePlot   = 0x02
+//                     };
+//    WheelAction wheelState = wheelZoom;
+//    enum mouseAction { mouseNone   = 0x00,
+//                       mouseMove   = 0x01,
+//                       mouseShift   = 0x02,
+//                       mouseDoMesure = 0x03
+//                     };
+//    mouseAction mouseState = mouseMove;
+    bool MeasureInProgress = false;
     void resetMouseWheelState();
+    QTimer mouseWheelTimer;
     QCPItemText* infoModeLabel = nullptr;
     Qt::MouseButton mouseButtonState;
     QSharedPointer<QCPAxisTickerFixed> fixedTicker;

@@ -117,8 +117,8 @@ MainWindow::MainWindow(QWidget *parent) :
     contextMenu = new QMenu(this);
 //    connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuTriggered(QAction*)));
 //    connect(contextMenu, SIGNAL(aboutToHide()), this, SLOT(menuAboutToHide()));
-    ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
-
+    ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);    
+    mouseWheelTimer.stop();
     // Clear the terminal
     on_clearTermButton_clicked();
 //    ticksXTime.start();
@@ -420,7 +420,6 @@ void MainWindow::initTracer() {
 /* Slot for port opened successfully */
 /******************************************************************************************************************/
 void MainWindow::portOpenedSuccess() {
-
     connect(serialPort, SIGNAL(dataTerminalReadyChanged(bool)), this, SLOT(dataTerminalReadyChanged(bool)));
     serialPort->setDataTerminalReady(false);
     ui->menuWidgets->menuAction()->setVisible(true);
@@ -452,6 +451,7 @@ void MainWindow::portOpenedSuccess() {
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     lastDataTtime = 0;
     cleanDataTtime = PLOT_TIME_MAX_DEF;
+    connect(&mouseWheelTimer, SIGNAL(timeout()), this, SLOT(mouseWheelTimerShoot()));
 }
 
 /******************************************************************************************************************/
@@ -515,6 +515,18 @@ void MainWindow::replot() {
     if(connected) {
         ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
         ui->plot->replot();
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::mouseWheelTimerShoot() {
+//    mouseWheelTimer.setSingleShot(true);
+    mouseWheelTimer.stop();
+    if (workingGraph && !MeasureInProgress) {
+        qDebug() << "<<<<<<<<<<<<< mouseWheelTimerShoot >>>>>>>>>>>>>>";
+        infoModeLabel->setText(workingGraph->plot()->name() + " -> SHOW MODE");
+        infoModeLabel->setColor(workingGraph->plot()->pen().color());
+        infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
     }
 }
 
@@ -927,17 +939,17 @@ void MainWindow::cleanTracer() {
     resetMouseWheelState();
 }
 
-/******************************************************************************************************************/
-void MainWindow::doMenuPlotShiftAction() {
-    qDebug() << "doMenuPlotShiftAction: " << contextMenu->property("id");
-    resetMouseWheelState();
-    Q_ASSERT(workingGraph);
-    mouseState = mouseShift;
-    infoModeLabel->setText(workingGraph->plot()->name() + " -> SHIFT MODE");
-    infoModeLabel->setVisible(true);
-    infoModeLabel->setColor(workingGraph->plot()->pen().color());
-    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
-}
+///******************************************************************************************************************/
+//void MainWindow::doMenuPlotShiftAction() {
+//    qDebug() << "doMenuPlotShiftAction: " << contextMenu->property("id");
+//    resetMouseWheelState();
+//    Q_ASSERT(workingGraph);
+//    mouseState = mouseShift;
+//    infoModeLabel->setText(workingGraph->plot()->name() + " -> SHIFT MODE");
+//    infoModeLabel->setVisible(true);
+//    infoModeLabel->setColor(workingGraph->plot()->pen().color());
+//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
+//}
 
 /******************************************************************************************************************/
 void MainWindow::ShowPlotsExceptWG(bool show) {
@@ -951,16 +963,16 @@ void MainWindow::ShowPlotsExceptWG(bool show) {
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotMeasureAction() {
-    qDebug() << "doMenuPlotMeasureAction: " << contextMenu->property("id") << " mouseState: " << mouseState;
+    qDebug() << "doMenuPlotMeasureAction: " << contextMenu->property("id") << " MeasureInProgress: " << MeasureInProgress;
     Q_ASSERT(contextMenu);
     Q_ASSERT(workingGraph);
-    if (mouseState == mouseDoMesure) {
+    if (MeasureInProgress) {
         cleanTracer();
-        mouseState = mouseNone;
+        MeasureInProgress = false;
         plotLabelSelectionChanged(true);
     } else {
         qDebug() << "Init Tracer !";
-        mouseState = mouseDoMesure;
+        MeasureInProgress = true;
         ShowPlotsExceptWG(false);
         measureMult = workingGraph->mult();
 //        ui->plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag );
@@ -1002,24 +1014,24 @@ void MainWindow::doMenuPlotColorAction() {
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotResetAction() {
-    qDebug() << "doMenuPlotScaleAction: " << contextMenu->property("id");
+    qDebug() << "doMenuPlotResetAction: " << contextMenu->property("id");
     resetMouseWheelState();
     Q_ASSERT(workingGraph);
     workingGraph->reset();
 }
 
-/******************************************************************************************************************/
-void MainWindow::doMenuPlotScaleAction() {
-    qDebug() << "doMenuPlotScaleAction: " << contextMenu->property("id");
-    resetMouseWheelState();
-    Q_ASSERT(workingGraph);
-    infoModeLabel->setText(workingGraph->plot()->name() + " --> SCALE MODE");
-    infoModeLabel->setVisible(true);
-    infoModeLabel->setColor(workingGraph->plot()->pen().color());
-    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
-    wheelState = wheelScalePlot;
-    ui->plot->setInteraction(QCP::iRangeZoom, false);
-}
+///******************************************************************************************************************/
+//void MainWindow::doMenuPlotScaleAction() {
+//    qDebug() << "doMenuPlotScaleAction: " << contextMenu->property("id");
+//    resetMouseWheelState();
+//    Q_ASSERT(workingGraph);
+//    infoModeLabel->setText(workingGraph->plot()->name() + " --> SCALE MODE");
+//    infoModeLabel->setVisible(true);
+//    infoModeLabel->setColor(workingGraph->plot()->pen().color());
+//    infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
+//    wheelState = wheelScalePlot;
+//    ui->plot->setInteraction(QCP::iRangeZoom, false);
+//}
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotShowHideAction() {
@@ -1098,7 +1110,7 @@ void MainWindow::messageSent(QString str) {
 
 /******************************************************************************************************************/
 void MainWindow::updateTracer(int pX) {
-    if (mouseState == mouseDoMesure) {
+    if (MeasureInProgress) {
         Q_ASSERT(tracer);
         QList<QCPItemLine*>::iterator lI;
         lI = tracerHLinesRef.end();
@@ -1336,13 +1348,13 @@ void MainWindow::updateTracer(int pX) {
 
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
-    qDebug() << "onMouseMoveInPlot " << mouseState;
+//    qDebug() << "onMouseMoveInPlot " << MeasureInProgress;
     double xx = ui->plot->xAxis->pixelToCoord(event->x());
     double yy = ui->plot->yAxis->pixelToCoord(event->y());
     QString coordinates("X: %1 Y: %2 Points:%3");
     coordinates = coordinates.arg(xx).arg(yy).arg(dataPointNumber);
     ui->statusBar->setStyleSheet("background-color: SkyBlue;");
-    if (workingGraph && ((mouseState != mouseDoMesure))) {
+    if (workingGraph && !MeasureInProgress) {
         // Just shift the selected plot
         if (event->buttons() == Qt::LeftButton) {
             ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
@@ -1423,10 +1435,10 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
 
 /******************************************************************************************************************/
 void MainWindow::resetMouseWheelState() {
-    qDebug() << "resetMouseWheelState: " << mouseState;
-    mouseState = mouseNone;
-    wheelState = wheelNone;
-
+    qDebug() << "resetMouseWheelState: " << MeasureInProgress;
+    MeasureInProgress = false;
+    mouseWheelTimer.stop();
+//    wheelState = wheelNone;
     startShiftPlot = false;
 //    mouseButtonState = Qt::NoButton;
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
@@ -1463,15 +1475,14 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
         }
     } else {
         ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
-        if (workingGraph && ((mouseState != mouseDoMesure))) {
+        if (workingGraph && !MeasureInProgress) {
             ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
-            infoModeLabel->setText(workingGraph->plot()->name() + " -> SCALE MODE");
 //            infoModeLabel->setVisible(true);
-            infoModeLabel->setColor(workingGraph->plot()->pen().color());
-            infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
             QPoint numDegrees = event->angleDelta();
             int nY = numDegrees.y();
             if (nY != 0) {
+                mouseWheelTimer.start(500);
+                infoModeLabel->setText(workingGraph->plot()->name() + " -> SCALE MODE");
                 double scale = 1 + (static_cast<double>(nY) / 1000.0);
                 scalePlot(scale);
                 QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult());
@@ -1491,7 +1502,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 /******************************************************************************************************************/
 void MainWindow::onMousePressInPlot(QMouseEvent *event) {
     qDebug() << "onMousePressInPlot " << event->button()
-             << " mouseState: " << mouseState
+             << " MeasureInProgress: " << MeasureInProgress
              << " menu: " << contextMenu->isVisible();
     if (workingGraph) {
         startShiftPlot = true;
@@ -1688,7 +1699,7 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
         Q_ASSERT(workingGraph);
         workingGraph->setSelected(true);
         doContextMenuHeader(workingGraph);
-        if (mouseState != mouseDoMesure) {
+        if (!MeasureInProgress) {
             QAction* action = contextMenu->addAction("Color", this, SLOT(doMenuPlotColorAction()));
             action->setIcon(QIcon(":/Icons/Icons/icons8-paint-palette-48.png"));
             plotShowHideAction = contextMenu->addAction("Hide", this, SLOT(doMenuPlotShowHideAction()));
