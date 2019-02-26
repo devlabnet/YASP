@@ -489,7 +489,6 @@ void MainWindow:: closePort() {
             widgets->hide();
     }
     updateTimer.stop();
-//    ticksXTimer.stop();
     connected = false;
     disconnect(serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
     disconnect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
@@ -964,7 +963,7 @@ void MainWindow::doMenuPlotMeasureAction() {
         mouseState = mouseDoMesure;
         ShowPlotsExceptWG(false);
         measureMult = workingGraph->mult();
-        ui->plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag );
+//        ui->plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag );
         infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE MODE");
         infoModeLabel->setVisible(true);
         infoModeLabel->setColor(workingGraph->plot()->pen().color());
@@ -1339,6 +1338,7 @@ void MainWindow::updateTracer(int pX) {
 /* Prints coordinates of mouse pointer in status bar on mouse release */
 /******************************************************************************************************************/
 void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
+    qDebug() << "onMouseMoveInPlot " << mouseState;
     double xx = ui->plot->xAxis->pixelToCoord(event->x());
     double yy = ui->plot->yAxis->pixelToCoord(event->y());
     QString coordinates("X: %1 Y: %2 Points:%3");
@@ -1352,15 +1352,15 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
             ui->statusBar->showMessage(coordinates);
             }
             break;
-    case mouseShift: {
-            if (mouseButtonState == Qt::LeftButton) {
-                ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
-                shiftPlot(event->y());
-                QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->offset());
-                ui->statusBar->showMessage(msg);
-            } else {
-                ui->statusBar->showMessage(coordinates);
-            }
+        case mouseShift: {
+                if (event->buttons() == Qt::LeftButton) {
+                    ui->plot->setInteractions(QCP::iRangeZoom | QCP::iSelectItems );
+                    shiftPlot(event->y());
+                    QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->offset());
+                    ui->statusBar->showMessage(msg);
+                } else {
+                    ui->statusBar->showMessage(coordinates);
+                }
             }
             break;
         case mouseDoMesure:
@@ -1387,7 +1387,7 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     default:
         break;
     }
-    mouseButtonState = Qt::NoButton;
+//    mouseButtonState = Qt::NoButton;
 }
 
 /******************************************************************************************************************/
@@ -1396,7 +1396,7 @@ void MainWindow::resetMouseWheelState() {
     mouseState = mouseNone;
     wheelState = wheelNone;
     startShiftPlot = false;
-    mouseButtonState = Qt::NoButton;
+//    mouseButtonState = Qt::NoButton;
     infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
     ui->plot->replot();
@@ -1404,7 +1404,10 @@ void MainWindow::resetMouseWheelState() {
 
 /******************************************************************************************************************/
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
-    if (mouseButtonState == Qt::RightButton) {
+//    if (event->buttons() == Qt::RightButton) {
+//        qDebug() << event->buttons();
+//    }
+    if (event->buttons() == Qt::RightButton) {
         QCPRange range = ui->plot->xAxis->range();
         double spd = ui->spinDisplayTime->value();
         // change spinDisplayTime
@@ -1453,7 +1456,7 @@ void MainWindow::onMousePressInPlot(QMouseEvent *event) {
     qDebug() << "onMousePressInPlot " << event->button()
              << " mouseState: " << mouseState
              << " menu: " << contextMenu->isVisible();
-    mouseButtonState = event->button();
+//    mouseButtonState = event->button();
     switch (mouseState) {
     case mouseShift:
         startShiftPlot = true;
