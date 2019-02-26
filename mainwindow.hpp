@@ -102,10 +102,11 @@ private slots:
     void on_scrollButton_clicked(bool checked);
     void on_logPlotButton_clicked();
     void plotLabelSelectionChanged(bool b);
-    void xAxisRangeChanged(const QCPRange& range);
     void on_spinDisplayTime_valueChanged(double arg1);
     void infoModeLabelSelectionChanged(bool b);
     void mouseWheelTimerShoot();
+    void xAxisRangeChanged(const QCPRange& range);
+    void yAxisRangeChanged(const QCPRange& range);
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
@@ -119,25 +120,12 @@ private:
     int numberOfAxes;                                                                     // Number of axes for the plot
     int STATE;                                                                            // State of recieiving message from port
     double plotTimeInSeconds;
-
     QColor bgColor = QColor(20,20,20);
     QColor colours[10] = {QColor("#EEEEEE"), QColor("#ffff00"), QColor("#aaffaf"),
                           QColor("#ffaa00"), QColor("#ffaaff"), QColor("#00ffff"),
                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                           QColor("#ff00aa")};
-
-//    enum WheelAction { wheelNone        = 0x00,
-//                       wheelZoom        = 0x01,
-//                       wheelScalePlot   = 0x02
-//                     };
-//    WheelAction wheelState = wheelZoom;
-//    enum mouseAction { mouseNone   = 0x00,
-//                       mouseMove   = 0x01,
-//                       mouseShift   = 0x02,
-//                       mouseDoMesure = 0x03
-//                     };
-//    mouseAction mouseState = mouseMove;
-    bool MeasureInProgress = false;
+    QPoint mousePos;
     void resetMouseWheelState();
     QTimer mouseWheelTimer;
     QCPItemText* infoModeLabel = nullptr;
@@ -163,13 +151,13 @@ private:
     QAction* plotShowHideAction;
     QAction* plotMeasureAction;
     // Tracer
-    QCPItemTracer *tracer = nullptr;
-    QCPItemRect* tracerRect;
     bool measureInProgress = false;
     double measureMult;
     double tracerStartKey;
     double lastTracerXValueRef;
     double lastTracerXValueTracer;
+    QCPItemTracer *tracer = nullptr;
+    QCPItemRect* tracerRect;
     QCPItemLine* traceLineBottom;
     QCPItemLine* traceLineTop;
     QCPItemLine* refLine;
@@ -199,7 +187,8 @@ private:
     void addMessageText(QString data, QString color = "black");
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
-    void updateTracer(int pX);
+    void updateTracer();
+    void scaleTracer();
     void saveDataPlot(yaspGraph* yGraph);
     void shiftPlot(int pY);
     void scalePlot(double scale);
