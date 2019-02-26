@@ -1007,6 +1007,7 @@ void MainWindow::doMenuPlotColorAction() {
         workingGraph->setSelected(true);
     }
     resetMouseWheelState();
+    infoModeLabel->setText(workingGraph->plot()->name() + " --> MENU MODE");
 }
 
 /******************************************************************************************************************/
@@ -1035,7 +1036,7 @@ void MainWindow::doMenuPlotShowHideAction() {
         workingGraph->rLine()->setVisible(true);
         plotShowHideAction->setText("Hide");
         plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-hide-48.png"));
-        infoModeLabel->setText(workingGraph->plot()->name() + " --> SHOW MODE");
+        infoModeLabel->setText(workingGraph->plot()->name() + " --> MENU MODE");
         infoModeLabel->setVisible(true);
         infoModeLabel->setColor(workingGraph->plot()->pen().color());
     }
@@ -1044,13 +1045,13 @@ void MainWindow::doMenuPlotShowHideAction() {
 }
 
 //*******************************************************************************************/
-void MainWindow::saveDataPlot(yaspGraph* yGraph) {
-    QCPGraph* g = yGraph->plot();
-    if (!g->visible()) return;
-    infoModeLabel->setText(yGraph->plot()->name() + " --> SAVE MODE");
+void MainWindow::saveDataPlot() {
+    Q_ASSERT(workingGraph);
+    if (!workingGraph->plot()->visible()) return;
+    infoModeLabel->setText(workingGraph->plot()->name() + " --> SAVE MODE");
     infoModeLabel->setVisible(true);
-    infoModeLabel->setColor(yGraph->plot()->pen().color());
-    QString plotName = g->name();
+    infoModeLabel->setColor(workingGraph->plot()->pen().color());
+    QString plotName = workingGraph->plot()->name();
     if (logData == nullptr) {
         QString fileName = QFileDialog::getSaveFileName(this, tr("Log Plot"),
                                    plotName,
@@ -1065,21 +1066,23 @@ void MainWindow::saveDataPlot(yaspGraph* yGraph) {
         }
 //        qDebug() << "Log DATA Opened : " << logData->fileName();
         streamData.setDevice(logData);
-        yGraph->save(streamData);
+        workingGraph->save(streamData);
     }
 //   qDebug() << "Close Log DATA : " << logData->fileName();
    logData->close();
    delete logData;
    logData = nullptr;
+   infoModeLabel->setText(workingGraph->plot()->name() + " --> MENU MODE");
+
 }
 
 /******************************************************************************************************************/
 void MainWindow::saveSelectedGraph() {
 //    qDebug() << "saveSelectedGraph: " << contextMenu->property("id");
     Q_ASSERT(selectedPlotId >= 0);
-    yaspGraph* yGraph = graphs[selectedPlotId];
-    Q_ASSERT(yGraph);
-    saveDataPlot(yGraph);
+    workingGraph = graphs[selectedPlotId];
+    Q_ASSERT(workingGraph);
+    saveDataPlot();
     resetMouseWheelState();
 }
 
@@ -1139,14 +1142,25 @@ void MainWindow::updateTracer() {
         traceLineTop->setVisible(true);
         tracerRect->setVisible(true);
         if (traceLineBottom->start->coords().y() > endY) {
+            qDebug() << "traceLineBottom "  << endY;
             traceLineBottom->start->setCoords(0, endY);
             traceLineBottom->end->setCoords(DBL_MAX, endY);
         }
         if (traceLineTop->start->coords().y() < endY) {
+            qDebug() << "traceLineTop "  << endY;
             traceLineTop->start->setCoords(0, endY);
             traceLineTop->end->setCoords(DBL_MAX, endY);
         }
+        if (qFuzzyCompare(traceLineTop->start->coords().y(), traceLineBottom->start->coords().y())) {
+            if (traceLineBottom->start->coords().y() > ref) {
+                traceLineBottom->start->setCoords(0, ref);
+            }
+            if (traceLineTop->start->coords().y() < ref) {
+                traceLineTop->start->setCoords(0, ref);
+            }
+        }
         double plotVCenter = (traceLineTop->start->coords().y() + traceLineBottom->start->coords().y()) / 2.0;
+//        qDebug() << "plotVCenter "  << plotVCenter;
         double rh = plotHeight * 0.35;
         double tracerRectTop = plotVCenter + rh;
         double tracerRectBottom = plotVCenter - rh;
@@ -1636,7 +1650,7 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
             if (workingGraph->plot()->visible()) {
                 plotShowHideAction->setText("Hide");
 //                qDebug() << " ---- SHOW MODE ---- " << __FUNCTION__ << " / " <<  __LINE__;
-                infoModeLabel->setText(workingGraph->plot()->name() + " --> SHOW MODE");
+                infoModeLabel->setText(workingGraph->plot()->name() + " --> MENU MODE");
                 infoModeLabel->setVisible(true);
                 infoModeLabel->setColor(workingGraph->plot()->pen().color());
                 plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-hide-48.png"));

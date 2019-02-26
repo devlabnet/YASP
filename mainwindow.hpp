@@ -188,7 +188,7 @@ private:
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
     void updateTracer();
-    void saveDataPlot(yaspGraph* yGraph);
+    void saveDataPlot();
     void shiftPlot(int pY);
     void scalePlot(double scale);
     void unselectGraphs();
