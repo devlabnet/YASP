@@ -24,7 +24,7 @@ yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine,
 //    rLine->setSelectable(false);
     rLine->start->setCoords(0,0);
     rLine->end->setCoords(plotTimeInSeconds, 0);
-    tracerVisibleDef = true;
+    hidden = false;
    // textTicker = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText());
 //    dataContainer = QSharedPointer<QCPGraphDataContainer>(new QCPGraphDataContainer());
 }
@@ -42,19 +42,26 @@ void yaspGraph::reset() {
     yMult = 1.0;
 }
 
+
 //-----------------------------------------------------------------------------------------
-void yaspGraph::toggleTracerVisibility(bool show) {
-    if (show) {
-        infoGraph->setVisible(tracerVisibleDef);
-    } else {
-        tracerVisibleDef = infoGraph->visible();
+void yaspGraph::hide(bool h) {
+    hidden = h;
+    infoGraph->setVisible(!h);
+}
+
+//-----------------------------------------------------------------------------------------
+void yaspGraph::toggleVisibility(bool show) {
+//    qDebug() << "yaspGraph::toggleVisibility: " << infoGraph->name() << " / hidden " << hidden << " / show " << show;
+    if (hidden) {
         infoGraph->setVisible(false);
+    } else {
+        infoGraph->setVisible(show);
     }
 }
 
 //-----------------------------------------------------------------------------------------
 void yaspGraph::setSelected(bool sel) {
-//     qDebug() << "yaspGraph::setSelected: " << sel;
+//    qDebug() << "yaspGraph::setSelected: " << infoGraph->name() << " / hidden " << hidden << " / sel " << sel;
     QPen pen = infoGraph->pen();
     pen.setWidth(1);
     if (sel) {
@@ -75,6 +82,10 @@ void yaspGraph::setSelected(bool sel) {
     pen.setDashPattern(rLineDashPattern);
     pen.setWidthF(0.5);
     refLine->setPen(pen);
+    QFont font = infoText->font();
+    font.setStrikeOut(hidden);
+    infoText->setFont(font);
+    infoText->setSelectedFont(font);
 }
 
 //-----------------------------------------------------------------------------------------
@@ -83,27 +94,31 @@ void yaspGraph::updateLabel(QString str, double lX, int margin) {
     plotInfoStr = str;
     QString info = infoGraph->name() + " -> " + plotInfoStr;
     QColor color = infoGraph->pen().color();
-    QFont font;
-    font.setPointSize(7);
-    font.setStyleHint(QFont::Monospace);
-    font.setWeight(QFont::Medium);
-    font.setStyle(QFont::StyleItalic);
+    QFont font = infoText->font();
+//    font.setPointSize(8);
+////    font.setStyleHint(QFont::Monospace);
+    font.setWeight(QFont::Bold);
+//    font.setStyle(QFont::StyleItalic);
     QFontMetricsF fm(font);
     qreal pixelsWide = fm.width(info);
     qreal pixelsHigh = fm.height();
     QPoint labelPos;
-    labelPos.setX(pixelsWide + infoText->padding().left()+ infoText->padding().right() + margin + 70 );
-    labelPos.setY( (id+1) * (5 + (pixelsHigh + infoText->padding().top() + infoText->padding().bottom())));
+    labelPos.setX(pixelsWide + infoText->padding().left()+ infoText->padding().right() + margin + INFO_TEXT_LEFT_MARGIN );
+    labelPos.setY( (id+1) * (pixelsHigh + infoText->padding().top() + infoText->padding().bottom()));
     infoText->setColor(color);
-//    infoText->setPen(infoGraph->pen());
+//    QPen penT(color);
+    font.setStrikeOut(hidden);
+    infoText->setFont(font);
+    infoText->setSelectedFont(font);
+//    infoText->setPen(penT);
     infoText->setSelectedColor(color);
     infoText->setSelectedPen(infoGraph->pen());
     infoText->position->setCoords(labelPos.x(), labelPos.y());
     infoText->setText(info);
 //    infoText->layer()->replot();
-    QPen pen(color, 0.5);
-    pen.setDashPattern(rLineDashPattern);
-    refLine->setPen(pen);
+    QPen penL(color, 0.5);
+    penL.setDashPattern(rLineDashPattern);
+    refLine->setPen(penL);
     refLine->pen().setColor(color);
     refLine->start->setCoords(0, yOffset);
     refLine->end->setCoords(lastX, yOffset);

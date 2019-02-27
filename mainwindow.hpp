@@ -194,6 +194,7 @@ private:
     void unselectGraphs();
     void cleanGraphsBefore(double d);
     void ShowPlotsExceptWG(bool show);
+    void togglePlotsVisibility(bool show);
     bool startShiftPlot = false;
     double lastPosY = 0;
     int lastY = 0;

@@ -2,6 +2,8 @@
 #define YASPGRAPH_H
 #include <qcustomplot.h>
 
+#define INFO_TEXT_LEFT_MARGIN 50
+
 class yaspGraph {
 public:
     yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine, QString plotStr, QColor color, double plotTimeInSeconds);
@@ -20,7 +22,8 @@ public:
 //    void updateRefLine(int dpn);
     void setSelected(bool sel);
     void reset();
-    void toggleTracerVisibility(bool show);
+    void toggleVisibility(bool show);
+    void hide(bool h);
 private:
     int id;
     QVector<qreal> plotDashPattern;
@@ -32,7 +35,7 @@ private:
     double yOffset;
     double yMult;
     QString plotInfoStr;
-    bool tracerVisibleDef;
+    bool hidden;
 };
 
 #endif // YASPGRAPH_H

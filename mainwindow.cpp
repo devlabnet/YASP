@@ -905,7 +905,7 @@ void MainWindow::cleanTracer() {
     ui->plot->setCursor(Qt::ArrowCursor);
     measureInProgress = false;
     tracer->setVisible(false);
-    ShowPlotsExceptWG(true);
+    togglePlotsVisibility(true);
     infoModeLabel->setVisible(false);
     traceLineBottom->start->setCoords(0, DBL_MAX);
     traceLineBottom->end->setCoords(DBL_MAX, DBL_MAX);
@@ -951,12 +951,21 @@ void MainWindow::cleanTracer() {
 }
 
 /******************************************************************************************************************/
+void MainWindow::togglePlotsVisibility(bool show) {
+    foreach (yaspGraph* yGraph, graphs) {
+        Q_ASSERT(yGraph);
+        yGraph->toggleVisibility(show);
+    }
+}
+
+/******************************************************************************************************************/
 void MainWindow::ShowPlotsExceptWG(bool show) {
     if (workingGraph == nullptr) return;
+//    qDebug() << "ShowPlotsExceptWG: " << workingGraph->plot()->name() << " show " << show;
     foreach (yaspGraph* yGraph, graphs) {
         Q_ASSERT(yGraph);
         if (workingGraph == yGraph) continue;
-        yGraph->toggleTracerVisibility(show);
+        yGraph->toggleVisibility(show);
     }
 }
 
@@ -1021,11 +1030,11 @@ void MainWindow::doMenuPlotResetAction() {
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotShowHideAction() {
-//    qDebug() << "doMenuPlotShowHideAction: " << contextMenu->property("id");
+    qDebug() << "doMenuPlotShowHideAction: " << workingGraph->plot()->name();
     resetMouseWheelState();
     Q_ASSERT(workingGraph);
     if (workingGraph->plot()->visible()) {
-        workingGraph->plot()->setVisible(false);
+        workingGraph->hide(true);
         workingGraph->rLine()->setVisible(false);
         plotShowHideAction->setText("show");
         plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-eye-48.png"));
@@ -1033,7 +1042,7 @@ void MainWindow::doMenuPlotShowHideAction() {
         infoModeLabel->setVisible(true);
         infoModeLabel->setColor(workingGraph->plot()->pen().color());
     } else {
-        workingGraph->plot()->setVisible(true);
+        workingGraph->hide(false);
         workingGraph->rLine()->setVisible(true);
         plotShowHideAction->setText("Hide");
         plotShowHideAction->setIcon(QIcon(":/Icons/Icons/icons8-hide-48.png"));
