@@ -110,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinDisplayTime->setMaximum(PLOT_TIME_MAX_DEF);
     ui->spinDisplayTime->setSingleStep(PLOT_TIME_STEP_DEF);
     ui->spinDisplayTime->setValue(PLOT_TIME_DEF);
-    ui->spinDisplayTime->setDecimals(6);
+    ui->spinDisplayTime->setDecimals(0);
     ui->spinDisplayTime->setSuffix(" Millis");
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
@@ -918,8 +918,12 @@ void MainWindow::on_spinDisplayTime_valueChanged(double arg1) {
     plotTimeInSeconds = arg1;
     if (plotting) {
         ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
-        ui->plot->replot();
+    } else {
+        double oldRange = ui->plot->xAxis->range().size();
+        double inc = (plotTimeInSeconds - oldRange)/2.0;
+        ui->plot->xAxis->setRange(ui->plot->xAxis->range().lower - inc, ui->plot->xAxis->range().upper + inc);
     }
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
