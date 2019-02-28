@@ -48,7 +48,7 @@
 
 #define DEF_YAXIS_RANGE 1500
 #define PLOT_TIME_DEF 15            // Default time Displayed in Plot in Seconds
-#define PLOT_TIME_MIN_DEF 2.0      // Seconds
+#define PLOT_TIME_MIN_DEF 0.0      // Seconds
 #define PLOT_TIME_MAX_DEF 600.0     // Seconds
 #define PLOT_TIME_STEP_DEF 10.0     // Seconds
 
@@ -122,6 +122,8 @@ private:
     int numberOfAxes;                                                                     // Number of axes for the plot
     int STATE;                                                                            // State of recieiving message from port
     double plotTimeInSeconds;
+//    double yaspUnit = 1000000.0;
+    double yaspUnit = 1000.0;
     QColor bgColor = QColor(20,20,20);
     QColor colours[10] = {QColor("#EEEEEE"), QColor("#ffff00"), QColor("#aaffaf"),
                           QColor("#ffaa00"), QColor("#ffaaff"), QColor("#00ffff"),

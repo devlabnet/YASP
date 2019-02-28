@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1461</width>
-    <height>1205</height>
+    <height>1239</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -492,6 +492,9 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
              <property name="minimum">
               <double>0.000000000000000</double>
              </property>
@@ -499,10 +502,39 @@
               <double>1000.000000000000000</double>
              </property>
              <property name="singleStep">
-              <double>0.100000000000000</double>
+              <double>0.010000000000000</double>
              </property>
              <property name="value">
               <double>30.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_14">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="dataTimeInfoLabel">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
