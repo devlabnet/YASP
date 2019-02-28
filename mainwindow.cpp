@@ -466,26 +466,36 @@ void MainWindow::portOpenedSuccess() {
 
 /******************************************************************************************************************/
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    if (measureMode == measureType::Measure) {
-        if( event->modifiers() == Qt::ShiftModifier ) {
-            if (measureMode == measureType::Measure) {
-                qDebug() << "keyPressEvent ShiftModifier";
-                tracerArrowFromRef->setVisible(false);
-                tracerArrowFromRefTxt->setVisible(false);
-                tracerArrowAmplitudeTopTxt->setVisible(false);
-                tracerArrowAmplitudeBottomTxt->setVisible(false);
+    if(event->key() == Qt::Key_Escape ) {
+        if (workingGraph) {
+            if ((measureMode == measureType::Measure) || (measureMode == measureType::Box)) {
+                measureMode = measureType::None;
+                cleanTracer();
+                plotLabelSelectionChanged(true);
+                return;
+            } else {
+                unselectGraphs();
             }
         }
-        if( event->modifiers() == Qt::ControlModifier ) {
-            if (measureMode == measureType::Measure) {
-                qDebug() << "keyPressEvent ControlModifier";
-                tracerArrowFromRef->setVisible(true);
-                tracerArrowFromRefTxt->setVisible(true);
-                tracerArrowAmplitudeTopTxt->setVisible(true);
-                tracerArrowAmplitudeBottomTxt->setVisible(true);
-                tracerArrowFromRef->start->setCoords(tracer->position->coords());
-                tracerArrowFromRef->end->setCoords(tracer->position->coords());
-            }
+    }
+    if( event->modifiers() == Qt::ShiftModifier ) {
+        if (measureMode == measureType::Measure) {
+            qDebug() << "keyPressEvent ShiftModifier";
+            tracerArrowFromRef->setVisible(false);
+            tracerArrowFromRefTxt->setVisible(false);
+            tracerArrowAmplitudeTopTxt->setVisible(false);
+            tracerArrowAmplitudeBottomTxt->setVisible(false);
+        }
+    }
+    if( event->modifiers() == Qt::ControlModifier ) {
+        if (measureMode == measureType::Measure) {
+            qDebug() << "keyPressEvent ControlModifier";
+            tracerArrowFromRef->setVisible(true);
+            tracerArrowFromRefTxt->setVisible(true);
+            tracerArrowAmplitudeTopTxt->setVisible(true);
+            tracerArrowAmplitudeBottomTxt->setVisible(true);
+            tracerArrowFromRef->start->setCoords(tracer->position->coords());
+            tracerArrowFromRef->end->setCoords(tracer->position->coords());
         }
     }
 }
