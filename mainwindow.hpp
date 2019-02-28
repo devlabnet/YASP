@@ -67,6 +67,7 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
     void replot();
@@ -92,6 +93,7 @@ private slots:
     void doMenuPlotColorAction();
 //    void doMenuPlotScaleAction();
     void doMenuPlotResetAction();
+    void doMenuPlotMeasureBoxAction();
     void doMenuPlotMeasureAction();
     void doMenuPlotShowHideAction();
     void on_actionHow_to_use_triggered();
@@ -126,6 +128,10 @@ private:
                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                           QColor("#ff00aa")};
     QPoint mousePos;
+    enum measureType { None     = 0x00,
+                       Measure  = 0x01,
+                       Box      = 0x02
+                     };
     void resetMouseWheelState();
     QTimer mouseWheelTimer;
     QCPItemText* infoModeLabel = nullptr;
@@ -149,9 +155,10 @@ private:
     QTextStream streamData;
     QMenu* contextMenu = nullptr;
     QAction* plotShowHideAction;
+    QAction* plotMeasureBoxAction;
     QAction* plotMeasureAction;
     // Tracer
-    bool measureInProgress = false;
+    measureType measureMode = measureType::None;
     double measureMult;
     double tracerStartKey;
     double lastTracerXValueRef;
@@ -187,7 +194,8 @@ private:
     void addMessageText(QString data, QString color = "black");
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
-    void updateTracer();
+    void updateTracerBox();
+    void updateTracerMeasure();
     void saveDataPlot();
     void shiftPlot(int pY);
     void scalePlot(double scale);

@@ -47,6 +47,7 @@ void yaspGraph::reset() {
 void yaspGraph::hide(bool h) {
     hidden = h;
     infoGraph->setVisible(!h);
+    refLine->setVisible(!h);
 }
 
 //-----------------------------------------------------------------------------------------
@@ -54,8 +55,10 @@ void yaspGraph::toggleVisibility(bool show) {
 //    qDebug() << "yaspGraph::toggleVisibility: " << infoGraph->name() << " / hidden " << hidden << " / show " << show;
     if (hidden) {
         infoGraph->setVisible(false);
+        refLine->setVisible(false);
     } else {
         infoGraph->setVisible(show);
+        refLine->setVisible(show);
     }
 }
 
@@ -102,9 +105,9 @@ void yaspGraph::updateLabel(QString str, double lX, int margin) {
     QFontMetricsF fm(font);
     qreal pixelsWide = fm.width(info);
     qreal pixelsHigh = fm.height();
-    QPoint labelPos;
+    QPointF labelPos;
     labelPos.setX(pixelsWide + infoText->padding().left()+ infoText->padding().right() + margin + INFO_TEXT_LEFT_MARGIN );
-    labelPos.setY( (id+1) * (pixelsHigh + infoText->padding().top() + infoText->padding().bottom()));
+    labelPos.setY( (static_cast<double>(id)+1) * (pixelsHigh + infoText->padding().top() + infoText->padding().bottom()));
     infoText->setColor(color);
 //    QPen penT(color);
     font.setStrikeOut(hidden);
