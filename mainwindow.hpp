@@ -194,8 +194,8 @@ private:
     void addMessageText(QString data, QString color = "black");
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
-    void updateTracerBox();
-    void updateTracerMeasure();
+    void updateTracerBox(bool adjustHeight = false, double scale = 1.0);
+    void updateTracerMeasure(bool adjustStart = false);
     void saveDataPlot();
     void shiftPlot(int pY);
     void scalePlot(double scale);
@@ -212,6 +212,7 @@ private:
         return std::abs(value1 - value2) < std::pow(10, -precision);
     }
 
+//    bool boolTest;
 //    double round(long double number, int precision) {
 //      int decimals = std::pow(10, precision);
 //      return (std::round(number * decimals)) / decimals;

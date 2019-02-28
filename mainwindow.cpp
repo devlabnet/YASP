@@ -480,7 +480,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     }
     if( event->modifiers() == Qt::ShiftModifier ) {
         if (measureMode == measureType::Measure) {
-            qDebug() << "keyPressEvent ShiftModifier";
+//            qDebug() << "keyPressEvent ShiftModifier";
             tracerArrowFromRef->setVisible(false);
             tracerArrowFromRefTxt->setVisible(false);
             tracerArrowAmplitudeTopTxt->setVisible(false);
@@ -489,7 +489,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     }
     if( event->modifiers() == Qt::ControlModifier ) {
         if (measureMode == measureType::Measure) {
-            qDebug() << "keyPressEvent ControlModifier";
+//            qDebug() << "keyPressEvent ControlModifier";
             tracerArrowFromRef->setVisible(true);
             tracerArrowFromRefTxt->setVisible(true);
             tracerArrowAmplitudeTopTxt->setVisible(true);
@@ -718,11 +718,11 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             // Add data to graphs according plot Id
             QCPGraph* plot = yGraph->plot();
             QString plotInfoStr = " val: ";
-            plotInfoStr += QString::number(val);
+            plotInfoStr += QString::number(val, 'f', 2);
             plotInfoStr +=  + " offset: ";
-            plotInfoStr += QString::number(yGraph->offset());
+            plotInfoStr += QString::number(yGraph->offset(), 'f', 2);
             plotInfoStr +=  + " mult: ";
-            plotInfoStr += QString::number(yGraph->mult());
+            plotInfoStr += QString::number(yGraph->mult(), 'f', 2);
             updateLabel(plotId, plotInfoStr);
             plot->addData(lastDataTtime, val );
         } else {
@@ -898,6 +898,10 @@ void MainWindow::on_saveJPGButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_resetPlotButton_clicked() {
     unselectGraphs();
+    foreach (yaspGraph* yGraph, graphs) {
+        Q_ASSERT(yGraph);
+        yGraph->reset();
+    }
     plotTimeInSeconds = PLOT_TIME_DEF;
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
@@ -909,8 +913,10 @@ void MainWindow::on_resetPlotButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_spinDisplayTime_valueChanged(double arg1) {
     plotTimeInSeconds = arg1;
-    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
-    ui->plot->replot();
+    if (plotting) {
+        ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+        ui->plot->replot();
+    }
 }
 
 /******************************************************************************************************************/
@@ -1009,7 +1015,7 @@ void MainWindow::ShowPlotsExceptWG(bool show) {
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotMeasureAction() {
-    qDebug() << "doMenuPlotMeasureAction: " << contextMenu->property("id") << " measureInProgress: " << measureMode;
+//    qDebug() << "doMenuPlotMeasureAction: " << contextMenu->property("id") << " measureInProgress: " << measureMode;
     Q_ASSERT(contextMenu);
     Q_ASSERT(workingGraph);
     if (measureMode != measureType::None) {
@@ -1017,7 +1023,7 @@ void MainWindow::doMenuPlotMeasureAction() {
         measureMode = measureType::None;
         plotLabelSelectionChanged(true);
     } else {
-        qDebug() << "Init Measure !";
+//        qDebug() << "Init Measure !";
         measureMode = measureType::Measure;
         ShowPlotsExceptWG(false);
         measureMult = workingGraph->mult();
@@ -1045,7 +1051,7 @@ void MainWindow::doMenuPlotMeasureBoxAction() {
         measureMode = measureType::None;
         plotLabelSelectionChanged(true);
     } else {
-        qDebug() << "Init Tracer !";
+//        qDebug() << "Init Tracer !";
 //        qDebug() << " ---- resetMouseWheelState true ---- " << __FUNCTION__ << " / " <<  __LINE__;
         measureMode = measureType::Box;
         ShowPlotsExceptWG(false);
@@ -1172,7 +1178,7 @@ void MainWindow::messageSent(QString str) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::updateTracerMeasure() {
+void MainWindow::updateTracerMeasure(bool adjustStart) {
     if (measureMode == measureType::Measure) {
         Q_ASSERT(tracer);
         double pX = mousePos.x();
@@ -1198,6 +1204,14 @@ void MainWindow::updateTracerMeasure() {
         tracer->updatePosition();
         double startX = tracerArrowFromRef->start->coords().x();
         double startY = tracerArrowFromRef->start->coords().y();
+        if (adjustStart) {
+//            qDebug() << "    startX " << startX << " / startY " << startY;
+            QSharedPointer<QCPGraphDataContainer> gData = workingGraph->plot()->data();
+            QCPDataContainer<QCPGraphData>::const_iterator itStart = gData->findBegin(startX, true);
+            startX = itStart->key;
+            startY = itStart->value;
+//            qDebug() << " -> startX " << startX << " / startY " << startY;
+        }
         double endX = tracer->position->key();
         double endY = tracer->position->value();
         double plotWidth = ui->plot->xAxis->range().size();
@@ -1215,6 +1229,7 @@ void MainWindow::updateTracerMeasure() {
         //        tracerRect->topLeft->setCoords(tracerRectLeft, tracerRectTop);
         //        tracerRect->bottomRight->setCoords(tracerRectRight, tracerRectBottom);
         double space = plotWidth / 50;
+        tracerArrowFromRef->start->setCoords(startX, startY);
         tracerArrowFromRef->end->setCoords(tracer->position->coords());
         //        QPointF startPoint = tracerArrowFromRef->start->coords();
         //        QPointF endPoint = tracerArrowFromRef->end->coords();
@@ -1244,19 +1259,19 @@ void MainWindow::updateTracerMeasure() {
             tracerArrowAmplitudeTopTxt->setTextAlignment(Qt::AlignRight);
             tracerArrowAmplitudeTopTxt->position->setCoords(endX + space, endY);
         }
-        QString str = QString::number(startX) + " / " + QString::number(startY);
+        QString str = QString::number(startX, 'f', 2) + " / " + QString::number(startY, 'f', 2);
         if (!qFuzzyCompare(mult, 1.0)) {
-            str += " [" + QString::number(startY/mult) + "]";
+            str += " [" + QString::number(startY/mult, 'f', 2) + "]";
         }
         tracerArrowAmplitudeBottomTxt->setText(str);
-        str = QString::number(endX) + " / " + QString::number(endY);
+        str = QString::number(endX, 'f', 2) + " / " + QString::number(endY, 'f', 2);
         if (!qFuzzyCompare(mult, 1.0)) {
-            str += " [" + QString::number(endY/mult) + "]";
+            str += " [" + QString::number(endY/mult, 'f', 2) + "]";
         }
         tracerArrowAmplitudeTopTxt->setText(str);
-        str = QString::number(tracerArrowLine.dx()) + " / " + QString::number(tracerArrowLine.dy());
+        str = QString::number(tracerArrowLine.dx(), 'f', 2) + " / " + QString::number(tracerArrowLine.dy(), 'f', 2);
         if (!qFuzzyCompare(mult, 1.0)) {
-            str += " [" + QString::number(tracerArrowLine.dy()/mult) + "]";
+            str += " [" + QString::number(tracerArrowLine.dy()/mult, 'f', 2) + "]";
         }
         tracerArrowFromRefTxt->setText(str);
         ui->plot->replot();
@@ -1264,7 +1279,7 @@ void MainWindow::updateTracerMeasure() {
 }
 
 /******************************************************************************************************************/
-void MainWindow::updateTracerBox() {
+void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
     if (measureMode == measureType::Box) {
         Q_ASSERT(tracer);
         double pX = mousePos.x();
@@ -1299,6 +1314,23 @@ void MainWindow::updateTracerBox() {
 //        double plotVCenter = ui->plot->yAxis->range().center() * 0.8;
         double space = plotWidth / 800;
         double coordX = ui->plot->xAxis->pixelToCoord(pX);
+        if (adjustHeight) {
+            double botToTop = traceLineTop->start->coords().y() - traceLineBottom->start->coords().y();
+            double refToTop = traceLineTop->start->coords().y() - ref;
+            double botToRef = ref - traceLineBottom->start->coords().y();
+//            qDebug() << "         BOT Y " << botToTop << " / refToTop " << refToTop << " / botToRef " << botToRef;
+            refToTop *= scale;
+            botToRef *= scale;
+//            qDebug() << "ADJUSTED BOT Y " << botToTop << " / refToTop " << refToTop << " / botToRef " << botToRef;
+            double adjustedEndY = ref + refToTop;
+            traceLineTop->start->setCoords(0, adjustedEndY);
+            traceLineTop->end->setCoords(DBL_MAX, adjustedEndY);
+//            qDebug() << "BOT Y " << traceLineBottom->start->coords().y() << " / Scale " << scale << " / adjustedEndY " << adjustedEndY;
+            adjustedEndY = ref - botToRef;
+            traceLineBottom->start->setCoords(0, adjustedEndY);
+            traceLineBottom->end->setCoords(DBL_MAX, adjustedEndY);
+//            qDebug() << "TOP Y " << traceLineTop->start->coords().y() << " / Scale " << scale << " / adjustedEndY " << adjustedEndY;
+        }
         // get tracer origin
         tracer->setGraphKey(tracerStartKey);
         tracer->updatePosition();
@@ -1366,10 +1398,10 @@ void MainWindow::updateTracerBox() {
             tracerArrowAmplitudeTxt->setFont(QFont(font().family(), 8));
             tracerArrowAmplitudeTxt->setVisible(true);
             if (qFuzzyCompare(mult, 1.0)) {
-                tracerArrowAmplitudeTxt->setText(QString::number(amplitude));
+                tracerArrowAmplitudeTxt->setText(QString::number(amplitude, 'f', 2));
             } else {
-                tracerArrowAmplitudeTxt->setText(QString::number(amplitude) + " ["
-                                                 + QString::number(amplitude/mult) + "]");
+                tracerArrowAmplitudeTxt->setText(QString::number(amplitude, 'f', 2) + " ["
+                                                 + QString::number(amplitude/mult, 'f', 2) + "]");
             }
             tracerArrowAmplitudeTxt->position->setCoords(coordX - (space0+space1)*space,
                                                          (ampTracerArrowSY + ampTracerArrowEY)/2.0);
@@ -1384,10 +1416,10 @@ void MainWindow::updateTracerBox() {
             tracerArrowAmplitudeTopTxt->setFont(QFont(font().family(), 8));
             tracerArrowAmplitudeTopTxt->setVisible(true);
             if (qFuzzyCompare(mult, 1.0)) {
-                tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop));
+                tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop, 'f', 2));
             } else {
-                tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop) + " ["
-                                                 + QString::number(deltaTop/mult) + "]");
+                tracerArrowAmplitudeTopTxt->setText(QString::number(deltaTop, 'f', 2) + " ["
+                                                 + QString::number(deltaTop/mult, 'f', 2) + "]");
             }
             tracerArrowAmplitudeTopTxt->position->setCoords(coordX + space1*space,
                                                          (endY + ampTracerArrowEY)/2.0);
@@ -1402,10 +1434,10 @@ void MainWindow::updateTracerBox() {
             tracerArrowAmplitudeBottomTxt->setFont(QFont(font().family(), 8));
             tracerArrowAmplitudeBottomTxt->setVisible(true);
             if (qFuzzyCompare(mult, 1.0)) {
-                tracerArrowAmplitudeBottomTxt->setText(QString::number(deltaBottom));
+                tracerArrowAmplitudeBottomTxt->setText(QString::number(deltaBottom, 'f', 2));
             } else {
-                tracerArrowAmplitudeBottomTxt->setText(QString::number(deltaBottom) + " ["
-                                                 + QString::number(deltaBottom/mult) + "]");
+                tracerArrowAmplitudeBottomTxt->setText(QString::number(deltaBottom, 'f', 2) + " ["
+                                                 + QString::number(deltaBottom/mult, 'f', 2) + "]");
             }
             tracerArrowAmplitudeBottomTxt->position->setCoords(coordX + space1*space,
                                                          (ampTracerArrowSY + endY)/2.0);
@@ -1420,10 +1452,10 @@ void MainWindow::updateTracerBox() {
             tracerArrowFromRefTxt->setFont(QFont(font().family(), 8));
             tracerArrowFromRefTxt->setVisible(true);
             if (qFuzzyCompare(mult, 1.0)) {
-                tracerArrowFromRefTxt->setText(QString::number(deltaFromRef));
+                tracerArrowFromRefTxt->setText(QString::number(deltaFromRef, 'f', 2));
             } else {
-                tracerArrowFromRefTxt->setText(QString::number(deltaFromRef) + " ["
-                                                 + QString::number(deltaFromRef/mult) + "]");
+                tracerArrowFromRefTxt->setText(QString::number(deltaFromRef, 'f', 2) + " ["
+                                                 + QString::number(deltaFromRef/mult, 'f', 2) + "]");
             }
             tracerArrowFromRefTxt->position->setCoords(coordX - (space0+space1)*space,
                                                          (ref + endY)/2.0);
@@ -1454,7 +1486,7 @@ void MainWindow::updateTracerBox() {
                         // Add Time info between lines
                         QCPItemText* info = new QCPItemText(ui->plot);
                         info->setSelectable(false);
-                        info->setText(QString::number(deltaRef));
+                        info->setText(QString::number(deltaRef, 'f', 2));
                         info->setFont(QFont(font().family(), 8));
                         info->setPositionAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
                         info->setTextAlignment(Qt::AlignCenter);
@@ -1490,7 +1522,7 @@ void MainWindow::updateTracerBox() {
                         // Add Time info between lines
                         QCPItemText* info = new QCPItemText(ui->plot);
                         info->setSelectable(false);
-                        info->setText(QString::number(deltaTracer));
+                        info->setText(QString::number(deltaTracer, 'f', 2));
                         info->setFont(QFont(font().family(), 8));
                         info->setPositionAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
                         info->setTextAlignment(Qt::AlignCenter);
@@ -1546,7 +1578,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
                 infoModeLabel->setColor(workingGraph->plot()->pen().color());
                 infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
                 shiftPlot(event->y());
-                QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->offset());
+                QString msg = "Moving PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->offset(), 'f', 2);
                 ui->statusBar->showMessage(msg);
             }
         } else {
@@ -1559,6 +1591,8 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
 /******************************************************************************************************************/
 void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
     Q_UNUSED(event)
+//    boolTest = true;
+
 //    qDebug() << "---------- release ---------- measureInProgress: " << measureInProgress;
     if (workingGraph) {
         startShiftPlot = false;
@@ -1588,10 +1622,9 @@ void MainWindow::resetMouseWheelState() {
 
 /******************************************************************************************************************/
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
-    mousePos =event->pos();
+//    mousePos = event->pos();
     if (event->buttons() == Qt::RightButton) {
         // Change plot range
-        QCPRange range = ui->plot->xAxis->range();
         double lastPlotTimeInSeconds = plotTimeInSeconds;
         // change spinDisplayTime
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
@@ -1606,6 +1639,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
         if (plotting) {
             ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
         } else {
+            QCPRange range = ui->plot->xAxis->range();
             double ratio = plotTimeInSeconds/lastPlotTimeInSeconds;
             QCPRange newRange = range * ratio;
             ui->plot->xAxis->setRange(newRange);
@@ -1615,7 +1649,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
         // zoom display
         ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
         if (workingGraph) {
-            if (measureMode == measureType::None) {
+//            if (measureMode == measureType::None) {
                 ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
                 QPoint numDegrees = event->angleDelta();
                 int nY = numDegrees.y();
@@ -1624,10 +1658,19 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
                     infoModeLabel->setText(workingGraph->plot()->name() + " -> SCALE MODE");
                     double scale = 1 + (static_cast<double>(nY) / 1000.0);
                     scalePlot(scale);
-                    QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult());
+                    QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult(), 'f', 2);
                     ui->statusBar->showMessage(msg);
                 }
-            }
+                if (measureMode == measureType::Measure) {
+                    updateTracerMeasure(true);
+                }
+                if (measureMode == measureType::Box) {
+                    if (nY != 0) {
+                        double scale = 1 + (static_cast<double>(nY) / 1000.0);
+                        updateTracerBox(true, scale);
+                    }
+                }
+//            }
         } else {
             ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
         }
