@@ -47,10 +47,10 @@
 #define UNDEFINED       4
 
 #define DEF_YAXIS_RANGE 1500
-#define PLOT_TIME_DEF 15            // Default time Displayed in Plot in Seconds
-#define PLOT_TIME_MIN_DEF 0.0      // Seconds
-#define PLOT_TIME_MAX_DEF 600.0     // Seconds
-#define PLOT_TIME_STEP_DEF 10.0     // Seconds
+#define PLOT_TIME_DEF 15000.0            // Default time Displayed in Plot in MilliSeconds
+#define PLOT_TIME_MIN_DEF 1.0      // MilliSeconds
+#define PLOT_TIME_MAX_DEF 600000.0     // MilliSeconds
+#define PLOT_TIME_STEP_DEF 1000.0     // MilliSeconds
 
 namespace Ui {
 class MainWindow;
@@ -197,7 +197,7 @@ private:
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
     void updateTracerBox(bool adjustHeight = false, double scale = 1.0);
-    void updateTracerMeasure(bool adjustStart = false);
+    void updateTracerMeasure(bool adjustHeight = false, double scale = 1.0);
     void saveDataPlot();
     void shiftPlot(int pY);
     void scalePlot(double scale);

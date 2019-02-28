@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->xAxis->setTickLabelColor(gridColor);
     fixedTicker = QSharedPointer<QCPAxisTickerFixed>(new QCPAxisTickerFixed);
-    plotTimeInSeconds = 30;
+//    plotTimeInSeconds = 30;
     ui->plot->xAxis->setTicker(fixedTicker);
     // tick step shall be 0.001 second -> 1 milisecond
     // tick step shall be 0.0001 second -> 0.1 milisecond -> 100 microdeconds
@@ -110,8 +110,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinDisplayTime->setMaximum(PLOT_TIME_MAX_DEF);
     ui->spinDisplayTime->setSingleStep(PLOT_TIME_STEP_DEF);
     ui->spinDisplayTime->setValue(PLOT_TIME_DEF);
-    ui->spinDisplayTime->setDecimals(2);
-    ui->spinDisplayTime->setSuffix(" Secs");
+    ui->spinDisplayTime->setDecimals(6);
+    ui->spinDisplayTime->setSuffix(" Millis");
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
     ui->tabWidget->removeTab(1);
@@ -707,7 +707,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
 //        qDebug() << "NEW DATA : " << plotId << " / " << dataListSize << " --> " << newData;
         dataPointNumber++;
         if (dataListSize == 3) {
-            lastDataTtime = newData[1].toDouble()/yaspUnit;
+            lastDataTtime = newData[1].toDouble();
             if (lastDataTtime > cleanDataTtime) {
                 // Clean graphs data
                 cleanGraphsBefore(lastDataTtime);
@@ -1181,7 +1181,7 @@ void MainWindow::messageSent(QString str) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::updateTracerMeasure(bool adjustStart) {
+void MainWindow::updateTracerMeasure(bool adjustHeight, double scale) {
     if (measureMode == measureType::Measure) {
         Q_ASSERT(tracer);
         double pX = mousePos.x();
@@ -1198,7 +1198,6 @@ void MainWindow::updateTracerMeasure(bool adjustStart) {
             ui->plot->removeItem(*tI);
         }
         tracerHLinesRefInfo.clear();
-
         double coordX = ui->plot->xAxis->pixelToCoord(pX);
         // get tracer origin
         tracer->setGraphKey(tracerStartKey);
@@ -1207,46 +1206,27 @@ void MainWindow::updateTracerMeasure(bool adjustStart) {
         tracer->updatePosition();
         double startX = tracerArrowFromRef->start->coords().x();
         double startY = tracerArrowFromRef->start->coords().y();
-        if (adjustStart) {
-//            qDebug() << "    startX " << startX << " / startY " << startY;
-            QSharedPointer<QCPGraphDataContainer> gData = workingGraph->plot()->data();
-            QCPDataContainer<QCPGraphData>::const_iterator itStart = gData->findBegin(startX, true);
-//            startX = itStart->key;
-            startY = itStart->value;
-//            qDebug() << " -> startX " << startX << " / startY " << startY;
+        double mult = workingGraph->mult();
+        double offset = workingGraph->offset();
+        if (adjustHeight) {
+            startY -= offset;
+            startY *= scale;
+            startY += offset;
+            tracerArrowFromRef->start->setCoords(startX, startY);
         }
         double endX = tracer->position->key();
         double endY = tracer->position->value();
         double plotWidth = ui->plot->xAxis->range().size();
-        double mult = workingGraph->mult();
-        //        double plotHeight = ui->plot->yAxis->range().size();
-        //        double ref = workingGraph->rLine()->start->coords().y();
-        //        tracerRect->setVisible(true);
-        //        double plotVCenter = endY;
-        ////        qDebug() << "plotVCenter "  << plotVCenter;
-        //        double rh = plotHeight * 0.35;
-        //        double tracerRectTop = plotVCenter + rh;
-        //        double tracerRectBottom = plotVCenter - rh;
-        //        double tracerRectLeft = endX - (plotWidth/3);
-        //        double tracerRectRight = endX + (plotWidth/3);
-        //        tracerRect->topLeft->setCoords(tracerRectLeft, tracerRectTop);
-        //        tracerRect->bottomRight->setCoords(tracerRectRight, tracerRectBottom);
         double space = plotWidth / 50;
         tracerArrowFromRef->start->setCoords(startX, startY);
         tracerArrowFromRef->end->setCoords(tracer->position->coords());
-        //        QPointF startPoint = tracerArrowFromRef->start->coords();
-        //        QPointF endPoint = tracerArrowFromRef->end->coords();
         QLineF tracerArrowLine = QLineF(startX, startY, endX, endY);
-        //        if (tracerArrowLine.length() > 50) {
-
         tracerArrowAmplitudeTopTxt->setFont(QFont(font().family(), 8));
         tracerArrowAmplitudeBottomTxt->setFont(QFont(font().family(), 8));
         tracerArrowFromRefTxt->setFont(QFont(font().family(), 8));
         tracerArrowFromRefTxt->setPositionAlignment(Qt::AlignCenter|Qt::AlignVCenter);
         tracerArrowFromRefTxt->setTextAlignment(Qt::AlignCenter);
         tracerArrowFromRefTxt->position->setCoords(tracerArrowLine.center());
-
-        //            tracerArrowFromRefTxt->setVisible(true);
         if (startX > endX) {
             tracerArrowAmplitudeBottomTxt->setPositionAlignment(Qt::AlignLeft|Qt::AlignVCenter);
             tracerArrowAmplitudeBottomTxt->setTextAlignment(Qt::AlignRight);
@@ -1627,13 +1607,10 @@ void MainWindow::resetMouseWheelState() {
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 //    mousePos = event->pos();
     if (event->buttons() == Qt::RightButton) {
-        // Change plot range
-        double lastPlotTimeInSeconds = plotTimeInSeconds;
-        // change spinDisplayTime
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
         QPoint numDegrees = event->angleDelta();
         if (numDegrees.y() == 0) return;
-        double inc = plotTimeInSeconds / 100;
+        double inc = plotTimeInSeconds / 100.0;
         if (numDegrees.y() > 0) {
             plotTimeInSeconds += inc;
         } else {
@@ -1642,10 +1619,11 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
         if (plotting) {
             ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
         } else {
-            QCPRange range = ui->plot->xAxis->range();
-            double ratio = plotTimeInSeconds/lastPlotTimeInSeconds;
-            QCPRange newRange = range * ratio;
-            ui->plot->xAxis->setRange(newRange);
+            if (numDegrees.y() > 0) {
+                ui->plot->xAxis->setRange(ui->plot->xAxis->range().lower - inc, ui->plot->xAxis->range().upper + inc);
+            } else {
+                ui->plot->xAxis->setRange(ui->plot->xAxis->range().lower + inc, ui->plot->xAxis->range().upper - inc);
+            }
             ui->plot->replot();
         }
     } else {
@@ -1663,14 +1641,14 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
                     scalePlot(scale);
                     QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult(), 'f', 3);
                     ui->statusBar->showMessage(msg);
-                }
-                if (measureMode == measureType::Measure) {
-                    updateTracerMeasure(true);
-                }
-                if (measureMode == measureType::Box) {
-                    if (nY != 0) {
-                        double scale = 1 + (static_cast<double>(nY) / 1000.0);
-                        updateTracerBox(true, scale);
+                    if (measureMode == measureType::Measure) {
+                        updateTracerMeasure(true, scale);
+                    }
+                    if (measureMode == measureType::Box) {
+                        if (nY != 0) {
+                            double scale = 1 + (static_cast<double>(nY) / 1000.0);
+                            updateTracerBox(true, scale);
+                        }
                     }
                 }
 //            }
