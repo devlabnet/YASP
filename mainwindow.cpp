@@ -596,6 +596,7 @@ void MainWindow::unselectGraphs() {
     workingGraph = nullptr;
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);
     ui->plot->deselectAll();
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -1903,6 +1904,7 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
         }
         ui->plot->setContextMenuPolicy(Qt::CustomContextMenu);
     }
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
