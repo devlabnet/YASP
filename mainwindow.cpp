@@ -28,7 +28,7 @@
 #include <QSplitter>
 #include <QtGui>
 #include <QPen>
-
+#include <QDoubleSpinBox>
 /******************************************************************************************************************/
 /* Constructor */
 /******************************************************************************************************************/
@@ -108,10 +108,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinDisplayTime->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
     ui->spinDisplayTime->setMinimum(PLOT_TIME_MIN_DEF);
     ui->spinDisplayTime->setMaximum(PLOT_TIME_MAX_DEF);
-    ui->spinDisplayTime->setSingleStep(PLOT_TIME_STEP_DEF);
+//    ui->spinDisplayTime->setSingleStep(PLOT_TIME_STEP_DEF);
     ui->spinDisplayTime->setValue(PLOT_TIME_DEF);
     ui->spinDisplayTime->setDecimals(0);
     ui->spinDisplayTime->setSuffix(" Millis");
+    ui->spinDisplayTime->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
     ui->tabWidget->removeTab(1);
@@ -199,13 +200,23 @@ void MainWindow::cleanGraphs() {
 }
 
 /******************************************************************************************************************/
-void MainWindow::cleanGraphsBefore(double d) {
-    d -= PLOT_TIME_MAX_DEF/2;
+void MainWindow::cleanDataGraphsBefore(double d) {
+//    d -= PLOT_TIME_MAX_DEF/2;
+    if (d < PLOT_TIME_MAX_CLEAN_DEF) return;
+    d -= PLOT_TIME_MAX_CLEAN_DEF;
     foreach (yaspGraph* yGraph, graphs) {
         Q_ASSERT(yGraph);
         yGraph->plot()->data()->removeBefore(d);
     }
-    cleanDataTtime += PLOT_TIME_MAX_DEF;
+//    cleanDataTtime += PLOT_TIME_MAX_DEF;
+}
+
+/******************************************************************************************************************/
+void MainWindow::cleanDataGraphs() {
+    foreach (yaspGraph* yGraph, graphs) {
+        Q_ASSERT(yGraph);
+        yGraph->plot()->data()->clear();
+    }
 }
 
 /******************************************************************************************************************/
@@ -460,7 +471,7 @@ void MainWindow::portOpenedSuccess() {
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     lastDataTtime = 0;
-    cleanDataTtime = PLOT_TIME_MAX_DEF;
+//    cleanDataTtime = PLOT_TIME_MAX_DEF;
     connect(&mouseWheelTimer, SIGNAL(timeout()), this, SLOT(mouseWheelTimerShoot()));
 }
 
@@ -559,8 +570,16 @@ void MainWindow:: closePort() {
 /******************************************************************************************************************/
 void MainWindow::replot() {
     if(connected) {
-        ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
-        ui->plot->replot();
+        if (plotting) {
+            ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+            ui->plot->replot();
+        } else {
+            double range = ui->plot->xAxis->range().size();
+            ui->plot->xAxis->setRange(ui->plot->xAxis->range().lower, ui->plot->xAxis->range().upper);
+            updateTracerMeasure();
+            updateTracerBox();
+
+        }
     }
 }
 
@@ -607,13 +626,13 @@ void MainWindow::on_stopPlotButton_clicked() {
         // Stop plotting
         ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
         // Stop updating plot timer
-        updateTimer.stop();
+//        updateTimer.stop();
         plotting = false;
         ui->stopPlotButton->setText("Start Plot");
     } else {
         // Start plotting
         // Start updating plot timer
-        updateTimer.start();
+//        updateTimer.start();
         plotting = true;
         ui->stopPlotButton->setText("Stop Plot");
     }
@@ -708,11 +727,22 @@ void MainWindow::onNewDataArrived(QStringList newData) {
 //        qDebug() << "NEW DATA : " << plotId << " / " << dataListSize << " --> " << newData;
         dataPointNumber++;
         if (dataListSize == 3) {
-            lastDataTtime = newData[1].toDouble();
-            if (lastDataTtime > cleanDataTtime) {
-                // Clean graphs data
-                cleanGraphsBefore(lastDataTtime);
+            double currentTime = newData[1].toDouble();
+            if (currentTime < lastDataTtime) {
+                // Will normally never (or rarely) append
+                // Means that current millis() returned is lower than the previous one !!
+                // --> millis() overflow !!
+                // So just clean everything in graph
+                qDebug() << "============================ CLEAN OVERFLOW ============================ " << lastDataTtime;
+//                qDebug() << "============================ CLEAN OVERFLOW ============================";
+//                qDebug() << "============================ CLEAN OVERFLOW ============================";
+                cleanDataGraphs();
             }
+            lastDataTtime = currentTime;
+//            if (lastDataTtime > cleanDataTtime) {
+                // Clean graphs data
+                cleanDataGraphsBefore(lastDataTtime);
+//            }
             double val = newData[2].toDouble();
             val *= yGraph->mult();
             val += yGraph->offset();
@@ -916,6 +946,12 @@ void MainWindow::on_resetPlotButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_spinDisplayTime_valueChanged(double arg1) {
     plotTimeInSeconds = arg1;
+//    if (plotTimeInSeconds < 100) {
+//        ui->spinDisplayTime->setSingleStep(1);
+//    } else {
+//        int log = static_cast<int>(log10(plotTimeInSeconds)) - 1;
+//        ui->spinDisplayTime->setSingleStep(static_cast<int>(pow(10, log)));
+//    }
     if (plotting) {
         ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
     } else {

@@ -47,10 +47,11 @@
 #define UNDEFINED       4
 
 #define DEF_YAXIS_RANGE 1500
-#define PLOT_TIME_DEF 15000.0            // Default time Displayed in Plot in MilliSeconds
-#define PLOT_TIME_MIN_DEF 1.0      // MilliSeconds
-#define PLOT_TIME_MAX_DEF 600000.0     // MilliSeconds
-#define PLOT_TIME_STEP_DEF 1000.0     // MilliSeconds
+#define PLOT_TIME_DEF 15000.0               // Default time Displayed in Plot in MilliSeconds
+#define PLOT_TIME_MIN_DEF 1.0               // Minimum Range in MilliSeconds
+#define PLOT_TIME_MAX_DEF 600000.0          // Maximum Range in MilliSeconds
+#define PLOT_TIME_MAX_CLEAN_DEF 900000.0    // Max Before Clean Range in MilliSeconds
+//#define PLOT_TIME_STEP_DEF 1000.0           // MilliSeconds
 
 namespace Ui {
 class MainWindow;
@@ -141,7 +142,7 @@ private:
     QSharedPointer<QCPAxisTickerFixed> fixedTicker;
     QMap<int, yaspGraph*> graphs;
     double lastDataTtime;
-    double cleanDataTtime;
+//    double cleanDataTtime;
     yaspGraph* getGraph(int id);
     int selectedPlotId = -1;
     QTimer updateTimer;
@@ -202,7 +203,8 @@ private:
     void shiftPlot(int pY);
     void scalePlot(double scale);
     void unselectGraphs();
-    void cleanGraphsBefore(double d);
+    void cleanDataGraphsBefore(double d);
+    void cleanDataGraphs();
     void ShowPlotsExceptWG(bool show);
     void togglePlotsVisibility(bool show);
     bool startShiftPlot = false;
