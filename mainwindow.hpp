@@ -110,6 +110,7 @@ private slots:
     void mouseWheelTimerShoot();
     void xAxisRangeChanged(const QCPRange& range);
     void yAxisRangeChanged(const QCPRange& range);
+    void checkBoxDynamicMeasuresChanged(int state);
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived

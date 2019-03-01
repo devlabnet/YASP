@@ -510,7 +510,7 @@
             </widget>
            </item>
            <item>
-            <spacer name="horizontalSpacer_14">
+            <spacer name="horizontalSpacer_16">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -523,7 +523,30 @@
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="dataTimeInfoLabel">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Points</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_14">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>10</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="dataInfoLabel">
              <property name="minimumSize">
               <size>
                <width>100</width>
@@ -535,6 +558,29 @@
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_17">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBoxDynamicMeasures">
+             <property name="layoutDirection">
+              <enum>Qt::RightToLeft</enum>
+             </property>
+             <property name="text">
+              <string>Dynamic Measures</string>
              </property>
             </widget>
            </item>

@@ -96,6 +96,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->setInteraction(QCP::iSelectPlottables, false);
     ui->plot->setInteraction(QCP::iSelectOther, false);
 
+    connect(ui->checkBoxDynamicMeasures, SIGNAL(stateChanged(int)), this, SLOT(checkBoxDynamicMeasuresChanged(int)));
     serialPort = nullptr;
     // Connect update timer to replot slot
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(replot()));
@@ -154,7 +155,7 @@ void MainWindow::createUI() {
     if(QSerialPortInfo::availablePorts().size() == 0) {                                   // Check if there are any ports at all; if not, disable controls and return
         enableControls(false);
         ui->connectButton->setEnabled(false);
-        ui->statusBar->setStyleSheet("color: Black; background-color: Tomato;");
+        ui->statusBar->setStyleSheet("color: Black; background-color: Tomato; font-weight:bold;");
         ui->statusBar->showMessage("No ports detected.");
         ui->saveJPGButton->setEnabled(false);
         return;
@@ -217,6 +218,7 @@ void MainWindow::cleanDataGraphs() {
         Q_ASSERT(yGraph);
         yGraph->plot()->data()->clear();
     }
+    dataPointNumber = 0;
 }
 
 /******************************************************************************************************************/
@@ -291,7 +293,7 @@ void MainWindow::openPort() {
         noMsgReceivedData.clear();
         portOpenedSuccess();
     } else {
-        ui->statusBar->setStyleSheet("background-color: Tomato;");
+        ui->statusBar->setStyleSheet("background-color: Tomato; font-weight:bold;");
         ui->statusBar->showMessage("Cannot open port " + ui->comboPort->currentText() + " --> " + serialPort->errorString());
         qDebug() << "Cannot open port " << ui->comboPort->currentText();
         qDebug() << serialPort->errorString();
@@ -303,7 +305,7 @@ void MainWindow::openPort() {
 /******************************************************************************************************************/
 void MainWindow::on_comboPort_currentIndexChanged(const QString &arg1) {
     QSerialPortInfo selectedPort(arg1);                                                   // Dislplay info for selected port
-    ui->statusBar->setStyleSheet("background-color: SkyBlue ;");
+    ui->statusBar->setStyleSheet("background-color: SkyBlue ; font-weight:bold;");
     ui->statusBar->showMessage(selectedPort.description());
 }
 
@@ -449,7 +451,7 @@ void MainWindow::portOpenedSuccess() {
         widgets->setSerialPort(serialPort);
     }
     ui->connectButton->setText("Disconnect");                                             // Change buttons
-    ui->statusBar->setStyleSheet("background-color: SpringGreen ;");
+    ui->statusBar->setStyleSheet("background-color: SpringGreen ; font-weight:bold;");
     ui->statusBar->showMessage("Connected!");
     enableControls(false);                                                                // Disable controls if port is open
     ui->stopPlotButton->setText("Stop Plot");                                             // Enable button for stopping plot
@@ -554,7 +556,7 @@ void MainWindow:: closePort() {
     delete serialPort;                                                                // Delete the pointer
     serialPort = nullptr;                                                                // Assign NULL to dangling pointer
     ui->connectButton->setText("Connect");                                            // Change Connect button text, to indicate disconnected
-    ui->statusBar->setStyleSheet("background-color: SkyBlue;");
+    ui->statusBar->setStyleSheet("background-color: SkyBlue; font-weight:bold;");
     ui->statusBar->showMessage("Disconnected!");                                      // Show message in status bar
     connected = false;                                                                // Set connected status flag to false
     plotting = false;                                                                 // Not plotting anymore
@@ -574,8 +576,7 @@ void MainWindow::replot() {
             ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
             ui->plot->replot();
         } else {
-            double range = ui->plot->xAxis->range().size();
-            ui->plot->xAxis->setRange(ui->plot->xAxis->range().lower, ui->plot->xAxis->range().upper);
+            ui->plot->xAxis->setRange(ui->plot->xAxis->range());
             updateTracerMeasure();
             updateTracerBox();
 
@@ -733,7 +734,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
                 // Means that current millis() returned is lower than the previous one !!
                 // --> millis() overflow !!
                 // So just clean everything in graph
-                qDebug() << "============================ CLEAN OVERFLOW ============================ " << lastDataTtime;
+                qDebug() << currentTime <<  " ============================ CLEAN OVERFLOW ============================ " << lastDataTtime;
 //                qDebug() << "============================ CLEAN OVERFLOW ============================";
 //                qDebug() << "============================ CLEAN OVERFLOW ============================";
                 cleanDataGraphs();
@@ -756,7 +757,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             plotInfoStr += QString::number(yGraph->mult(), 'f', 3);
             updateLabel(plotId, plotInfoStr);
             plot->addData(lastDataTtime, val );
-            ui->dataTimeInfoLabel->setNum(lastDataTtime);
+            ui->dataInfoLabel->setNum(dataPointNumber);
         } else {
             qDebug() << "------------> BAD DATA : " << plotId << " / " << dataListSize << " --> " << newData;
         }
@@ -1135,6 +1136,9 @@ void MainWindow::doMenuPlotColorAction() {
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotResetAction() {
+//    doMenuPlotMeasureBoxAction();
+//    doMenuPlotMeasureAction();
+//    return;
 //    qDebug() << "doMenuPlotResetAction: " << contextMenu->property("id");
     resetMouseWheelState();
     Q_ASSERT(workingGraph);
@@ -1407,7 +1411,7 @@ void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
                 .arg(traceLineTop->start->coords().y())
                 .arg(amplitude)
                 .arg(amplitude / workingGraph->mult());
-        ui->statusBar->setStyleSheet("background-color: lightgreen;");
+        ui->statusBar->setStyleSheet("background-color: lightgreen; font-weight:bold;");
         ui->statusBar->showMessage(tracerInfo);
         double ampTracerArrowSY = traceLineBottom->start->coords().y();
         double ampTracerArrowEY = traceLineTop->end->coords().y();
@@ -1574,9 +1578,11 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     mousePos =event->pos();
     double xx = ui->plot->xAxis->pixelToCoord(event->x());
     double yy = ui->plot->yAxis->pixelToCoord(event->y());
-    QString coordinates("X: %1 Y: %2 Points:%3");
-    coordinates = coordinates.arg(xx).arg(yy).arg(dataPointNumber);
-    ui->statusBar->setStyleSheet("background-color: SkyBlue;");
+//    QString coordinates("Time: %1 Seconds -- Y: %2 -- Points: %3");
+//    coordinates = coordinates.arg(xx/1000.0,0,'f',3).arg(yy,0,'f',3).arg(dataPointNumber);
+    QString coordinates(" -- Time: %1 Seconds -- Amplitude: %2 -- ");
+    coordinates = coordinates.arg(xx/1000.0,0,'f',3).arg(yy,0,'f',3);
+    ui->statusBar->setStyleSheet("background-color: SkyBlue; font-weight:bold;");
     if (measureMode == measureType::Box) {
         if (event->buttons() != Qt::LeftButton) {
             updateTracerBox();
@@ -1652,6 +1658,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
         QPoint numDegrees = event->angleDelta();
         if (numDegrees.y() == 0) return;
         double inc = plotTimeInSeconds / 100.0;
+
         if (numDegrees.y() > 0) {
             plotTimeInSeconds += inc;
         } else {
@@ -1931,7 +1938,7 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
     //            action->setIcon(QIcon(":/Icons/Icons/icons8-shift-48.png"));
                 action = contextMenu->addAction("Save", this, SLOT(saveSelectedGraph()));
                 action->setIcon(QIcon(":/Icons/Icons/icons8-save-48.png"));
-                if (plotting == false) {
+                if ((plotting == false) || (ui->checkBoxDynamicMeasures->isChecked())) {
                     plotMeasureBoxAction = contextMenu->addAction("Start Measure Box", this, SLOT(doMenuPlotMeasureBoxAction()));
                     plotMeasureBoxAction->setIcon(QIcon(":/Icons/Icons/icons8-caliper-48.png"));
                     plotMeasureAction = contextMenu->addAction("Start Measure", this, SLOT(doMenuPlotMeasureAction()));
@@ -1965,3 +1972,18 @@ void MainWindow::yAxisRangeChanged(const QCPRange& range) {
     updateTracerMeasure();
 }
 
+/******************************************************************************************************************/
+void MainWindow::checkBoxDynamicMeasuresChanged(int state) {
+//    qDebug() << "checkBoxDynamicMeasuresChanged " << state;
+//    qDebug() << " selectedItems: " << ui->plot->selectedItems();
+//    qDebug() << " selectedGraphs: " << ui->plot->selectedGraphs();
+//    qDebug() << " selectedPlottables: " << ui->plot->selectedPlottables();
+//    qDebug() << " workingGraph: " << workingGraph;
+    if (workingGraph) {
+        if ((measureMode == measureType::Measure) || (measureMode == measureType::Box)) {
+            measureMode = measureType::None;
+            cleanTracer();
+            plotLabelSelectionChanged(true);
+        }
+    }
+}
