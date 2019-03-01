@@ -577,9 +577,8 @@ void MainWindow::replot() {
             ui->plot->replot();
         } else {
             ui->plot->xAxis->setRange(ui->plot->xAxis->range());
-            updateTracerMeasure();
-            updateTracerBox();
-
+//            updateTracerMeasure();
+//            updateTracerBox();
         }
     }
 }
@@ -1485,8 +1484,13 @@ void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
                 tracerArrowFromRefTxt->setText(QString::number(deltaFromRef, 'f', 3) + " ["
                                                  + QString::number(deltaFromRef/mult, 'f', 3) + "]");
             }
-            tracerArrowFromRefTxt->position->setCoords(coordX - (space0+space1)*space,
-                                                         (ref + endY)/2.0);
+            if (deltaFromRef > 0) {
+                tracerArrowFromRefTxt->position->setCoords(coordX - (space0+space1)*space,
+                                                             (ref + endY)/2.0 + 150);
+            } else {
+                tracerArrowFromRefTxt->position->setCoords(coordX - (space0+space1)*space,
+                                                             (ref + endY)/2.0 - 150);
+            }
         }
         // Horizontal measures
         QSharedPointer<QCPGraphDataContainer> gData = workingGraph->plot()->data();
@@ -1496,7 +1500,8 @@ void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
         lastTracerXValueTracer = itStart->key;
         double deltaMin = space * 20;
         for (QCPDataContainer<QCPGraphData>::const_iterator it = itStart; it != itEnd; ++it) {
-            if (compareDouble( it->value, ref, 0)) {
+//            qDebug() << ref << " / " << it->value;
+            if (compareDouble( it->value / mult, ref, 0)) {
                 double deltaRef = it->key - lastTracerXValueRef;
                 if (deltaRef > deltaMin) {
                     QCPItemLine* line = new QCPItemLine(ui->plot);
@@ -1974,6 +1979,7 @@ void MainWindow::yAxisRangeChanged(const QCPRange& range) {
 
 /******************************************************************************************************************/
 void MainWindow::checkBoxDynamicMeasuresChanged(int state) {
+    Q_UNUSED(state);
 //    qDebug() << "checkBoxDynamicMeasuresChanged " << state;
 //    qDebug() << " selectedItems: " << ui->plot->selectedItems();
 //    qDebug() << " selectedGraphs: " << ui->plot->selectedGraphs();
