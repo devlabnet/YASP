@@ -133,6 +133,15 @@ MainWindow::MainWindow(QWidget *parent) :
 //    connect(contextMenu, SIGNAL(aboutToHide()), this, SLOT(menuAboutToHide()));
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);    
     mouseWheelTimer.stop();
+
+    // green rgb(153, 255, 153)
+    // pink rgb(255, 179, 209)
+    // yellow rgb(255, 255, 102)
+    // blue rgb(102, 255, 255)
+    ui->buttonsFrame->setStyleSheet("QFrame{color:black; background-color:rgb(153, 255, 153);border-radius:10px;border:2px solid grey} QLabel{border:none;}");
+    ui->rangeFrame->setStyleSheet("QFrame{color:black; background-color:rgb(255, 179, 209);border-radius:10px;border:2px solid grey} QLabel{border:none;}");
+    ui->dynamicFrame->setStyleSheet("QFrame{color:black; background-color:rgb(255, 255, 102);border-radius:10px;border:2px solid grey} QLabel{border:none;}");
+    ui->pointsCountFrame->setStyleSheet("QFrame{color:black; background-color:rgb(102, 255, 255);border-radius:10px;border:2px solid grey} QLabel{border:none;}");
     // Clear the terminal
     on_clearTermButton_clicked();
 //    ticksXTime.start();

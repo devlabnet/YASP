@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1461</width>
-    <height>1239</height>
+    <height>1429</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -302,7 +302,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <item>
-            <widget class="QFrame" name="frame_2">
+            <widget class="QFrame" name="buttonsFrame">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -523,7 +523,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QFrame" name="frame">
+            <widget class="QFrame" name="rangeFrame">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -677,7 +677,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QFrame" name="frame_3">
+            <widget class="QFrame" name="dynamicFrame">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -733,7 +733,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QFrame" name="frame_4">
+            <widget class="QFrame" name="pointsCountFrame">
              <property name="minimumSize">
               <size>
                <width>0</width>
