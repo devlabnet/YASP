@@ -46,7 +46,8 @@
 #define IN_PLOT_MSG     3
 #define UNDEFINED       4
 
-#define DEF_YAXIS_RANGE 1500
+#define DEF_YAXIS_RANGE 4000
+#define YAXIS_MAX_RANGE 1000000
 #define PLOT_TIME_DEF 15000.0               // Default time Displayed in Plot in MilliSeconds
 #define PLOT_TIME_MIN_DEF 1.0               // Minimum Range in MilliSeconds
 #define PLOT_TIME_MAX_DEF 600000.0          // Maximum Range in MilliSeconds
@@ -111,6 +112,8 @@ private slots:
     void xAxisRangeChanged(const QCPRange& range);
     void yAxisRangeChanged(const QCPRange& range);
     void checkBoxDynamicMeasuresChanged(int state);
+    void on_spinDisplayRange_valueChanged(double arg1);
+
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived

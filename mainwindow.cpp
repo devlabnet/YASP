@@ -28,7 +28,7 @@
 #include <QSplitter>
 #include <QtGui>
 #include <QPen>
-#include <QDoubleSpinBox>
+
 /******************************************************************************************************************/
 /* Constructor */
 /******************************************************************************************************************/
@@ -114,6 +114,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinDisplayTime->setDecimals(0);
     ui->spinDisplayTime->setSuffix(" Millis");
     ui->spinDisplayTime->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
+
+    ui->spinDisplayRange->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
+    ui->spinDisplayRange->setMinimum(1);
+    ui->spinDisplayRange->setMaximum(YAXIS_MAX_RANGE);
+//    ui->spinDisplayTime->setSingleStep(PLOT_TIME_STEP_DEF);
+    ui->spinDisplayRange->setValue(DEF_YAXIS_RANGE);
+    ui->spinDisplayRange->setDecimals(0);
+//    ui->spinDisplayRange->setSuffix(" Millis");
+    ui->spinDisplayRange->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
+
+
     ui->autoScrollLabel->setStyleSheet("QLabel { color : DodgerBlue; }");
     ui->autoScrollLabel->setText("Auto Scroll OFF, To allow move cursor to the end or SELECT Button ---> ");
     ui->tabWidget->removeTab(1);
@@ -223,7 +234,7 @@ void MainWindow::cleanDataGraphs() {
 
 /******************************************************************************************************************/
 yaspGraph* MainWindow::addGraph(int id) {
-        ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
+        ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE/2, DEF_YAXIS_RANGE/2);       // Set lower and upper plot range
         QString plotStr = "Plot " + QString::number(id);
         QCPGraph* graph = ui->plot->addGraph();
         graph->setSelectable(QCP::stNone);
@@ -935,7 +946,8 @@ void MainWindow::on_resetPlotButton_clicked() {
         yGraph->reset();
     }
     plotTimeInSeconds = PLOT_TIME_DEF;
-    ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE, DEF_YAXIS_RANGE);       // Set lower and upper plot range
+    ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE/2, DEF_YAXIS_RANGE/2);       // Set lower and upper plot range
+    ui->spinDisplayRange->setValue(ui->plot->yAxis->range().size());
     ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     ui->plot->replot();
@@ -1498,12 +1510,14 @@ void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
         QCPDataContainer<QCPGraphData>::const_iterator itEnd = gData->findBegin(tracerRectRight, true);
         lastTracerXValueRef = itStart->key;
         lastTracerXValueTracer = itStart->key;
-        double deltaMin = space * 20;
+        double deltaMinTracer = 0;
+        double deltaMinRef = 0;
         for (QCPDataContainer<QCPGraphData>::const_iterator it = itStart; it != itEnd; ++it) {
-//            qDebug() << ref << " / " << it->value;
-            if (compareDouble( it->value / mult, ref, 0)) {
+            double deltaFromRef = abs(ref - (it->value))/mult;
+            if (deltaFromRef < 1) {
                 double deltaRef = it->key - lastTracerXValueRef;
-                if (deltaRef > deltaMin) {
+                if (deltaRef > deltaMinRef) {
+                    deltaMinRef = space * 20;
                     QCPItemLine* line = new QCPItemLine(ui->plot);
                     line->setSelectable(false);
                     tracerHLinesRef.append(line);
@@ -1536,9 +1550,12 @@ void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
                 }
                 lastTracerXValueRef = it->key;
             }
-           if (compareDouble( it->value, endY, 0)) {
+            double deltaFromTracer = abs(it->value - endY)/mult;
+            if (deltaFromTracer < 1) {
+//           if (compareDouble( it->value, endY, 0)) {
                 double deltaTracer = it->key - lastTracerXValueTracer;
-                if (deltaTracer > deltaMin) {
+                if (deltaTracer > deltaMinTracer) {
+                    deltaMinTracer = space * 20;
                     QCPItemLine* line = new QCPItemLine(ui->plot);
                     line->setSelectable(false);
                     tracerHLinesTracer.append(line);
@@ -1972,7 +1989,7 @@ void MainWindow::xAxisRangeChanged(const QCPRange& range) {
 
 /******************************************************************************************************************/
 void MainWindow::yAxisRangeChanged(const QCPRange& range) {
-    Q_UNUSED(range);
+    ui->spinDisplayRange->setValue(range.size());
     updateTracerBox();
     updateTracerMeasure();
 }
@@ -1987,9 +2004,28 @@ void MainWindow::checkBoxDynamicMeasuresChanged(int state) {
 //    qDebug() << " workingGraph: " << workingGraph;
     if (workingGraph) {
         if ((measureMode == measureType::Measure) || (measureMode == measureType::Box)) {
-            measureMode = measureType::None;
             cleanTracer();
-            plotLabelSelectionChanged(true);
         }
+        plotLabelSelectionChanged(true);
     }
+    measureMode = measureType::None;
+    if (state) {
+    } else {
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_spinDisplayRange_valueChanged(double arg1) {
+    qDebug() << "-----------------------------------------";
+    QCPRange range = ui->plot->yAxis->range();
+//    double lower = ui->plot->yAxis->range().lower;
+//    double upper = ui->plot->yAxis->range().upper;
+//    qDebug() << "arg1 " << arg1 << " / range " << range.size() << " lower " << lower << " upper " << upper;
+    double ratio = arg1 / range.size();
+    ui->plot->yAxis->setRange(range.lower * ratio, range.upper * ratio);
+//    range = ui->plot->yAxis->range();
+//    lower = ui->plot->yAxis->range().lower;
+//    upper = ui->plot->yAxis->range().upper;
+//    qDebug() << "ratio " << ratio << " / range " << range.size() << " lower " << lower << " upper " << upper;
+
 }
