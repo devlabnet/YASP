@@ -28,6 +28,10 @@
 #include <QSplitter>
 #include <QtGui>
 #include <QPen>
+#include <QNetworkReply>
+
+static const QString DEFS_URL = "https://www.devlabnet.eu/softdev/yasp/updates.json";
+static const QString YASP_VERSION = "1.0";
 
 /******************************************************************************************************************/
 /* Constructor */
@@ -40,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QLocale::setDefault(QLocale::C);
     createUI();      // Create the UI
+
+//    ui->terminalWidget->setVisible(false);
     QColor gridColor = QColor(170,170,170);
     ui->bgColorButton->setAutoFillBackground(true);
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
@@ -105,6 +111,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QPalette p;
     p.setColor(QPalette::Background, QColor(144, 238, 144));
     ui->splitter->setPalette(p);
+    ui->splitter->setMinimumHeight(100);
     ui->tabWidget->setCurrentIndex(0);
     ui->spinDisplayTime->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
     ui->spinDisplayTime->setMinimum(PLOT_TIME_MIN_DEF);
@@ -134,6 +141,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);    
     mouseWheelTimer.stop();
 
+    checkForUpdate();
+//    loadHelpFile();
     // green rgb(153, 255, 153)
     // pink rgb(255, 179, 209)
     // yellow rgb(255, 255, 102)
@@ -167,6 +176,113 @@ void MainWindow::closeEvent(QCloseEvent *event) {
    QMainWindow::closeEvent(event);
 }
 
+/******************************************************************************************************************/
+void MainWindow::checkForUpdate() {
+    QNetworkRequest request;
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),   this, SLOT(checkForUpdateFinished(QNetworkReply*)));
+    manager->get(QNetworkRequest(QUrl(DEFS_URL)));
+}
+
+/******************************************************************************************************************/
+/**
+ * Compares the two version strings (\a x and \a y).
+ *     - If \a x is greater than \y, this function returns \c true.
+ *     - If \a y is greater than \x, this function returns \c false.
+ *     - If both versions are the same, this function returns \c false.
+ */
+bool MainWindow::compareVersions(const QString& x, const QString& y) {
+    QStringList versionsX = x.split (".");
+    QStringList versionsY = y.split (".");
+    int count = qMin (versionsX.count(), versionsY.count());
+    for (int i = 0; i < count; ++i) {
+        int a = QString (versionsX.at (i)).toInt();
+        int b = QString (versionsY.at (i)).toInt();
+        if (a > b) {
+            return true;
+        } else if (b > a) {
+            return false;
+        }
+    }
+    return versionsY.count() < versionsX.count();
+}
+
+/******************************************************************************************************************/
+void MainWindow::loadHelpFile() {
+//    ui->helpTextWidget->setUrl(QUrl(QStringLiteral("https://www.qt.io")));
+ }
+
+/******************************************************************************************************************/
+void MainWindow::setUpdateAvailable(bool available, QString latestVersion, QString downloadUrl, QString changelog) {
+    QMessageBox box;
+    box.setIcon (QMessageBox::Information);
+    box.setTextFormat(Qt::RichText);
+    if (available) {
+        QString text = "<h3>"
+                        + tr ("Version %1 of %2 has been released!")
+                        .arg (latestVersion).arg(qApp->applicationName())
+                        + "</h3>";
+        text += tr ("Would you like to download the update now?");
+        text = text.replace(" ","&nbsp;");
+        text += "<hr/><b>New in version " + latestVersion + "</b>";
+        text += changelog;
+        text += "<hr/><br>";
+//        qDebug().noquote() << text;
+        box.setText(text);
+        box.setStandardButtons (QMessageBox::No | QMessageBox::Yes);
+        box.setDefaultButton   (QMessageBox::Yes);
+        if (box.exec() == QMessageBox::Yes) {
+           QDesktopServices::openUrl (QUrl (downloadUrl));
+        }
+    } else  {
+        box.setStandardButtons (QMessageBox::Close);
+        QString text = "<h3>"
+                     + tr ("Congratulations!<br>You are running the "
+                           "latest version of %1").arg(qApp->applicationName())
+                     + "</h3>";
+        text += tr("No updates are available for the moment");
+        text = text.replace(" ","&nbsp;");
+        box.setText(text);
+        box.exec();
+    }
+}
+
+
+/******************************************************************************************************************/
+void MainWindow::checkForUpdateFinished(QNetworkReply* reply) {
+    if(reply->error())  {
+        qDebug() << "checkForUpdateFinished ERROR --> " << reply->errorString();
+    }
+    else
+    {
+//        qDebug() << __LINE__ << reply->header(QNetworkRequest::ContentTypeHeader).toString();
+//        qDebug() << __LINE__ << reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toString();;
+//        qDebug() << __LINE__ << reply->header(QNetworkRequest::ContentLengthHeader).toULongLong();
+//        qDebug() << __LINE__ << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+//        qDebug() << __LINE__ << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+//        QString response =  reply->readAll();
+//        qDebug() << "response: " << response;
+        QJsonDocument document = QJsonDocument::fromJson (reply->readAll());
+        /* JSON is invalid */
+        if (document.isNull()) {
+            qDebug() << "JSON is invalid !!!";
+            return;
+        }
+        QString platformKey = "windows";
+        /* Get the platform information */
+        QJsonObject updates = document.object().value ("updates").toObject();
+        QJsonObject platform = updates.value (platformKey).toObject();
+        /* Get update information */
+        QString changelog = platform.value ("changelog").toString();
+        QString downloadUrl = platform.value ("download-url").toString();
+        QString latestVersion = platform.value ("latest-version").toString();
+        qDebug() << "changelog: " << changelog;
+        qDebug() << "downloadUrl: " << downloadUrl;
+        qDebug() << "latestVersion: " << latestVersion;
+        setUpdateAvailable(compareVersions(latestVersion, YASP_VERSION), latestVersion, downloadUrl, changelog);
+    }
+    reply->deleteLater();
+}
 
 /******************************************************************************************************************/
 /**Create the GUI */
@@ -327,6 +443,9 @@ void MainWindow::on_comboPort_currentIndexChanged(const QString &arg1) {
     QSerialPortInfo selectedPort(arg1);                                                   // Dislplay info for selected port
     ui->statusBar->setStyleSheet("background-color: SkyBlue ; font-weight:bold;");
     ui->statusBar->showMessage(selectedPort.description());
+
+    loadHelpFile();
+
 }
 
 /******************************************************************************************************************/
@@ -466,6 +585,7 @@ void MainWindow::initTracer() {
 void MainWindow::portOpenedSuccess() {
     connect(serialPort, SIGNAL(dataTerminalReadyChanged(bool)), this, SLOT(dataTerminalReadyChanged(bool)));
     serialPort->setDataTerminalReady(false);
+//    ui->terminalWidget->setVisible(true);
     ui->menuWidgets->menuAction()->setVisible(true);
     if ((widgets != nullptr)) {
         widgets->setSerialPort(serialPort);
@@ -578,6 +698,7 @@ void MainWindow:: closePort() {
     ui->connectButton->setText("Connect");                                            // Change Connect button text, to indicate disconnected
     ui->statusBar->setStyleSheet("background-color: SkyBlue; font-weight:bold;");
     ui->statusBar->showMessage("Disconnected!");                                      // Show message in status bar
+//    ui->terminalWidget->setVisible(false);
     connected = false;                                                                // Set connected status flag to false
     plotting = false;                                                                 // Not plotting anymore
     receivedData.clear();                                                             // Clear received string
@@ -2025,7 +2146,7 @@ void MainWindow::checkBoxDynamicMeasuresChanged(int state) {
 
 /******************************************************************************************************************/
 void MainWindow::on_spinDisplayRange_valueChanged(double arg1) {
-    qDebug() << "-----------------------------------------";
+//    qDebug() << "-----------------------------------------";
     QCPRange range = ui->plot->yAxis->range();
 //    double lower = ui->plot->yAxis->range().lower;
 //    double upper = ui->plot->yAxis->range().upper;
@@ -2037,4 +2158,41 @@ void MainWindow::on_spinDisplayRange_valueChanged(double arg1) {
 //    upper = ui->plot->yAxis->range().upper;
 //    qDebug() << "ratio " << ratio << " / range " << range.size() << " lower " << lower << " upper " << upper;
 
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_saveTermButton_clicked() {
+    qDebug() << "----------------SAVE TERM TBD ------------------";
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_restartDeviceButton_clicked() {
+    qDebug() << "----------------RESTART TBD ------------------";
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_tabWidget_currentChanged(int index) {
+    qDebug() << "on_tabWidget_currentChanged " << index;
+//    if (index == 0) {
+//        ui->helpTextWidget->setVisible(true);
+//        ui->terminalWidget->setVisible(false);
+//        ui->plot->setVisible(false);
+////        QWidget* ww = new QWidget();
+////        QVBoxLayout* vbl = new QVBoxLayout;
+////        QLabel* label = new QLabel();
+////        QPixmap imagePixmap;
+////        imagePixmap.load(":/Icons/Icons/Oscilloscope-128.png");
+////        label->setPixmap(imagePixmap);
+////        label->setFixedSize(100,100);
+////        //label->setScaledContents(true);
+////        vbl->addWidget(label);
+////        ww->setLayout(vbl);
+////        ui->terminalWidget->setParent(ww);
+//////        ui->terminalWidget->setFixedSize(0,0);
+//////        ui->tabPlots->setFixedSize(0,0);
+//    } else {
+//        ui->helpTextWidget->setVisible(false);
+//        ui->terminalWidget->setVisible(true);
+//        ui->plot->setVisible(true);
+//    }
 }

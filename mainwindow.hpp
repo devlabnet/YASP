@@ -35,6 +35,7 @@
 #include <QTextEdit>
 #include <QTime>
 #include "yaspgraph.h"
+#include <QNetworkAccessManager>
 
 #define START_MSG      0x10
 #define PLOT_MSG       0X11
@@ -113,6 +114,12 @@ private slots:
     void yAxisRangeChanged(const QCPRange& range);
     void checkBoxDynamicMeasuresChanged(int state);
     void on_spinDisplayRange_valueChanged(double arg1);
+    void checkForUpdateFinished(QNetworkReply* reply);
+    void on_saveTermButton_clicked();
+
+    void on_restartDeviceButton_clicked();
+
+    void on_tabWidget_currentChanged(int index);
 
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
@@ -189,6 +196,7 @@ private:
     QList<QCPItemText*> tracerHLinesTracerInfo;
     void createUI();
     void enableControls(bool enable);
+    void loadHelpFile();
     void initTracer();
     yaspGraph *addGraph(int id);
     void updateLabel(int id, QString plotInfoStr);
@@ -219,7 +227,10 @@ private:
     bool compareDouble(double value1, double value2, quint8 precision) {
         return std::abs(value1 - value2) < std::pow(10, -precision);
     }
-
+    // Check Update Version
+    void checkForUpdate();
+    bool compareVersions(const QString& x, const QString& y);
+    void setUpdateAvailable(bool available, QString latestVersion="", QString downloadUrl="", QString changelog="");
 //    bool boolTest;
 //    double round(long double number, int precision) {
 //      int decimals = std::pow(10, precision);
