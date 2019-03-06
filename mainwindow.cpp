@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QLocale::setDefault(QLocale::C);
     createUI();      // Create the UI
-
+//    resize(minimumSize());
 //    ui->terminalWidget->setVisible(false);
     QColor gridColor = QColor(170,170,170);
     ui->bgColorButton->setAutoFillBackground(true);
@@ -112,6 +112,9 @@ MainWindow::MainWindow(QWidget *parent) :
     p.setColor(QPalette::Background, QColor(144, 238, 144));
     ui->splitter->setPalette(p);
     ui->splitter->setMinimumHeight(100);
+//    ui->splitter->setSizes({2, 1});
+    ui->splitter->setSizes(QList<int>({INT_MAX, INT_MAX}));
+
     ui->tabWidget->setCurrentIndex(0);
     ui->spinDisplayTime->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
     ui->spinDisplayTime->setMinimum(PLOT_TIME_MIN_DEF);
@@ -209,8 +212,10 @@ bool MainWindow::compareVersions(const QString& x, const QString& y) {
 
 /******************************************************************************************************************/
 void MainWindow::loadHelpFile() {
-//    ui->helpTextWidget->setUrl(QUrl(QStringLiteral("https://www.qt.io")));
- }
+    ui->helpWebWidget->setUrl(QUrl(QStringLiteral("https://docs.google.com/document/d/e/2PACX-1vQmyyZDie11-NvYd0V3Ry10cUGisbMw1lMT7EOq4qnecPBSdgyicpQix47Plv0QDT93KMiAFPEK7MNc/pub")));
+    QFont ft = ui->helpWebWidget->font();
+    ui->helpWebWidget->setZoomFactor(1.5);
+}
 
 /******************************************************************************************************************/
 void MainWindow::setUpdateAvailable(bool available, QString latestVersion, QString downloadUrl, QString changelog) {
