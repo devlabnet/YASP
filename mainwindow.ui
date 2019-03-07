@@ -55,9 +55,6 @@
            <bool>false</bool>
           </property>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="1" column="0">
-            <widget class="QWebEngineView" name="helpWebWidget" native="true"/>
-           </item>
            <item row="0" column="0">
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <item>
@@ -262,6 +259,33 @@
               </widget>
              </item>
             </layout>
+           </item>
+           <item row="1" column="0">
+            <widget class="QTabWidget" name="helpWebWidget">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <widget class="QWidget" name="AboutTab" native="true">
+              <attribute name="title">
+               <string>About</string>
+              </attribute>
+              <layout class="QVBoxLayout" name="verticalLayout">
+               <item>
+                <widget class="QPushButton" name="aboutNevVersionButton">
+                 <property name="text">
+                  <string>Download New Version</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QTextEdit" name="AboutTextEdit"/>
+               </item>
+              </layout>
+             </widget>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -1060,12 +1084,6 @@
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
    <header location="global">qcustomplot.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QWebEngineView</class>
-   <extends>QWidget</extends>
-   <header location="global">qwebengineview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

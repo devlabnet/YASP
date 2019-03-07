@@ -144,6 +144,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->setContextMenuPolicy(Qt::PreventContextMenu);    
     mouseWheelTimer.stop();
 
+    ui->aboutNevVersionButton->setVisible(false);
     checkForUpdate();
 //    loadHelpFile();
     // green rgb(153, 255, 153)
@@ -210,45 +211,62 @@ bool MainWindow::compareVersions(const QString& x, const QString& y) {
     return versionsY.count() < versionsX.count();
 }
 
-/******************************************************************************************************************/
-void MainWindow::loadHelpFile() {
-    ui->helpWebWidget->setUrl(QUrl(QStringLiteral("https://docs.google.com/document/d/e/2PACX-1vQmyyZDie11-NvYd0V3Ry10cUGisbMw1lMT7EOq4qnecPBSdgyicpQix47Plv0QDT93KMiAFPEK7MNc/pub")));
-    QFont ft = ui->helpWebWidget->font();
-    ui->helpWebWidget->setZoomFactor(1.5);
-}
+///******************************************************************************************************************/
+//void MainWindow::loadHelpFile() {
+//    ui->helpWebWidget->setUrl(QUrl(QStringLiteral("https://docs.google.com/document/d/e/2PACX-1vQmyyZDie11-NvYd0V3Ry10cUGisbMw1lMT7EOq4qnecPBSdgyicpQix47Plv0QDT93KMiAFPEK7MNc/pub")));
+//    QFont ft = ui->helpWebWidget->font();
+//    ui->helpWebWidget->setZoomFactor(1.5);
+//}
 
 /******************************************************************************************************************/
-void MainWindow::setUpdateAvailable(bool available, QString latestVersion, QString downloadUrl, QString changelog) {
-    QMessageBox box;
-    box.setIcon (QMessageBox::Information);
-    box.setTextFormat(Qt::RichText);
+void MainWindow::setUpdateAvailable(bool available, QString latestVersion, QString changelog) {
+//    QMessageBox box;
+//    box.setIcon (QMessageBox::Information);
+//    box.setTextFormat(Qt::RichText);
+    //ui->AboutTextBrowser->setTextFormat(Qt::RichText);
+    QString text;
+    text += "<hr/>";
+    text += "<div style=\"text-align:center;\">";
+    text += "<img src=\":/Icons/Icons/logo_devlabnet_small.png\" alt=\"Smiley face\">";
+    text += "</div>";
     if (available) {
-        QString text = "<h3>"
-                        + tr ("Version %1 of %2 has been released!")
-                        .arg (latestVersion).arg(qApp->applicationName())
-                        + "</h3>";
-        text += tr ("Would you like to download the update now?");
-        text = text.replace(" ","&nbsp;");
+        text += "<div style=\"text-align:center;color:black;font-size:20px;background-color:#ffb3b3;\">";
+        text += "<br>";
+        text += tr("Version %1 of %2 has been released!").arg (latestVersion).arg(qApp->applicationName());
+        text += "<br><br>" + tr("If you like to download the update now");
+        text += ",<br>";
+        text += tr("Click on the \"Download New Version\" button above.");
+        text += "<br>";
+        text += "</div>";
+        text += "<br>";
         text += "<hr/><b>New in version " + latestVersion + "</b>";
         text += changelog;
         text += "<hr/><br>";
-//        qDebug().noquote() << text;
-        box.setText(text);
-        box.setStandardButtons (QMessageBox::No | QMessageBox::Yes);
-        box.setDefaultButton   (QMessageBox::Yes);
-        if (box.exec() == QMessageBox::Yes) {
-           QDesktopServices::openUrl (QUrl (downloadUrl));
-        }
+        ui->AboutTextEdit->setHtml(text);
+        ui->aboutNevVersionButton->setStyleSheet("color: Black; background-color: Tomato; font-weight:bold;");
+        ui->aboutNevVersionButton->setVisible(true);
+////        qDebug().noquote() << text;
+//        box.setText(text);
+//        box.setStandardButtons (QMessageBox::No | QMessageBox::Yes);
+//        box.setDefaultButton   (QMessageBox::Yes);
+//        if (box.exec() == QMessageBox::Yes) {
+//           QDesktopServices::openUrl (QUrl (downloadUrl));
+//        }
     } else  {
-        box.setStandardButtons (QMessageBox::Close);
-        QString text = "<h3>"
-                     + tr ("Congratulations!<br>You are running the "
-                           "latest version of %1").arg(qApp->applicationName())
-                     + "</h3>";
+//        box.setStandardButtons (QMessageBox::Close);
+        text += "<hr/>";
+        text += "<div style=\"text-align:center;color:black;font-size:20px;background-color:#d9ffb3;\">";
+        text += "<br>";
+        text += tr ("Congratulations!<br>You are running the latest version of %1").arg(qApp->applicationName());
+        text += "<br>";
         text += tr("No updates are available for the moment");
-        text = text.replace(" ","&nbsp;");
-        box.setText(text);
-        box.exec();
+        text += "<br>";
+        text += "</div>";
+        text += "<hr/><br>";
+        ui->AboutTextEdit->setText(text);
+        ui->aboutNevVersionButton->setVisible(false);
+//        box.setText(text);
+//        box.exec();
     }
 }
 
@@ -271,6 +289,7 @@ void MainWindow::checkForUpdateFinished(QNetworkReply* reply) {
         /* JSON is invalid */
         if (document.isNull()) {
             qDebug() << "JSON is invalid !!!";
+            downloadUrl = "";
             return;
         }
         QString platformKey = "windows";
@@ -279,12 +298,12 @@ void MainWindow::checkForUpdateFinished(QNetworkReply* reply) {
         QJsonObject platform = updates.value (platformKey).toObject();
         /* Get update information */
         QString changelog = platform.value ("changelog").toString();
-        QString downloadUrl = platform.value ("download-url").toString();
+        downloadUrl = platform.value ("download-url").toString();
         QString latestVersion = platform.value ("latest-version").toString();
-        qDebug() << "changelog: " << changelog;
-        qDebug() << "downloadUrl: " << downloadUrl;
-        qDebug() << "latestVersion: " << latestVersion;
-        setUpdateAvailable(compareVersions(latestVersion, YASP_VERSION), latestVersion, downloadUrl, changelog);
+//        qDebug() << "changelog: " << changelog;
+//        qDebug() << "downloadUrl: " << downloadUrl;
+//        qDebug() << "latestVersion: " << latestVersion;
+        setUpdateAvailable(compareVersions(latestVersion, YASP_VERSION), latestVersion, changelog);
     }
     reply->deleteLater();
 }
@@ -449,7 +468,7 @@ void MainWindow::on_comboPort_currentIndexChanged(const QString &arg1) {
     ui->statusBar->setStyleSheet("background-color: SkyBlue ; font-weight:bold;");
     ui->statusBar->showMessage(selectedPort.description());
 
-    loadHelpFile();
+//    loadHelpFile();
 
 }
 
@@ -1737,7 +1756,7 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
     double yy = ui->plot->yAxis->pixelToCoord(event->y());
 //    QString coordinates("Time: %1 Seconds -- Y: %2 -- Points: %3");
 //    coordinates = coordinates.arg(xx/1000.0,0,'f',3).arg(yy,0,'f',3).arg(dataPointNumber);
-    QString coordinates(" -- Time: %1 Seconds -- Amplitude: %2 -- ");
+    QString coordinates(" -- Time: %1 Seconds -- Y: %2 -- ");
     coordinates = coordinates.arg(xx/1000.0,0,'f',3).arg(yy,0,'f',3);
     ui->statusBar->setStyleSheet("background-color: SkyBlue; font-weight:bold;");
     if (measureMode == measureType::Box) {
@@ -2006,7 +2025,7 @@ void MainWindow::doContextMenuHeader(yaspGraph* yGraph) {
     contextMenu->setAttribute(Qt::WA_TranslucentBackground);
     contextMenu->setStyleSheet("QMenu {border-radius:16px;}");
     QWidget* menuTitleWidget = new QWidget();
-    QLabel* menuTitleLabel = new QLabel("plot " + yGraph->plot()->name(), contextMenu);
+    QLabel* menuTitleLabel = new QLabel(yGraph->plot()->name(), contextMenu);
     menuTitleLabel->setAlignment(Qt::AlignCenter);
     QLabel* menuIcon = new QLabel();
     menuIcon->setPixmap(QPixmap(":/Icons/Icons/logo_devlabnet_small.png").scaledToWidth(300));
@@ -2165,39 +2184,42 @@ void MainWindow::on_spinDisplayRange_valueChanged(double arg1) {
 
 }
 
+
 /******************************************************************************************************************/
 void MainWindow::on_saveTermButton_clicked() {
-    qDebug() << "----------------SAVE TERM TBD ------------------";
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Log"),
+                               "",
+                               tr("Logs (*.log)"));
+    QTextDocumentWriter writer(fileName);
+    writer.setFormat("plaintext");
+    bool success = writer.write(ui->receiveTerminal->document());
+    if (success) {
+        ui->receiveTerminal->document()->setModified(false);
+        ui->statusBar->setStyleSheet("background-color:SpringGreen; font-weight:bold;");
+        statusBar()->showMessage(tr("Log File: \"%1\" Saved").arg(QDir::toNativeSeparators(fileName)));
+    } else {
+        ui->statusBar->setStyleSheet("background-color:Tomato; font-weight:bold;");
+        statusBar()->showMessage(tr("Could not write to file \"%1\"").arg(QDir::toNativeSeparators(fileName)));
+    }
 }
 
 /******************************************************************************************************************/
 void MainWindow::on_restartDeviceButton_clicked() {
     qDebug() << "----------------RESTART TBD ------------------";
+    serialPort->setDataTerminalReady(false);
+    serialPort->setDataTerminalReady(true);
 }
 
 /******************************************************************************************************************/
 void MainWindow::on_tabWidget_currentChanged(int index) {
-    qDebug() << "on_tabWidget_currentChanged " << index;
-//    if (index == 0) {
-//        ui->helpTextWidget->setVisible(true);
-//        ui->terminalWidget->setVisible(false);
-//        ui->plot->setVisible(false);
-////        QWidget* ww = new QWidget();
-////        QVBoxLayout* vbl = new QVBoxLayout;
-////        QLabel* label = new QLabel();
-////        QPixmap imagePixmap;
-////        imagePixmap.load(":/Icons/Icons/Oscilloscope-128.png");
-////        label->setPixmap(imagePixmap);
-////        label->setFixedSize(100,100);
-////        //label->setScaledContents(true);
-////        vbl->addWidget(label);
-////        ww->setLayout(vbl);
-////        ui->terminalWidget->setParent(ww);
-//////        ui->terminalWidget->setFixedSize(0,0);
-//////        ui->tabPlots->setFixedSize(0,0);
-//    } else {
-//        ui->helpTextWidget->setVisible(false);
-//        ui->terminalWidget->setVisible(true);
-//        ui->plot->setVisible(true);
-//    }
+//    qDebug() << "on_tabWidget_currentChanged " << index;
+    if (index == 0) {
+        ui->statusBar->showMessage("About");
+    } else {
+    }
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_aboutNevVersionButton_clicked() {
+    QDesktopServices::openUrl(QUrl (downloadUrl));
 }

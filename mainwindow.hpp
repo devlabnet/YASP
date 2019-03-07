@@ -121,6 +121,8 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
+    void on_aboutNevVersionButton_clicked();
+
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
     void newData(QStringList data);                                                       // Emitted when new data has arrived
@@ -153,6 +155,7 @@ private:
     QSharedPointer<QCPAxisTickerFixed> fixedTicker;
     QMap<int, yaspGraph*> graphs;
     double lastDataTtime;
+    QString downloadUrl = "";
 //    double cleanDataTtime;
     yaspGraph* getGraph(int id);
     int selectedPlotId = -1;
@@ -230,7 +233,7 @@ private:
     // Check Update Version
     void checkForUpdate();
     bool compareVersions(const QString& x, const QString& y);
-    void setUpdateAvailable(bool available, QString latestVersion="", QString downloadUrl="", QString changelog="");
+    void setUpdateAvailable(bool available, QString latestVersion="", QString changelog="");
 //    bool boolTest;
 //    double round(long double number, int precision) {
 //      int decimals = std::pow(10, precision);
