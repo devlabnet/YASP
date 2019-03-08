@@ -66,10 +66,10 @@ void yaspGraph::toggleVisibility(bool show) {
 void yaspGraph::setSelected(bool sel) {
 //    qDebug() << "yaspGraph::setSelected: " << infoGraph->name() << " / hidden " << hidden << " / sel " << sel;
     QPen pen = infoGraph->pen();
-    pen.setWidth(1);
     if (sel) {
         pen.setDashPattern(plotDashPattern);
         infoGraph->setPen(pen);
+        pen.setWidth(1);
         infoText->setPen(pen);
         infoText->setSelectedPen(pen);
         infoText->setSelectedColor(pen.color());
@@ -77,6 +77,7 @@ void yaspGraph::setSelected(bool sel) {
     } else {
         pen.setStyle(Qt::SolidLine);
         infoGraph->setPen(pen);
+        pen.setWidth(1);
         infoText->setPen(Qt::NoPen);
         infoText->setSelectedPen(Qt::NoPen);
         infoText->setSelectedColor(pen.color());
@@ -115,7 +116,9 @@ void yaspGraph::updateLabel(QString str, double lX, int margin) {
     infoText->setSelectedFont(font);
 //    infoText->setPen(penT);
     infoText->setSelectedColor(color);
-    infoText->setSelectedPen(infoGraph->pen());
+    QPen pen = infoGraph->pen();
+    pen.setWidth(1);
+    infoText->setSelectedPen(pen);
     infoText->position->setCoords(labelPos.x(), labelPos.y());
     infoText->setText(info);
 //    infoText->layer()->replot();

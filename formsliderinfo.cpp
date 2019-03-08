@@ -9,6 +9,7 @@ FormSliderInfo::FormSliderInfo(QString name, int rMin, int rMax, int val, QWidge
 {
     ui->setupUi(this);
     ui->label->setText(name);
+    setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
     //setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
     validator = new QIntValidator(rMin, rMax);
     ui->value->setValidator(validator);

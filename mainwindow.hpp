@@ -94,6 +94,9 @@ private slots:
     void cleanTracer();
 //    void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
+#ifdef YASP_PLOTS_WIDTH
+    void doMenuPlotWidthAction(int w);
+#endif
 //    void doMenuPlotScaleAction();
     void doMenuPlotResetAction();
     void doMenuPlotMeasureBoxAction();

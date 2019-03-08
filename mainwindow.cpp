@@ -52,6 +52,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QColor subGridColor = QColor(80,80,80);
     ui->plot->setBackground(QBrush(bgColor));                                    // Background for the plot area
     ui->plot->hide();
+#ifdef YASP_PLOTS_WIDTH
+    ui->plot->setOpenGl(true);
+#endif
     ui->stopPlotButton->setEnabled(false);                                                // Plot button is disabled initially
     ui->logPlotButton->setVisible(false);
     // Legend
@@ -1149,7 +1152,7 @@ void MainWindow::shiftPlot(int pY) {
 void MainWindow::scalePlot(double scale) {
     Q_ASSERT(workingGraph);
     workingGraph->setMult(scale);
-    ui->plot->replot();
+//    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -1298,6 +1301,19 @@ void MainWindow::doMenuPlotColorAction() {
     resetMouseWheelState();
     infoModeLabel->setText(workingGraph->plot()->name() + " --> MENU MODE");
 }
+
+
+#ifdef YASP_PLOTS_WIDTH
+/******************************************************************************************************************/
+void MainWindow::doMenuPlotWidthAction(int w) {
+    qDebug() << "doMenuPlotWidthAction: " << contextMenu->property("id");
+    qDebug() << "doMenuPlotWidthAction width: " << w;
+    Q_ASSERT(workingGraph);
+    QPen pen = workingGraph->plot()->pen();
+    pen.setWidth(w);
+    workingGraph->plot()->setPen(pen);
+}
+#endif
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotResetAction() {
@@ -1828,7 +1844,7 @@ void MainWindow::resetMouseWheelState() {
 
 /******************************************************************************************************************/
 void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
-//    mousePos = event->pos();
+    QPoint mPos = event->pos();
     if (event->buttons() == Qt::RightButton) {
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
         QPoint numDegrees = event->angleDelta();
@@ -1848,7 +1864,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
             } else {
                 ui->plot->xAxis->setRange(ui->plot->xAxis->range().lower + inc, ui->plot->xAxis->range().upper - inc);
             }
-            ui->plot->replot();
+//            ui->plot->replot();
         }
     } else {
         // zoom display
@@ -1861,8 +1877,14 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
                 if (nY != 0) {
                     mouseWheelTimer.start(500);
                     infoModeLabel->setText(workingGraph->plot()->name() + " -> SCALE MODE");
-                    double scale = 1 + (static_cast<double>(nY) / 1000.0);
+                    double delta = static_cast<double>(nY) / 1000.0;
+                    double scale = 1 + delta;
                     scalePlot(scale);
+                    double p0 = ui->plot->yAxis->pixelToCoord(mPos.y());
+                    double p1 = (p0 - workingGraph->offset()) * delta;
+//                    qDebug() << mPos << " / " << p0 << " /p1 " << p1 << " / scale " << scale << " /delta " << delta;
+                    ui->plot->yAxis->setRange(ui->plot->yAxis->range().lower + p1, ui->plot->yAxis->range().upper + p1);
+//                    ui->plot->replot();
                     QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult(), 'f', 3);
                     ui->statusBar->showMessage(msg);
                     if (measureMode == measureType::Measure) {
@@ -1880,6 +1902,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
             ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems);
         }
     }
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -2089,6 +2112,34 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
             if (workingGraph->plot()->visible()) {
                 action = contextMenu->addAction("Color", this, SLOT(doMenuPlotColorAction()));
                 action->setIcon(QIcon(":/Icons/Icons/icons8-paint-palette-48.png"));
+#ifdef YASP_PLOTS_WIDTH
+                QWidgetAction* widgetAction = new QWidgetAction(contextMenu);
+                QWidget *popup = new QWidget(this);
+                QSlider* slider = new QSlider(Qt::Horizontal, popup);
+                slider->setRange(1, 5);
+                slider->setSingleStep(1);
+                slider->setPageStep(1);
+                slider->setValue(workingGraph->plot()->pen().width());
+                slider->setStyleSheet("border:2px solid white");
+                connect(slider, SIGNAL(valueChanged(int)), this, SLOT(doMenuPlotWidthAction(int)));
+                QLabel* label = new QLabel(popup);
+                label->setAlignment(Qt::AlignCenter);
+                label->setText("Pen Width");
+                QLabel* labelIcon = new QLabel(popup);
+                QPixmap labelPixMap = QPixmap(":/Icons/Icons/icons8-line-width-40.png").scaled(24,24);
+                labelIcon->setPixmap(labelPixMap);
+                label->setScaledContents(true);
+                labelIcon->setScaledContents(true);
+//                label->setMinimumWidth(label->sizeHint().width());
+                QHBoxLayout* hBoxLayout = new QHBoxLayout(popup);
+                hBoxLayout->setContentsMargins(4,0,10,0);
+                //hBoxLayout->setMargin(10);
+                hBoxLayout->addWidget(labelIcon);
+                hBoxLayout->addWidget(label);
+                hBoxLayout->addWidget(slider);
+                widgetAction->setDefaultWidget(popup);
+                contextMenu->addAction(widgetAction);
+#endif
             }
             plotShowHideAction = contextMenu->addAction("Hide", this, SLOT(doMenuPlotShowHideAction()));
             if (workingGraph->plot()->visible()) {
@@ -2120,6 +2171,8 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
                     plotMeasureAction = contextMenu->addAction("Start Measure", this, SLOT(doMenuPlotMeasureAction()));
                     plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-design-40.png"));
                 }
+
+
             }
         } else {
             plotMeasureBoxAction = contextMenu->addAction("Stop Measure", this, SLOT(doMenuPlotMeasureBoxAction()));
