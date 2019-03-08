@@ -19,9 +19,9 @@
 **  along with this program.  If not, see http://www.gnu.org/licenses/.   **
 **                                                                        **
 ****************************************************************************
-**           Author: Borislav                                             **
-**           Contact: b.kereziev@gmail.com                                **
-**           Date: 29.12.14                                               **
+**           Author: Cricri042                                             **
+**           Contact: Cricri042@devlabnet.eu                               **
+**           Date: 08.03.2019                                              **
 ****************************************************************************/
 
 #include "mainwindow.hpp"

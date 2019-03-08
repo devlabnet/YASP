@@ -535,6 +535,14 @@ void MainWindow::initTracer() {
     traceLineTop->setSelectable(false);
     pen.setColor(Qt::red);
     traceLineTop->setPen(pen);
+    traceLineLeft = new QCPItemLine(ui->plot);
+    traceLineLeft->setSelectable(false);
+    pen.setColor(Qt::green);
+    traceLineLeft->setPen(pen);
+    traceLineRight = new QCPItemLine(ui->plot);
+    traceLineRight->setSelectable(false);
+    pen.setColor(Qt::yellow);
+    traceLineRight->setPen(pen);
     font.setPixelSize(12);
     tracerArrowAmplitude = new QCPItemLine(ui->plot);
     tracerArrowAmplitude->setSelectable(false);
@@ -648,7 +656,7 @@ void MainWindow::portOpenedSuccess() {
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape ) {
         if (workingGraph) {
-            if ((measureMode == measureType::Measure) || (measureMode == measureType::Box)) {
+            if ((measureMode == measureType::Arrow) || (measureMode == measureType::Box) || (measureMode == measureType::Freq)) {
                 measureMode = measureType::None;
                 cleanTracer();
                 plotLabelSelectionChanged(true);
@@ -659,16 +667,22 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         }
     }
     if( event->modifiers() == Qt::ShiftModifier ) {
-        if (measureMode == measureType::Measure) {
+        if (measureMode == measureType::Arrow) {
 //            qDebug() << "keyPressEvent ShiftModifier";
             tracerArrowFromRef->setVisible(false);
             tracerArrowFromRefTxt->setVisible(false);
             tracerArrowAmplitudeTopTxt->setVisible(false);
             tracerArrowAmplitudeBottomTxt->setVisible(false);
+        } else if (measureMode == measureType::Freq) {
+//            tracerRect->setVisible(false);
+            traceLineTop->setVisible(false);
+            traceLineLeft->setVisible(false);
+            traceLineRight->setVisible(false);
+            tracerStep = 0;
         }
     }
     if( event->modifiers() == Qt::ControlModifier ) {
-        if (measureMode == measureType::Measure) {
+        if (measureMode == measureType::Arrow) {
 //            qDebug() << "keyPressEvent ControlModifier";
             tracerArrowFromRef->setVisible(true);
             tracerArrowFromRefTxt->setVisible(true);
@@ -676,6 +690,31 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             tracerArrowAmplitudeBottomTxt->setVisible(true);
             tracerArrowFromRef->start->setCoords(tracer->position->coords());
             tracerArrowFromRef->end->setCoords(tracer->position->coords());
+        }
+        else if (measureMode == measureType::Freq) {
+            if (tracerStep == 0) {
+//                tracerRect->setVisible(true);
+                traceLineLeft->setVisible(true);
+                traceLineTop->setVisible(false);
+                traceLineRight->setVisible(true);
+//                tracerRect->setRoundCorners(0);
+                double posX = ui->plot->xAxis->pixelToCoord(mousePos.x());
+                double posY = ui->plot->yAxis->pixelToCoord(mousePos.y());
+                qDebug() << "Start measureType::Freq: " << posX << " / " << posY;
+//                tracerRect->topLeft->setCoords(posX, posY);
+//                tracerRect->bottomRight->setCoords(posX, posY);
+                traceLineLeft->start->setCoords(posX, -DBL_MAX);
+                traceLineLeft->end->setCoords(posX, DBL_MAX);
+                traceLineRight->start->setCoords(posX, -DBL_MAX);
+                traceLineRight->end->setCoords(posX, DBL_MAX);
+                tracerStep = 1;
+            } else if (tracerStep == 1) {
+                tracerStep = 2;
+                double lineY = (tracerRect->topLeft->coords().y() + tracerRect->bottomRight->coords().y()) / 2;
+                traceLineTop->setVisible(true);
+                traceLineTop->start->setCoords(traceLineLeft->start->coords().x(), lineY);
+                traceLineTop->end->setCoords(traceLineLeft->start->coords().x(), lineY);
+            }
         }
     }
 }
@@ -759,8 +798,10 @@ void MainWindow::mouseWheelTimerShoot() {
 //        qDebug() << "<<<<<<<<<<<<< mouseWheelTimerShoot >>>>>>>>>>>>>>";
         if (measureMode == measureType::Box) {
             infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE BOX MODE");
-        } else if (measureMode == measureType::Measure) {
-            infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE MODE");
+        } else if (measureMode == measureType::Arrow) {
+            infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE ARROW MODE");
+        } else if (measureMode == measureType::Freq) {
+            infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE FREQ MODE");
         } else {
 //            qDebug() << " ---- SHOW MODE ---- " << __FUNCTION__ << " / " <<  __LINE__;
             infoModeLabel->setText(workingGraph->plot()->name() + " -> SHOW MODE");
@@ -1161,12 +1202,15 @@ void MainWindow::cleanTracer() {
     ui->plot->setCursor(Qt::ArrowCursor);
     measureMode = measureType::None;
     tracer->setVisible(false);
+    tracerStep = 0;
     togglePlotsVisibility(true);
     infoModeLabel->setVisible(false);
     traceLineBottom->start->setCoords(0, DBL_MAX);
     traceLineBottom->end->setCoords(DBL_MAX, DBL_MAX);
     traceLineBottom->setVisible(false);
     traceLineTop->setVisible(false);
+    traceLineLeft->setVisible(false);
+    traceLineRight->setVisible(false);
     traceLineTop->start->setCoords(0, -DBL_MAX);
     traceLineTop->end->setCoords(DBL_MAX, -DBL_MAX);
     tracerArrowAmplitude->setVisible(false);
@@ -1236,7 +1280,7 @@ void MainWindow::doMenuPlotMeasureAction() {
         plotLabelSelectionChanged(true);
     } else {
 //        qDebug() << "Init Measure !";
-        measureMode = measureType::Measure;
+        measureMode = measureType::Arrow;
         ShowPlotsExceptWG(false);
         measureMult = workingGraph->mult();
         infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE MODE");
@@ -1249,6 +1293,36 @@ void MainWindow::doMenuPlotMeasureAction() {
         tracer->setGraph(workingGraph->plot());
         updateTracerMeasure();
     }
+}
+
+/******************************************************************************************************************/
+void MainWindow::doMenuPlotMeasureFreqAction() {
+   qDebug() << "doMenuPlotMeasureFreqAction: " << contextMenu->property("id");
+   Q_ASSERT(contextMenu);
+   Q_ASSERT(workingGraph);
+   if (measureMode != measureType::None) {
+       cleanTracer();
+//        qDebug() << " ---- resetMouseWheelState false ---- " << __FUNCTION__ << " / " <<  __LINE__;
+       measureMode = measureType::None;
+       plotLabelSelectionChanged(true);
+   } else {
+//        qDebug() << "Init Tracer !";
+//        qDebug() << " ---- resetMouseWheelState true ---- " << __FUNCTION__ << " / " <<  __LINE__;
+       measureMode = measureType::Freq;
+       ShowPlotsExceptWG(false);
+       measureMult = workingGraph->mult();
+//        ui->plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag );
+       infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE FREQ MODE");
+       infoModeLabel->setVisible(true);
+       infoModeLabel->setColor(workingGraph->plot()->pen().color());
+       plotLabelSelectionChanged(true);
+       infoModeLabel->position->setCoords(ui->plot->geometry().width() - 32, 16);
+       ui->plot->setCursor(Qt::CrossCursor);
+//       tracer->setVisible(true);
+//       tracer->setGraph(workingGraph->plot());
+//       updateTracerFrequency();
+   }
+
 }
 
 /******************************************************************************************************************/
@@ -1408,7 +1482,7 @@ void MainWindow::messageSent(QString str) {
 
 /******************************************************************************************************************/
 void MainWindow::updateTracerMeasure(bool adjustHeight, double scale) {
-    if (measureMode == measureType::Measure) {
+    if (measureMode == measureType::Arrow) {
         Q_ASSERT(tracer);
         double pX = mousePos.x();
         QList<QCPItemLine*>::iterator lI;
@@ -1485,6 +1559,78 @@ void MainWindow::updateTracerMeasure(bool adjustHeight, double scale) {
         tracerArrowFromRefTxt->setText(str);
         ui->plot->replot();
     }
+}
+
+/******************************************************************************************************************/
+void MainWindow::updateTracerFrequency() {
+    double posY = ui->plot->yAxis->pixelToCoord(mousePos.y());
+    if (tracerStep == 1) {
+        // Create / Adjust Rectangle
+        double posX = ui->plot->xAxis->pixelToCoord(mousePos.x());
+//        QPointF rTL = tracerRect->topLeft->coords();
+//        QPointF rBR = tracerRect->bottomRight->coords();
+//        double left = rTL.x();
+        double right = posX;
+//        double bottom = rBR.y();
+//        double top = posY;
+        traceLineRight->start->setCoords(right, -DBL_MAX);
+        traceLineRight->end->setCoords(right, DBL_MAX);
+
+//        tracerRect->topLeft->setCoords(left, DBL_MAX);
+//        tracerRect->bottomRight->setCoords(right, -DBL_MAX);
+    }
+    if (tracerStep == 2) {
+        double left = traceLineLeft->start->coords().x();
+        double right =  traceLineRight->start->coords().x();
+        qDebug() << "================================ tracerStep == 2";
+        qDebug() << left << " / " << right;
+//        double bottom = tracerRect->bottomRight->coords().y();
+//        double top =  tracerRect->topLeft->coords().y();
+        double xVal;
+        double yVal;
+        traceLineTop->start->setCoords(left, posY);
+        traceLineTop->end->setCoords(right, posY);
+        // Measures
+        QSharedPointer<QCPGraphDataContainer> gData = workingGraph->plot()->data();
+        QCPDataContainer<QCPGraphData>::const_iterator itStart;
+        QCPDataContainer<QCPGraphData>::const_iterator itEnd;
+        bool rangeOk = false;
+        if (right > left) {
+            itStart = gData->findBegin(left, false);
+            itEnd = gData->findBegin(right, true);
+            if (itEnd->key > itStart->key ) {
+                rangeOk = true;
+            }
+        } else {
+            itStart = gData->findBegin(right, false);
+            itEnd = gData->findBegin(left, true);
+    //        itEnd = gData->findBegin(left, true);
+    //        itStart = gData->findBegin(right, false);
+            if (itEnd->key > itStart->key ) {
+                rangeOk = true;
+            }
+        }
+        if (rangeOk) {
+            double minVal = DBL_MAX;
+            double maxVal = -DBL_MAX;
+             qDebug() << "================================";
+            qDebug() << itStart->key << " / " << itEnd->key;
+            qDebug() << "====  ====  ====  ====  ====";
+            for (QCPDataContainer<QCPGraphData>::const_iterator it = itStart; it <= itEnd; ++it) {
+                xVal = it->key;
+                yVal = it->value;
+//                qDebug() << xVal << " / " << yVal;
+                if (yVal > maxVal) {
+                    maxVal = yVal;
+                }
+                if (yVal < minVal) {
+                    minVal = yVal;
+                }
+            }
+            qDebug() << minVal << " / " << maxVal;
+        }
+    }
+    ui->plot->replot();
 }
 
 /******************************************************************************************************************/
@@ -1783,9 +1929,17 @@ void MainWindow::onMouseMoveInPlot(QMouseEvent *event) {
             ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
             ui->statusBar->showMessage(coordinates);
         }
-    } else if (measureMode == measureType::Measure) {
+    } else if (measureMode == measureType::Arrow) {
         if (event->buttons() != Qt::LeftButton) {
             updateTracerMeasure();
+        } else {
+            // shift all plots
+            ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
+            ui->statusBar->showMessage(coordinates);
+        }
+    } else if (measureMode == measureType::Freq) {
+        if (event->buttons() != Qt::LeftButton) {
+            updateTracerFrequency();
         } else {
             // shift all plots
             ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
@@ -1820,6 +1974,10 @@ void MainWindow::onMouseReleaseInPlot(QMouseEvent *event) {
         startShiftPlot = false;
         if (measureMode == measureType::Box) {
             infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE BOX MODE");
+        } else if (measureMode == measureType::Arrow) {
+             infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE ARROW MODE");
+        } else if (measureMode == measureType::Freq) {
+             infoModeLabel->setText(workingGraph->plot()->name() + " -> MEASURE FREQ MODE");
         } else {
 //            qDebug() << " ---- SHOW MODE ---- " << __FUNCTION__ << " / " <<  __LINE__;
             infoModeLabel->setText(workingGraph->plot()->name() + " -> SHOW MODE");
@@ -1887,7 +2045,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 //                    ui->plot->replot();
                     QString msg = "Scaling PLOT: " + workingGraph->plot()->name() + " -> " + QString::number(workingGraph->mult(), 'f', 3);
                     ui->statusBar->showMessage(msg);
-                    if (measureMode == measureType::Measure) {
+                    if (measureMode == measureType::Arrow) {
                         updateTracerMeasure(true, scale);
                     }
                     if (measureMode == measureType::Box) {
@@ -1908,25 +2066,7 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
 /******************************************************************************************************************/
 void MainWindow::onMousePressInPlot(QMouseEvent *event) {
     Q_UNUSED(event);
-//    if( event->modifiers() & Qt::ShiftModifier ) {
-//        if (measureMode == measureType::Measure) {
-//            qDebug() << "onMousePressInPlot ShiftModifier";
-//            tracerArrowFromRef->setVisible(false);
-//        }
-//    }
 
-//    if( event->modifiers() & Qt::ControlModifier ) {
-//        if (measureMode == measureType::Measure) {
-//            qDebug() << "onMousePressInPlot ControlModifier";
-//            tracerArrowFromRef->setVisible(true);
-//            tracerArrowFromRef->start->setCoords(tracer->position->coords());
-//            tracerArrowFromRef->end->setCoords(tracer->position->coords());
-//        }
-//    }
-
-    //    qDebug() << "onMousePressInPlot " << event->button()
-//             << " measureInProgress: " << measureInProgress
-//             << " menu: " << contextMenu->isVisible();
     if (workingGraph) {
         startShiftPlot = true;
     }
@@ -2168,8 +2308,10 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
                 if ((plotting == false) || (ui->checkBoxDynamicMeasures->isChecked())) {
                     plotMeasureBoxAction = contextMenu->addAction("Start Measure Box", this, SLOT(doMenuPlotMeasureBoxAction()));
                     plotMeasureBoxAction->setIcon(QIcon(":/Icons/Icons/icons8-caliper-48.png"));
-                    plotMeasureAction = contextMenu->addAction("Start Measure", this, SLOT(doMenuPlotMeasureAction()));
+                    plotMeasureAction = contextMenu->addAction("Start Measure Arrow", this, SLOT(doMenuPlotMeasureAction()));
                     plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-design-40.png"));
+                    plotMeasureAction = contextMenu->addAction("Start Measure Freq", this, SLOT(doMenuPlotMeasureFreqAction()));
+                    plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-sonometer-48.png"));
                 }
 
 
@@ -2210,7 +2352,7 @@ void MainWindow::checkBoxDynamicMeasuresChanged(int state) {
 //    qDebug() << " selectedPlottables: " << ui->plot->selectedPlottables();
 //    qDebug() << " workingGraph: " << workingGraph;
     if (workingGraph) {
-        if ((measureMode == measureType::Measure) || (measureMode == measureType::Box)) {
+        if ((measureMode == measureType::Arrow) || (measureMode == measureType::Box)) {
             cleanTracer();
         }
         plotLabelSelectionChanged(true);

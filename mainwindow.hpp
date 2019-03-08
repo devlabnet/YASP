@@ -100,6 +100,7 @@ private slots:
 //    void doMenuPlotScaleAction();
     void doMenuPlotResetAction();
     void doMenuPlotMeasureBoxAction();
+    void doMenuPlotMeasureFreqAction();
     void doMenuPlotMeasureAction();
     void doMenuPlotShowHideAction();
     void on_actionHow_to_use_triggered();
@@ -147,9 +148,10 @@ private:
                           QColor("#ff0000"), QColor("#00aaff"), QColor("#00ff00"),
                           QColor("#ff00aa")};
     QPoint mousePos;
-    enum measureType { None     = 0x00,
-                       Measure  = 0x01,
-                       Box      = 0x02
+    enum measureType {  None     = 0x00,
+                        Arrow    = 0x01,
+                        Box      = 0x02,
+                        Freq     = 0x03
                      };
     void resetMouseWheelState();
     QTimer mouseWheelTimer;
@@ -187,7 +189,9 @@ private:
     QCPItemRect* tracerRect;
     QCPItemLine* traceLineBottom;
     QCPItemLine* traceLineTop;
-    QCPItemLine* refLine;
+    QCPItemLine* traceLineLeft;
+    QCPItemLine* traceLineRight;
+//    QCPItemLine* refLine;
     QCPItemLine* tracerArrowAmplitude;
     QCPItemText* tracerArrowAmplitudeTxt;
     QCPItemLine* tracerArrowAmplitudeTop;
@@ -200,6 +204,7 @@ private:
     QList<QCPItemLine*> tracerHLinesTracer;
     QList<QCPItemText*> tracerHLinesRefInfo;
     QList<QCPItemText*> tracerHLinesTracerInfo;
+    int tracerStep = 0;
     void createUI();
     void enableControls(bool enable);
     void loadHelpFile();
@@ -217,6 +222,7 @@ private:
     bool isNumericChar(char cc);
     void updateTracerBox(bool adjustHeight = false, double scale = 1.0);
     void updateTracerMeasure(bool adjustHeight = false, double scale = 1.0);
+    void updateTracerFrequency();
     void saveDataPlot();
     void shiftPlot(int pY);
     void scalePlot(double scale);

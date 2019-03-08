@@ -19,6 +19,7 @@
         <file>Icons/icons8-design-40.png</file>
         <file>Icons/Oscilloscope-128.ico</file>
         <file>Icons/icons8-line-width-40.png</file>
+        <file>Icons/icons8-sonometer-48.png</file>
     </qresource>
     <qresource prefix="/StyleSheet">
         <file>StyleSheet/style.qss</file>
