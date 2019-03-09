@@ -1682,6 +1682,7 @@ void MainWindow::updateTracerFrequency() {
 //            qDebug() << "Min: " << minVal << " / Max: " << maxVal;
 //            qDebug() << "====  ====  ====  ====  ====";
             double periods = 0;
+            double period;
             if (points->dataCount() > 2) {
                 QCPDataContainer<QCPGraphData>::const_iterator it = points->data()->constBegin();
                 int cnt = points->dataCount() / 3;
@@ -1692,13 +1693,17 @@ void MainWindow::updateTracerFrequency() {
 //                    double v1 = it->key;
                     it++;
                     double v2 = it->key;
-                    double period = v2 - v0;
+                    period = v2 - v0;
                     periods += period;
 //                    qDebug() << i << " -> " << v0 << " / " << v1 << " / " << v2 << " -> " << period;
                 }
 //                qDebug() <<" PERIOD -> " << periods/cnt;
-                infoStr += "\nPeriod :";
-                infoStr += QString::number(periods/cnt, 'f', 3);
+                infoStr += "\nPeriod : ";
+                period = periods/cnt/1000.0;   // in Seconds
+                infoStr += QString::number(period, 'f', 3);
+                infoStr += " Sec\nFrequency : ";
+                infoStr += QString::number(1.0/(period), 'f', 3);
+                infoStr += " Hz";
             }
             tracerArrowAmplitudeTxt->setText(infoStr);
         }
