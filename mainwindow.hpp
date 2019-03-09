@@ -180,6 +180,9 @@ private:
     QAction* plotMeasureBoxAction;
     QAction* plotMeasureAction;
     // Tracer
+    QCPGraph* points;
+    QPointF intersectPoint;
+    void insertIntersectionPoint(QLineF ref, double x0, double y0, double x1, double y1);
     measureType measureMode = measureType::None;
     double measureMult;
     double tracerStartKey;
@@ -187,10 +190,10 @@ private:
     double lastTracerXValueTracer;
     QCPItemTracer *tracer = nullptr;
     QCPItemRect* tracerRect;
-    QCPItemLine* traceLineBottom;
-    QCPItemLine* traceLineTop;
-    QCPItemLine* traceLineLeft;
-    QCPItemLine* traceLineRight;
+    QCPItemStraightLine* traceLineBottom;
+    QCPItemStraightLine* traceLineTop;
+    QCPItemStraightLine* traceLineLeft;
+    QCPItemStraightLine* traceLineRight;
 //    QCPItemLine* refLine;
     QCPItemLine* tracerArrowAmplitude;
     QCPItemText* tracerArrowAmplitudeTxt;

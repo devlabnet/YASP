@@ -91,6 +91,16 @@ MainWindow::MainWindow(QWidget *parent) :
     fixedTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples );
     ui->plot->xAxis->setTickPen(QPen(Qt::red, 2));
     ui->plot->xAxis->setTickLength(15);
+    // Plot points
+    points = new QCPGraph(ui->plot->xAxis, ui->plot->yAxis);
+//    ui->plot->addPlottable(points);
+    points->setSelectable(QCP::stNone);
+    points->setAdaptiveSampling(false);
+    points->removeFromLegend();
+    points->setLineStyle(QCPGraph::lsNone);
+    points->setScatterStyle(QCPScatterStyle::ssCircle);
+    points->setPen(QPen(QBrush(Qt::red), 4));
+
     // Slot for printing coordinates
     connect(ui->plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePressInPlot(QMouseEvent*)));
     connect(ui->plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMoveInPlot(QMouseEvent*)));
@@ -527,19 +537,19 @@ void MainWindow::initTracer() {
     tracerRect->setPen(pen);
     tracerRect->setBrush(QBrush(QColor(200, 200, 200, 25)));
     pen.setStyle(Qt::DotLine);
-    traceLineBottom = new QCPItemLine(ui->plot);
+    traceLineBottom = new QCPItemStraightLine(ui->plot);
     traceLineBottom->setSelectable(false);
     pen.setColor(Qt::green);
     traceLineBottom->setPen(pen);
-    traceLineTop = new QCPItemLine(ui->plot);
+    traceLineTop = new QCPItemStraightLine(ui->plot);
     traceLineTop->setSelectable(false);
     pen.setColor(Qt::red);
     traceLineTop->setPen(pen);
-    traceLineLeft = new QCPItemLine(ui->plot);
+    traceLineLeft = new QCPItemStraightLine(ui->plot);
     traceLineLeft->setSelectable(false);
     pen.setColor(Qt::green);
     traceLineLeft->setPen(pen);
-    traceLineRight = new QCPItemLine(ui->plot);
+    traceLineRight = new QCPItemStraightLine(ui->plot);
     traceLineRight->setSelectable(false);
     pen.setColor(Qt::yellow);
     traceLineRight->setPen(pen);
@@ -659,8 +669,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             if ((measureMode == measureType::Arrow) || (measureMode == measureType::Box) || (measureMode == measureType::Freq)) {
                 measureMode = measureType::None;
                 cleanTracer();
+                measureMode = measureType::None;
                 plotLabelSelectionChanged(true);
                 return;
+//            } else if (measureMode == measureType::Freq) {
+//                cleanTracer();
+//                return;
             } else {
                 unselectGraphs();
             }
@@ -677,7 +691,13 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             traceLineTop->setVisible(false);
             traceLineLeft->setVisible(false);
             traceLineRight->setVisible(false);
+//            cleanTracer();
             tracerStep = 0;
+            points->data()->clear();
+            traceLineRight->setVisible(false);
+            traceLineLeft->setVisible(false);
+            traceLineTop->setVisible(false);
+            tracerArrowAmplitudeTxt->setVisible(false);
         }
     }
     if( event->modifiers() == Qt::ControlModifier ) {
@@ -695,17 +715,17 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
                 traceLineTop->setVisible(false);
                 traceLineRight->setVisible(true);
                 double posX = ui->plot->xAxis->pixelToCoord(mousePos.x());
-                traceLineLeft->start->setCoords(posX, -DBL_MAX);
-                traceLineLeft->end->setCoords(posX, DBL_MAX);
-                traceLineRight->start->setCoords(posX, -DBL_MAX);
-                traceLineRight->end->setCoords(posX, DBL_MAX);
+                traceLineLeft->point1->setCoords(posX, ui->plot->yAxis->range().lower);
+                traceLineLeft->point2->setCoords(posX, ui->plot->yAxis->range().upper);
+                traceLineRight->point1->setCoords(posX, -ui->plot->yAxis->range().lower);
+                traceLineRight->point2->setCoords(posX, ui->plot->yAxis->range().upper);
                 tracerStep = 1;
             } else if (tracerStep == 1) {
                 tracerStep = 2;
                 double lineY = (tracerRect->topLeft->coords().y() + tracerRect->bottomRight->coords().y()) / 2;
                 traceLineTop->setVisible(true);
-                traceLineTop->start->setCoords(traceLineLeft->start->coords().x(), lineY);
-                traceLineTop->end->setCoords(traceLineLeft->start->coords().x(), lineY);
+                traceLineTop->point1->setCoords(traceLineLeft->point1->coords().x(), lineY);
+                traceLineTop->point2->setCoords(traceLineLeft->point1->coords().x(), lineY);
             }
         }
     }
@@ -1191,20 +1211,22 @@ void MainWindow::scalePlot(double scale) {
 /******************************************************************************************************************/
 void MainWindow::cleanTracer() {
 //    qDebug() << "========================== cleanTracer ==========================";
+    points->setVisible(false);
+    points->data()->clear();
     ui->plot->setCursor(Qt::ArrowCursor);
-    measureMode = measureType::None;
+//    measureMode = measureType::None;
     tracer->setVisible(false);
     tracerStep = 0;
     togglePlotsVisibility(true);
     infoModeLabel->setVisible(false);
-    traceLineBottom->start->setCoords(0, DBL_MAX);
-    traceLineBottom->end->setCoords(DBL_MAX, DBL_MAX);
+//    traceLineBottom->point1->setCoords(0, DBL_MAX);
+//    traceLineBottom->point2->setCoords(DBL_MAX, DBL_MAX);
     traceLineBottom->setVisible(false);
     traceLineTop->setVisible(false);
     traceLineLeft->setVisible(false);
     traceLineRight->setVisible(false);
-    traceLineTop->start->setCoords(0, -DBL_MAX);
-    traceLineTop->end->setCoords(DBL_MAX, -DBL_MAX);
+//    traceLineTop->point1->setCoords(0, -DBL_MAX);
+//    traceLineTop->point2->setCoords(DBL_MAX, -DBL_MAX);
     tracerArrowAmplitude->setVisible(false);
     tracerArrowAmplitudeTop->setVisible(false);
     tracerArrowAmplitudeBottom->setVisible(false);
@@ -1289,7 +1311,7 @@ void MainWindow::doMenuPlotMeasureAction() {
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotMeasureFreqAction() {
-   qDebug() << "doMenuPlotMeasureFreqAction: " << contextMenu->property("id");
+//   qDebug() << "doMenuPlotMeasureFreqAction: " << contextMenu->property("id");
    Q_ASSERT(contextMenu);
    Q_ASSERT(workingGraph);
    if (measureMode != measureType::None) {
@@ -1554,24 +1576,35 @@ void MainWindow::updateTracerMeasure(bool adjustHeight, double scale) {
 }
 
 /******************************************************************************************************************/
+void MainWindow::insertIntersectionPoint(QLineF ref, double x0, double y0, double x1, double y1) {
+    QLineF line0 = QLineF(x0, y0, x1, y1);
+//    qDebug() << "== " << ref << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1 << " line " << line0;
+//    qDebug() << "-> " << ref.intersect(line0, &intersectPoint) << " point: " << intersectPoint;
+    if (ref.intersect(line0, &intersectPoint) == QLineF::BoundedIntersection) {
+        points->addData(intersectPoint.x(), intersectPoint.y());
+    }
+}
+
+/******************************************************************************************************************/
 void MainWindow::updateTracerFrequency() {
+//    double posX = ui->plot->yAxis->pixelToCoord(mousePos.x());
     double posY = ui->plot->yAxis->pixelToCoord(mousePos.y());
     if (tracerStep == 1) {
         // Create / Adjust Vertical Lines
         double posX = ui->plot->xAxis->pixelToCoord(mousePos.x());
         double right = posX;
-        traceLineRight->start->setCoords(right, -DBL_MAX);
-        traceLineRight->end->setCoords(right, DBL_MAX);
+        traceLineRight->point1->setCoords(right, ui->plot->yAxis->range().lower);
+        traceLineRight->point2->setCoords(right, ui->plot->yAxis->range().upper);
     }
     if (tracerStep == 2) {
-        double left = traceLineLeft->start->coords().x();
-        double right =  traceLineRight->start->coords().x();
-        qDebug() << "================================ tracerStep == 2";
-        qDebug() << left << " / " << right;
-        double xVal;
-        double yVal;
-        traceLineTop->start->setCoords(left, posY);
-        traceLineTop->end->setCoords(right, posY);
+        double left = traceLineLeft->point1->coords().x();
+        double right =  traceLineRight->point1->coords().x();
+//        qDebug() << "================================ tracerStep == 2";
+//        qDebug() << left << " / " << right;
+//        double xVal;
+//        double yVal;
+        traceLineTop->point1->setCoords(left, posY);
+        traceLineTop->point2->setCoords(right, posY);
         // Measures
         QSharedPointer<QCPGraphDataContainer> gData = workingGraph->plot()->data();
         QCPDataContainer<QCPGraphData>::const_iterator itStart;
@@ -1593,13 +1626,17 @@ void MainWindow::updateTracerFrequency() {
         if (rangeOk) {
             double minVal = DBL_MAX;
             double maxVal = -DBL_MAX;
-             qDebug() << "================================";
+//             qDebug() << "================================";
 //            qDebug() << itStart->key << " / " << itEnd->key;
 //            qDebug() << "====  ====  ====  ====  ====";
              double x0 = itStart->key;
              double x1 = itStart->key;;
              double y0 = itStart->value;
-             double y1 = itStart->value;;
+             double y1 = itStart->value;
+             points->setVisible(true);
+//             qDebug() << "clear points !";
+             points->data()->clear();
+
             for (QCPDataContainer<QCPGraphData>::const_iterator it = itStart; it <= itEnd; ++it) {
 //                xVal = it->key;
 //                yVal = it->value;
@@ -1607,11 +1644,20 @@ void MainWindow::updateTracerFrequency() {
                 y0 = it->value;
 //                qDebug() << "X " << x0 << " Y " << y0;
                 if (qFuzzyCompare(y0, posY)) {
-                    qDebug() << "== " << posY << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1;
+                    insertIntersectionPoint(QLineF(traceLineLeft->point1->coords().x(), posY,
+                                                   traceLineRight->point1->coords().x(), posY),
+                                            x0, y0, x1, y1);
+//                    qDebug() << "== " << posY << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1;
                 } else if ((y0 < posY) && (y1 > posY)) {
-                    qDebug() << "-- " << posY << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1;
+                    insertIntersectionPoint(QLineF(traceLineLeft->point1->coords().x(), posY,
+                                                   traceLineRight->point1->coords().x(), posY),
+                                            x0, y0, x1, y1);
+//                    qDebug() << "-- " << posY << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1;
                 } else if ((y0 > posY) && (y1 < posY)) {
-                    qDebug() << "++ " << posY << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1;
+                    insertIntersectionPoint(QLineF(traceLineLeft->point1->coords().x(), posY,
+                                                   traceLineRight->point1->coords().x(), posY),
+                                            x0, y0, x1, y1);
+//                    qDebug() << "++ " << posY << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1;
                 }
                 if (y0 > maxVal) {
                     maxVal = y0;
@@ -1622,9 +1668,39 @@ void MainWindow::updateTracerFrequency() {
                 x1 = x0;
                 y1 = y0;
             }
-            qDebug() << "====  ====  ====  ====  ====";
-            qDebug() << "Min: " << minVal << " / Max: " << maxVal;
-            qDebug() << "================================";
+            tracerArrowAmplitudeTxt->setFont(QFont(font().family(), 8));
+            tracerArrowAmplitudeTxt->setVisible(true);
+            QString infoStr;
+            tracerArrowAmplitudeTxt->position->setCoords(traceLineLeft->point1->coords().x() - 30, posY);
+            if (qFuzzyCompare(workingGraph->mult(), 1.0)) {
+                infoStr = "Amplitude: " + QString::number(maxVal - minVal, 'f', 3);
+            } else {
+                infoStr = "Amplitude: " + QString::number(maxVal - minVal, 'f', 3)
+                        + " [" + QString::number((maxVal - minVal)/workingGraph->mult(), 'f', 3) + "] ";
+            }
+//            qDebug() << "============================";
+//            qDebug() << "Min: " << minVal << " / Max: " << maxVal;
+//            qDebug() << "====  ====  ====  ====  ====";
+            double periods = 0;
+            if (points->dataCount() > 2) {
+                QCPDataContainer<QCPGraphData>::const_iterator it = points->data()->constBegin();
+                int cnt = points->dataCount() / 3;
+//                qDebug() << "CNT -> " << cnt;
+                for (int i=0; i < cnt; ++i) {
+                    double v0 = it->key;
+                    it++;
+//                    double v1 = it->key;
+                    it++;
+                    double v2 = it->key;
+                    double period = v2 - v0;
+                    periods += period;
+//                    qDebug() << i << " -> " << v0 << " / " << v1 << " / " << v2 << " -> " << period;
+                }
+//                qDebug() <<" PERIOD -> " << periods/cnt;
+                infoStr += "\nPeriod :";
+                infoStr += QString::number(periods/cnt, 'f', 3);
+            }
+            tracerArrowAmplitudeTxt->setText(infoStr);
         }
     }
     ui->plot->replot();
@@ -1668,19 +1744,19 @@ void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
         double coordX = ui->plot->xAxis->pixelToCoord(pX);
         if (adjustHeight) {
 //            double botToTop = traceLineTop->start->coords().y() - traceLineBottom->start->coords().y();
-            double refToTop = traceLineTop->start->coords().y() - ref;
-            double botToRef = ref - traceLineBottom->start->coords().y();
+            double refToTop = traceLineTop->point1->coords().y() - ref;
+            double botToRef = ref - traceLineBottom->point1->coords().y();
 //            qDebug() << "         BOT Y " << botToTop << " / refToTop " << refToTop << " / botToRef " << botToRef;
             refToTop *= scale;
             botToRef *= scale;
 //            qDebug() << "ADJUSTED BOT Y " << botToTop << " / refToTop " << refToTop << " / botToRef " << botToRef;
             double adjustedEndY = ref + refToTop;
-            traceLineTop->start->setCoords(0, adjustedEndY);
-            traceLineTop->end->setCoords(DBL_MAX, adjustedEndY);
+            traceLineTop->point1->setCoords(ui->plot->xAxis->range().lower, adjustedEndY);
+            traceLineTop->point2->setCoords(ui->plot->xAxis->range().lower, adjustedEndY);
 //            qDebug() << "BOT Y " << traceLineBottom->start->coords().y() << " / Scale " << scale << " / adjustedEndY " << adjustedEndY;
             adjustedEndY = ref - botToRef;
-            traceLineBottom->start->setCoords(0, adjustedEndY);
-            traceLineBottom->end->setCoords(DBL_MAX, adjustedEndY);
+            traceLineBottom->point1->setCoords(ui->plot->xAxis->range().lower, adjustedEndY);
+            traceLineBottom->point2->setCoords(ui->plot->xAxis->range().lower, adjustedEndY);
 //            qDebug() << "TOP Y " << traceLineTop->start->coords().y() << " / Scale " << scale << " / adjustedEndY " << adjustedEndY;
         }
         // get tracer origin
@@ -1693,25 +1769,25 @@ void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
         traceLineBottom->setVisible(true);
         traceLineTop->setVisible(true);
         tracerRect->setVisible(true);
-        if (traceLineBottom->start->coords().y() > endY) {
+        if (traceLineBottom->point1->coords().y() > endY) {
 //            qDebug() << "traceLineBottom "  << endY;
-            traceLineBottom->start->setCoords(0, endY);
-            traceLineBottom->end->setCoords(DBL_MAX, endY);
+            traceLineBottom->point1->setCoords(ui->plot->xAxis->range().lower, endY);
+            traceLineBottom->point2->setCoords(ui->plot->xAxis->range().upper, endY);
         }
-        if (traceLineTop->start->coords().y() < endY) {
+        if (traceLineTop->point1->coords().y() < endY) {
 //            qDebug() << "traceLineTop "  << endY;
-            traceLineTop->start->setCoords(0, endY);
-            traceLineTop->end->setCoords(DBL_MAX, endY);
+            traceLineTop->point1->setCoords(ui->plot->xAxis->range().lower, endY);
+            traceLineTop->point2->setCoords(ui->plot->xAxis->range().upper, endY);
         }
-        if (qFuzzyCompare(traceLineTop->start->coords().y(), traceLineBottom->start->coords().y())) {
-            if (traceLineBottom->start->coords().y() > ref) {
-                traceLineBottom->start->setCoords(0, ref);
+        if (qFuzzyCompare(traceLineTop->point1->coords().y(), traceLineBottom->point1->coords().y())) {
+            if (traceLineBottom->point1->coords().y() > ref) {
+                traceLineBottom->point1->setCoords(0, ref);
             }
-            if (traceLineTop->start->coords().y() < ref) {
-                traceLineTop->start->setCoords(0, ref);
+            if (traceLineTop->point1->coords().y() < ref) {
+                traceLineTop->point1->setCoords(0, ref);
             }
         }
-        double plotVCenter = (traceLineTop->start->coords().y() + traceLineBottom->start->coords().y()) / 2.0;
+        double plotVCenter = (traceLineTop->point1->coords().y() + traceLineBottom->point1->coords().y()) / 2.0;
 //        qDebug() << "plotVCenter "  << plotVCenter;
         double rh = plotHeight * 0.35;
         double tracerRectTop = plotVCenter + rh;
@@ -1721,9 +1797,9 @@ void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
         tracerRect->topLeft->setCoords(tracerRectLeft, tracerRectTop);
         tracerRect->bottomRight->setCoords(tracerRectRight, tracerRectBottom);
         // Vertical measures
-        double amplitude = traceLineTop->start->coords().y() - traceLineBottom->start->coords().y();
-        double deltaTop = traceLineTop->start->coords().y() - endY;
-        double deltaBottom = endY - traceLineBottom->start->coords().y();
+        double amplitude = traceLineTop->point1->coords().y() - traceLineBottom->point1->coords().y();
+        double deltaTop = traceLineTop->point1->coords().y() - endY;
+        double deltaBottom = endY - traceLineBottom->point1->coords().y();
         double deltaFromRef = endY - ref;
         double space0 = 15.0;
         double space1 = 30.0;
@@ -1731,14 +1807,14 @@ void MainWindow::updateTracerBox(bool adjustHeight, double scale) {
         tracerInfo =  tracerInfo.arg(endY)
                 .arg(deltaTop)
                 .arg(deltaBottom)
-                .arg(traceLineBottom->start->coords().y())
-                .arg(traceLineTop->start->coords().y())
+                .arg(traceLineBottom->point1->coords().y())
+                .arg(traceLineTop->point1->coords().y())
                 .arg(amplitude)
                 .arg(amplitude / workingGraph->mult());
         ui->statusBar->setStyleSheet("background-color: lightgreen; font-weight:bold;");
         ui->statusBar->showMessage(tracerInfo);
-        double ampTracerArrowSY = traceLineBottom->start->coords().y();
-        double ampTracerArrowEY = traceLineTop->end->coords().y();
+        double ampTracerArrowSY = traceLineBottom->point1->coords().y();
+        double ampTracerArrowEY = traceLineTop->point2->coords().y();
         double mult = workingGraph->mult();
         if (qFuzzyCompare(amplitude, 0)) {
             tracerArrowAmplitude->setVisible(false);
@@ -2234,6 +2310,7 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
             if (workingGraph && (workingGraph != yGraph)) {
                 workingGraph->setSelected(false);
                 cleanTracer();
+                measureMode = measureType::None;
                 resetMouseWheelState();
             }
             workingGraph = yGraph;
