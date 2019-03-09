@@ -674,7 +674,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             tracerArrowAmplitudeTopTxt->setVisible(false);
             tracerArrowAmplitudeBottomTxt->setVisible(false);
         } else if (measureMode == measureType::Freq) {
-//            tracerRect->setVisible(false);
             traceLineTop->setVisible(false);
             traceLineLeft->setVisible(false);
             traceLineRight->setVisible(false);
@@ -683,7 +682,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     }
     if( event->modifiers() == Qt::ControlModifier ) {
         if (measureMode == measureType::Arrow) {
-//            qDebug() << "keyPressEvent ControlModifier";
             tracerArrowFromRef->setVisible(true);
             tracerArrowFromRefTxt->setVisible(true);
             tracerArrowAmplitudeTopTxt->setVisible(true);
@@ -693,16 +691,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         }
         else if (measureMode == measureType::Freq) {
             if (tracerStep == 0) {
-//                tracerRect->setVisible(true);
                 traceLineLeft->setVisible(true);
                 traceLineTop->setVisible(false);
                 traceLineRight->setVisible(true);
-//                tracerRect->setRoundCorners(0);
                 double posX = ui->plot->xAxis->pixelToCoord(mousePos.x());
-                double posY = ui->plot->yAxis->pixelToCoord(mousePos.y());
-                qDebug() << "Start measureType::Freq: " << posX << " / " << posY;
-//                tracerRect->topLeft->setCoords(posX, posY);
-//                tracerRect->bottomRight->setCoords(posX, posY);
                 traceLineLeft->start->setCoords(posX, -DBL_MAX);
                 traceLineLeft->end->setCoords(posX, DBL_MAX);
                 traceLineRight->start->setCoords(posX, -DBL_MAX);
@@ -1565,27 +1557,17 @@ void MainWindow::updateTracerMeasure(bool adjustHeight, double scale) {
 void MainWindow::updateTracerFrequency() {
     double posY = ui->plot->yAxis->pixelToCoord(mousePos.y());
     if (tracerStep == 1) {
-        // Create / Adjust Rectangle
+        // Create / Adjust Vertical Lines
         double posX = ui->plot->xAxis->pixelToCoord(mousePos.x());
-//        QPointF rTL = tracerRect->topLeft->coords();
-//        QPointF rBR = tracerRect->bottomRight->coords();
-//        double left = rTL.x();
         double right = posX;
-//        double bottom = rBR.y();
-//        double top = posY;
         traceLineRight->start->setCoords(right, -DBL_MAX);
         traceLineRight->end->setCoords(right, DBL_MAX);
-
-//        tracerRect->topLeft->setCoords(left, DBL_MAX);
-//        tracerRect->bottomRight->setCoords(right, -DBL_MAX);
     }
     if (tracerStep == 2) {
         double left = traceLineLeft->start->coords().x();
         double right =  traceLineRight->start->coords().x();
         qDebug() << "================================ tracerStep == 2";
         qDebug() << left << " / " << right;
-//        double bottom = tracerRect->bottomRight->coords().y();
-//        double top =  tracerRect->topLeft->coords().y();
         double xVal;
         double yVal;
         traceLineTop->start->setCoords(left, posY);
@@ -1604,8 +1586,6 @@ void MainWindow::updateTracerFrequency() {
         } else {
             itStart = gData->findBegin(right, false);
             itEnd = gData->findBegin(left, true);
-    //        itEnd = gData->findBegin(left, true);
-    //        itStart = gData->findBegin(right, false);
             if (itEnd->key > itStart->key ) {
                 rangeOk = true;
             }
@@ -1614,20 +1594,37 @@ void MainWindow::updateTracerFrequency() {
             double minVal = DBL_MAX;
             double maxVal = -DBL_MAX;
              qDebug() << "================================";
-            qDebug() << itStart->key << " / " << itEnd->key;
-            qDebug() << "====  ====  ====  ====  ====";
+//            qDebug() << itStart->key << " / " << itEnd->key;
+//            qDebug() << "====  ====  ====  ====  ====";
+             double x0 = itStart->key;
+             double x1 = itStart->key;;
+             double y0 = itStart->value;
+             double y1 = itStart->value;;
             for (QCPDataContainer<QCPGraphData>::const_iterator it = itStart; it <= itEnd; ++it) {
-                xVal = it->key;
-                yVal = it->value;
-//                qDebug() << xVal << " / " << yVal;
-                if (yVal > maxVal) {
-                    maxVal = yVal;
+//                xVal = it->key;
+//                yVal = it->value;
+                x0 = it->key;;
+                y0 = it->value;
+//                qDebug() << "X " << x0 << " Y " << y0;
+                if (qFuzzyCompare(y0, posY)) {
+                    qDebug() << "== " << posY << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1;
+                } else if ((y0 < posY) && (y1 > posY)) {
+                    qDebug() << "-- " << posY << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1;
+                } else if ((y0 > posY) && (y1 < posY)) {
+                    qDebug() << "++ " << posY << "y0: " << y0 << "x0: " << x0 << " y1: " << y1 << "x1: " << x1;
                 }
-                if (yVal < minVal) {
-                    minVal = yVal;
+                if (y0 > maxVal) {
+                    maxVal = y0;
                 }
+                if (y0 < minVal) {
+                    minVal = y0;
+                }
+                x1 = x0;
+                y1 = y0;
             }
-            qDebug() << minVal << " / " << maxVal;
+            qDebug() << "====  ====  ====  ====  ====";
+            qDebug() << "Min: " << minVal << " / Max: " << maxVal;
+            qDebug() << "================================";
         }
     }
     ui->plot->replot();
@@ -2305,16 +2302,19 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
     //            action->setIcon(QIcon(":/Icons/Icons/icons8-shift-48.png"));
                 action = contextMenu->addAction("Save", this, SLOT(saveSelectedGraph()));
                 action->setIcon(QIcon(":/Icons/Icons/icons8-save-48.png"));
-                if ((plotting == false) || (ui->checkBoxDynamicMeasures->isChecked())) {
+                if (plotting == false) {
                     plotMeasureBoxAction = contextMenu->addAction("Start Measure Box", this, SLOT(doMenuPlotMeasureBoxAction()));
                     plotMeasureBoxAction->setIcon(QIcon(":/Icons/Icons/icons8-caliper-48.png"));
                     plotMeasureAction = contextMenu->addAction("Start Measure Arrow", this, SLOT(doMenuPlotMeasureAction()));
                     plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-design-40.png"));
                     plotMeasureAction = contextMenu->addAction("Start Measure Freq", this, SLOT(doMenuPlotMeasureFreqAction()));
                     plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-sonometer-48.png"));
+                } else if (ui->checkBoxDynamicMeasures->isChecked()) {
+                    plotMeasureBoxAction = contextMenu->addAction("Start Measure Box", this, SLOT(doMenuPlotMeasureBoxAction()));
+                    plotMeasureBoxAction->setIcon(QIcon(":/Icons/Icons/icons8-caliper-48.png"));
+                    plotMeasureAction = contextMenu->addAction("Start Measure Arrow", this, SLOT(doMenuPlotMeasureAction()));
+                    plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-design-40.png"));
                 }
-
-
             }
         } else {
             plotMeasureBoxAction = contextMenu->addAction("Stop Measure", this, SLOT(doMenuPlotMeasureBoxAction()));
