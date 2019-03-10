@@ -1,13 +1,14 @@
 #include "yaspgraph.h"
 
-yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine, QString plotStr,
+yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemStraightLine* rLine, QString plotStr,
                      QColor color, double plotTimeInSeconds)
     : id(id), infoGraph(g), infoText(info), refLine(rLine) {
     yOffset = 0;
     yMult = 1.0;
     plotDashPattern = QVector<qreal>() << 16 << 4 << 8 << 4;
     rLineDashPattern = QVector<qreal>() << 64 << 4 ;
-
+    minY = DBL_MAX;
+    maxY = -DBL_MAX;
     QPen pen = QPen(color);
     infoGraph->setPen(pen);
     infoGraph->setName(plotStr);
@@ -22,8 +23,8 @@ yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine,
 //    rLine->layer()->setMode(QCPLayer::lmBuffered);
     rLine->setPen(pen);
 //    rLine->setSelectable(false);
-    rLine->start->setCoords(0,0);
-    rLine->end->setCoords(plotTimeInSeconds, 0);
+    rLine->point1->setCoords(0,0);
+    rLine->point2->setCoords(plotTimeInSeconds, 0);
     hidden = false;
    // textTicker = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText());
 //    dataContainer = QSharedPointer<QCPGraphDataContainer>(new QCPGraphDataContainer());
@@ -38,6 +39,10 @@ void yaspGraph::reset() {
         val /= yMult;
         it->value = val;
     }
+    minY -= yOffset;
+    minY /= yMult;
+    maxY -= yOffset;
+    maxY /= yMult;
     yOffset = 0;
     yMult = 1.0;
 }
@@ -93,8 +98,8 @@ void yaspGraph::setSelected(bool sel) {
 }
 
 //-----------------------------------------------------------------------------------------
-void yaspGraph::updateLabel(QString str, double lX, int margin) {
-    lastX = lX;
+void yaspGraph::updateLabel(QString str, int margin) {
+//    lastX = lX;
     plotInfoStr = str;
     QString info = infoGraph->name() + " -> " + plotInfoStr;
     QColor color = infoGraph->pen().color();
@@ -126,20 +131,47 @@ void yaspGraph::updateLabel(QString str, double lX, int margin) {
     penL.setDashPattern(rLineDashPattern);
     refLine->setPen(penL);
     refLine->pen().setColor(color);
-    refLine->start->setCoords(0, yOffset);
-    refLine->end->setCoords(lastX, yOffset);
+    refLine->point1->setCoords(0, yOffset);
+    refLine->point2->setCoords(1, yOffset);
 
 //    refLine->layer()->replot();
+}
+
+//-----------------------------------------------------------------------------------------
+void yaspGraph::addData(double v) {
+    if (v < minY) minY = v;
+    if (v > maxY) maxY = v;
+    if (qFuzzyCompare(minY, maxY)) {
+        if (minY > yOffset) {
+            minY = yOffset;
+        }
+        if (maxY < yOffset) {
+            maxY = yOffset;
+        }
+    }
+//    v *= yMult;
+//    v += yOffset;
+//    minY *= yMult;
+//    minY += yOffset;
+//    maxY *= yMult;
+//    maxY += yOffset;
+//    infoGraph->addData(t, v);
 }
 
 //-----------------------------------------------------------------------------------------
 QCPItemText* yaspGraph::info() {
     return infoText;
 }
-//-----------------------------------------------------------------------------------------
-QCPItemLine* yaspGraph::rLine() {
-    return refLine;
-}
+////-----------------------------------------------------------------------------------------
+//QCPItemStraightLine *yaspGraph::rLine() {
+//    return refLine;
+//}
+
+////-----------------------------------------------------------------------------------------
+//double yaspGraph::refY() {
+//    return refLine->point1->coords().y();
+//}
+
 //-----------------------------------------------------------------------------------------
 QCPGraph* yaspGraph::plot() {
     return infoGraph;
@@ -164,14 +196,14 @@ void yaspGraph::setOffset(double o) {
 //        qDebug() << "yOffset " << yOffset << " o-> " << o;
     QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
     for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
-//            double val = it->value;
-//            val += o;
-        //            it->value = val;
         it->value += o;
     }
     yOffset += o;
-    refLine->start->setCoords(0, yOffset);
-    refLine->end->setCoords(lastX, yOffset);
+    minY += o;
+    maxY += o;
+
+    refLine->point1->setCoords(0, yOffset);
+    refLine->point2->setCoords(1, yOffset);
 }
 //-----------------------------------------------------------------------------------------
 double yaspGraph::offset() {
@@ -190,9 +222,18 @@ void yaspGraph::setMult(double m) {
         val += yOffset;
         it->value = val;
     }
+    minY -= yOffset;
+    minY /= yMult;
+    minY *= nm;
+    minY += yOffset;
+    maxY -= yOffset;
+    maxY /= yMult;
+    maxY *= nm;
+    maxY += yOffset;
+
     yMult = nm;
-    refLine->start->setCoords(0, yOffset);
-    refLine->end->setCoords(lastX, yOffset);
+    refLine->point1->setCoords(0, yOffset);
+    refLine->point2->setCoords(1, yOffset);
 }
 //-----------------------------------------------------------------------------------------
 double yaspGraph::mult() {

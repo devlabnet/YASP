@@ -223,8 +223,8 @@ private:
     void addMessageText(QString data, QString color = "black");
     bool checkEndMsgMissed(char cc);
     bool isNumericChar(char cc);
-    void updateTracerBox(bool adjustHeight = false, double scale = 1.0);
-    void updateTracerMeasure(bool adjustHeight = false, double scale = 1.0);
+    void updateTracerBox();
+    void updateTracerMeasure();
     void updateTracerFrequency();
     void saveDataPlot();
     void shiftPlot(int pY);

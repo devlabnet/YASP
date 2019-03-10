@@ -6,34 +6,42 @@
 
 class yaspGraph {
 public:
-    yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemLine* rLine, QString plotStr, QColor color, double plotTimeInSeconds);
+    yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemStraightLine* rLine, QString plotStr, QColor color, double plotTimeInSeconds);
     QCPItemText* info();
-    QCPItemLine* rLine();
+//    QCPItemStraightLine* rLine();
     QCPGraph* plot();
+    void addData(double v);
     void save(QTextStream& streamData);
     void setOffset(double o);
     double offset();
     void setMult(double m);
     double mult();
+//    double refY();
     QString infoStr() {
         return plotInfoStr;
     }
-    void updateLabel(QString str, double lX, int margin);
+    void updateLabel(QString str, int margin);
 //    void updateRefLine(int dpn);
     void setSelected(bool sel);
     void reset();
     void toggleVisibility(bool show);
     void hide(bool h);
+    double getMin() { return minY;}
+//    void setMin(double m) { minY = m;}
+    double getMax() { return maxY; }
+//    void setMax(double m) { maxY = m;}
 private:
     int id;
     QVector<qreal> plotDashPattern;
     QVector<qreal> rLineDashPattern;
     QCPGraph* infoGraph;
     QCPItemText* infoText;
-    QCPItemLine* refLine;
-    double lastX;
+    QCPItemStraightLine* refLine;
+//    double lastX;
     double yOffset;
     double yMult;
+    double minY;
+    double maxY;
     QString plotInfoStr;
     bool hidden;
 };
