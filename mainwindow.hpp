@@ -91,7 +91,7 @@ private slots:
     void plotContextMenuRequest(QPoint pos);
     void saveSelectedGraph();
     void saveAllGraphs();
-    void cleanTracer();
+    void resetTracer();
 //    void doMenuPlotShiftAction();
     void doMenuPlotColorAction();
 #ifdef YASP_PLOTS_WIDTH

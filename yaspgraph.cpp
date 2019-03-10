@@ -31,6 +31,11 @@ yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemStraightLine
 }
 
 //-----------------------------------------------------------------------------------------
+yaspGraph::~yaspGraph() {
+     qDebug() << "====================== yaspGraph DESTRUCTOR ======================";
+}
+
+//-----------------------------------------------------------------------------------------
 void yaspGraph::reset() {
     QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
     for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){

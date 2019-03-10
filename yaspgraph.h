@@ -7,6 +7,7 @@
 class yaspGraph {
 public:
     yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemStraightLine* rLine, QString plotStr, QColor color, double plotTimeInSeconds);
+    ~yaspGraph();
     QCPItemText* info();
 //    QCPItemStraightLine* rLine();
     QCPGraph* plot();
