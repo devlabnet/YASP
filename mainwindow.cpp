@@ -1820,81 +1820,88 @@ void MainWindow::updateTracerBox() {
         lastTracerXValueTracer = itStart->key;
         double deltaMinTracer = 0;
         double deltaMinRef = 0;
+        double lastItValue = itStart->value;
+        bool valueChanged = false;
         for (QCPDataContainer<QCPGraphData>::const_iterator it = itStart; it != itEnd; ++it) {
-            double deltaFromRef = abs(ref - (it->value))/mult;
-            if (deltaFromRef < 1) {
-                double deltaRef = it->key - lastTracerXValueRef;
-                if (deltaRef > deltaMinRef) {
-                    deltaMinRef = space * 20;
-                    QCPItemLine* line = new QCPItemLine(ui->plot);
-                    line->setSelectable(false);
-                    tracerHLinesRef.append(line);
-                    // Orange
-//                    QColor col(255,165,0);
-                    QColor col(255,140,0);
-                    QPen pen(col, 2);
-                    pen.setStyle(Qt::DotLine);
-                    line->setPen(pen);
-                    line->start->setCoords(it->key, it->value);
-                    line->end->setCoords(it->key, tracerRectBottom);
-                    if (tracerHLinesRef.size() > 1) {
-                        // Add Time info between lines
-                        QCPItemText* info = new QCPItemText(ui->plot);
-                        info->setSelectable(false);
-                        info->setText(QString::number(deltaRef, 'f', 3));
-                        info->setFont(QFont(font().family(), 8));
-                        info->setPositionAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-                        info->setTextAlignment(Qt::AlignCenter);
-                        info->setRotation(45);
-                        info->setRoundCorners(5);
-                        info->setPen(QPen(Qt::black));
-                        info->setColor(Qt::black);
-                        info->setBrush(QBrush(col));
-                        info->setPadding(QMargins(4,2,4,2));
-                        info->setVisible(true);
-                        info->position->setCoords(lastTracerXValueRef + deltaRef/2.0, tracerRectBottom);
-                        tracerHLinesRefInfo.append(info);
+            valueChanged = !qFuzzyCompare(lastItValue, it->value);
+            if (valueChanged) {
+                double deltaFromRef = abs(ref - (it->value))/mult;
+//                qDebug() << it->value << " previous " << lastItValue << " changed " << valueChanged;
+                if (deltaFromRef < 1) {
+                    double deltaRef = it->key - lastTracerXValueRef;
+                    if (deltaRef > deltaMinRef) {
+                        deltaMinRef = space * 20;
+                        QCPItemLine* line = new QCPItemLine(ui->plot);
+                        line->setSelectable(false);
+                        tracerHLinesRef.append(line);
+                        // Orange
+                        //                    QColor col(255,165,0);
+                        QColor col(255,140,0);
+                        QPen pen(col, 2);
+                        pen.setStyle(Qt::DotLine);
+                        line->setPen(pen);
+                        line->start->setCoords(it->key, it->value);
+                        line->end->setCoords(it->key, tracerRectBottom);
+                        if (tracerHLinesRef.size() > 1) {
+                            // Add Time info between lines
+                            QCPItemText* info = new QCPItemText(ui->plot);
+                            info->setSelectable(false);
+                            info->setText(QString::number(deltaRef, 'f', 3));
+                            info->setFont(QFont(font().family(), 8));
+                            info->setPositionAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+                            info->setTextAlignment(Qt::AlignCenter);
+                            info->setRotation(45);
+                            info->setRoundCorners(5);
+                            info->setPen(QPen(Qt::black));
+                            info->setColor(Qt::black);
+                            info->setBrush(QBrush(col));
+                            info->setPadding(QMargins(4,2,4,2));
+                            info->setVisible(true);
+                            info->position->setCoords(lastTracerXValueRef + deltaRef/2.0, tracerRectBottom);
+                            tracerHLinesRefInfo.append(info);
+                        }
                     }
+                    lastTracerXValueRef = it->key;
                 }
-                lastTracerXValueRef = it->key;
-            }
-            double deltaFromTracer = abs(it->value - endY)/mult;
-            if (deltaFromTracer < 1) {
-                double deltaTracer = it->key - lastTracerXValueTracer;
-                if (deltaTracer > deltaMinTracer) {
-                    deltaMinTracer = space * 20;
-                    QCPItemLine* line = new QCPItemLine(ui->plot);
-                    line->setSelectable(false);
-                    tracerHLinesTracer.append(line);
-                    // Blue
-//                    QColor col(0,191,255);
-                    QColor col(30,144,255);
-//                    QColor col(138,43,226);
-                    QPen pen(col, 2);
-                    pen.setStyle(Qt::DotLine);
-                    line->setPen(pen);
-                    line->start->setCoords(it->key, it->value);
-                    line->end->setCoords(it->key, tracerRectTop);
-                    if (tracerHLinesTracer.size() > 1) {
-                        // Add Time info between lines
-                        QCPItemText* info = new QCPItemText(ui->plot);
-                        info->setSelectable(false);
-                        info->setText(QString::number(deltaTracer, 'f', 3));
-                        info->setFont(QFont(font().family(), 8));
-                        info->setPositionAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-                        info->setTextAlignment(Qt::AlignCenter);
-                        info->setRotation(-45);
-                        info->setRoundCorners(5);
-                        info->setPen(QPen(Qt::black));
-                        info->setColor(Qt::black);
-                        info->setBrush(QBrush(col));
-                        info->setPadding(QMargins(4,2,4,2));
-                        info->setVisible(true);
-                        info->position->setCoords(lastTracerXValueTracer + deltaTracer/2.0, tracerRectTop);
-                        tracerHLinesTracerInfo.append(info);
+                double deltaFromTracer = abs(it->value - endY)/mult;
+                if (deltaFromTracer < 1) {
+                    double deltaTracer = it->key - lastTracerXValueTracer;
+                    if (deltaTracer > deltaMinTracer) {
+                        deltaMinTracer = space * 20;
+                        QCPItemLine* line = new QCPItemLine(ui->plot);
+                        line->setSelectable(false);
+                        tracerHLinesTracer.append(line);
+                        // Blue
+                        //                    QColor col(0,191,255);
+                        QColor col(30,144,255);
+                        //                    QColor col(138,43,226);
+                        QPen pen(col, 2);
+                        pen.setStyle(Qt::DotLine);
+                        line->setPen(pen);
+                        line->start->setCoords(it->key, it->value);
+                        line->end->setCoords(it->key, tracerRectTop);
+                        if (tracerHLinesTracer.size() > 1) {
+                            // Add Time info between lines
+                            QCPItemText* info = new QCPItemText(ui->plot);
+                            info->setSelectable(false);
+                            info->setText(QString::number(deltaTracer, 'f', 3));
+                            info->setFont(QFont(font().family(), 8));
+                            info->setPositionAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+                            info->setTextAlignment(Qt::AlignCenter);
+                            info->setRotation(-45);
+                            info->setRoundCorners(5);
+                            info->setPen(QPen(Qt::black));
+                            info->setColor(Qt::black);
+                            info->setBrush(QBrush(col));
+                            info->setPadding(QMargins(4,2,4,2));
+                            info->setVisible(true);
+                            info->position->setCoords(lastTracerXValueTracer + deltaTracer/2.0, tracerRectTop);
+                            tracerHLinesTracerInfo.append(info);
+                        }
                     }
+                    lastTracerXValueTracer = it->key;
                 }
-                lastTracerXValueTracer = it->key;
+                lastItValue = it->value;
             }
         }
         ui->plot->replot();

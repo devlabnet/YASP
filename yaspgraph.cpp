@@ -146,20 +146,16 @@ void yaspGraph::updateLabel(QString str, int margin) {
 void yaspGraph::addData(double v) {
     if (v < minY) minY = v;
     if (v > maxY) maxY = v;
-    if (qFuzzyCompare(minY, maxY)) {
-        if (minY > yOffset) {
-            minY = yOffset;
-        }
-        if (maxY < yOffset) {
-            maxY = yOffset;
-        }
-    }
+//    if (qFuzzyCompare(minY, maxY)) {
+//        if (minY > yOffset) {
+//            minY = yOffset;
+//        }
+//        if (maxY < yOffset) {
+//            maxY = yOffset;
+//        }
+//    }
 //    v *= yMult;
 //    v += yOffset;
-//    minY *= yMult;
-//    minY += yOffset;
-//    maxY *= yMult;
-//    maxY += yOffset;
 //    infoGraph->addData(t, v);
 }
 
