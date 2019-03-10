@@ -6,12 +6,12 @@
 
 class yaspGraph {
 public:
-    yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemStraightLine* rLine, QString plotStr, QColor color, double plotTimeInSeconds);
+    yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemStraightLine* rLine, QString plotStr, QColor color, double plotTimeInMilliSeconds);
     ~yaspGraph();
     QCPItemText* info();
 //    QCPItemStraightLine* rLine();
     QCPGraph* plot();
-    void addData(double v);
+    void updateMinMax(double v);
     void save(QTextStream& streamData);
     void setOffset(double o);
     double offset();

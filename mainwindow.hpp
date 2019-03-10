@@ -49,11 +49,10 @@
 
 #define DEF_YAXIS_RANGE 4000
 #define YAXIS_MAX_RANGE 1000000
-#define PLOT_TIME_DEF 15000.0               // Default time Displayed in Plot in MilliSeconds
-#define PLOT_TIME_MIN_DEF 1.0               // Minimum Range in MilliSeconds
-#define PLOT_TIME_MAX_DEF 600000.0          // Maximum Range in MilliSeconds
-#define PLOT_TIME_MAX_CLEAN_DEF 900000.0    // Max Before Clean Range in MilliSeconds
-//#define PLOT_TIME_STEP_DEF 1000.0           // MilliSeconds
+#define PLOT_TIME_DEF 15000.0                           // Default time Displayed in Plot in MilliSeconds
+#define PLOT_TIME_MIN_DEF 10.0                          // Minimum Range in MilliSeconds
+#define PLOT_TIME_MAX_DEF 1000.0 * 3600                 // Maximum Range in MilliSeconds
+#define PLOT_TIME_MAX_CLEAN_DEF PLOT_TIME_MAX_DEF * 2   // Max Before Clean Range in MilliSeconds
 
 namespace Ui {
 class MainWindow;
@@ -139,7 +138,7 @@ private:
     int dataPointNumber;                                                                  // Keep track of data points
     int numberOfAxes;                                                                     // Number of axes for the plot
     int STATE;                                                                            // State of recieiving message from port
-    double plotTimeInSeconds;
+    double plotTimeInMilliSeconds;
 //    double yaspUnit = 1000000.0;
     double yaspUnit = 1000.0;
     QColor bgColor = QColor(20,20,20);

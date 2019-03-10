@@ -40,12 +40,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     connected(false), plotting(false), dataPointNumber(0), numberOfAxes(1),
-    STATE(WAIT_START), plotTimeInSeconds(PLOT_TIME_DEF) {
+    STATE(WAIT_START), plotTimeInMilliSeconds(PLOT_TIME_DEF) {
     ui->setupUi(this);
     QLocale::setDefault(QLocale::C);
     createUI();      // Create the UI
 //    resize(minimumSize());
 //    ui->terminalWidget->setVisible(false);
+    qDebug() << "YAXIS_MAX_RANGE " << YAXIS_MAX_RANGE;
     QColor gridColor = QColor(170,170,170);
     ui->bgColorButton->setAutoFillBackground(true);
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
@@ -80,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     ui->plot->xAxis->setTickLabelColor(gridColor);
     fixedTicker = QSharedPointer<QCPAxisTickerFixed>(new QCPAxisTickerFixed);
-//    plotTimeInSeconds = 30;
+//    plotTimeInMilliSeconds = 30;
     ui->plot->xAxis->setTicker(fixedTicker);
     // tick step shall be 0.001 second -> 1 milisecond
     // tick step shall be 0.0001 second -> 0.1 milisecond -> 100 microdeconds
@@ -385,7 +386,7 @@ yaspGraph* MainWindow::addGraph(int id) {
         connect(textLabel, SIGNAL(selectionChanged (bool)), this, SLOT(plotLabelSelectionChanged(bool)));
         QCPItemStraightLine* axisLine = new QCPItemStraightLine(ui->plot);
         axisLine->setSelectable(false);
-        yaspGraph* g = new yaspGraph(id, graph, textLabel, axisLine, plotStr, colours[id], plotTimeInSeconds);
+        yaspGraph* g = new yaspGraph(id, graph, textLabel, axisLine, plotStr, colours[id], plotTimeInMilliSeconds);
         graphs.insert(id, g);
         return g;
 }
@@ -640,7 +641,7 @@ void MainWindow::portOpenedSuccess() {
     ui->tabWidget->insertTab(1, tabW, "Plots");
     ui->tabWidget->setCurrentIndex(1);
     updateTimer.start();
-    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInMilliSeconds, lastDataTtime);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     lastDataTtime = 0;
     connect(&mouseWheelTimer, SIGNAL(timeout()), this, SLOT(mouseWheelTimerShoot()));
@@ -773,7 +774,7 @@ void MainWindow:: closePort() {
 void MainWindow::replot() {
     if(connected) {
         if (plotting) {
-            ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+            ui->plot->xAxis->setRange(lastDataTtime - plotTimeInMilliSeconds, lastDataTtime);
             ui->plot->replot();
         } else {
             ui->plot->xAxis->setRange(ui->plot->xAxis->range());
@@ -938,7 +939,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             QCPGraph* plot = yGraph->plot();
             val *= yGraph->mult();
             val += yGraph->offset();
-            yGraph->addData(val);
+            yGraph->updateMinMax(val);
             plot->addData(lastDataTtime, val);
             ui->dataInfoLabel->setNum(dataPointNumber);
             QString plotInfoStr = " val: ";
@@ -1133,10 +1134,10 @@ void MainWindow::on_resetPlotButton_clicked() {
         Q_ASSERT(yGraph);
         yGraph->reset();
     }
-    plotTimeInSeconds = PLOT_TIME_DEF;
+    plotTimeInMilliSeconds = PLOT_TIME_DEF;
     ui->plot->yAxis->setRange(-DEF_YAXIS_RANGE/2, DEF_YAXIS_RANGE/2);       // Set lower and upper plot range
     ui->spinDisplayRange->setValue(ui->plot->yAxis->range().size());
-    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+    ui->plot->xAxis->setRange(lastDataTtime - plotTimeInMilliSeconds, lastDataTtime);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectItems );
     ui->plot->replot();
 }
@@ -1145,12 +1146,12 @@ void MainWindow::on_resetPlotButton_clicked() {
 /* Spin box controls how many data points are collected and displayed */
 /******************************************************************************************************************/
 void MainWindow::on_spinDisplayTime_valueChanged(double arg1) {
-    plotTimeInSeconds = arg1;
+    plotTimeInMilliSeconds = arg1;
     if (plotting) {
-        ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+        ui->plot->xAxis->setRange(lastDataTtime - plotTimeInMilliSeconds, lastDataTtime);
     } else {
         double oldRange = ui->plot->xAxis->range().size();
-        double inc = (plotTimeInSeconds - oldRange)/2.0;
+        double inc = (plotTimeInMilliSeconds - oldRange)/2.0;
         ui->plot->xAxis->setRange(ui->plot->xAxis->range().lower - inc, ui->plot->xAxis->range().upper + inc);
     }
 //    ui->plot->replot();
@@ -1984,15 +1985,21 @@ void MainWindow::onMouseWheelInPlot(QWheelEvent *event) {
         ui->plot->setInteractions(QCP::iRangeDrag | QCP::iSelectItems);
         QPoint numDegrees = event->angleDelta();
         if (numDegrees.y() == 0) return;
-        double inc = plotTimeInSeconds / 100.0;
+        double inc = plotTimeInMilliSeconds / 100.0;
 
         if (numDegrees.y() > 0) {
-            plotTimeInSeconds += inc;
+            if (plotTimeInMilliSeconds > PLOT_TIME_MAX_DEF) {
+                return;
+            }
+            plotTimeInMilliSeconds += inc;
         } else {
-            plotTimeInSeconds -= inc;
+            if (plotTimeInMilliSeconds < PLOT_TIME_MIN_DEF) {
+                return;
+            }
+            plotTimeInMilliSeconds -= inc;
         }
         if (plotting) {
-            ui->plot->xAxis->setRange(lastDataTtime - plotTimeInSeconds, lastDataTtime);
+            ui->plot->xAxis->setRange(lastDataTtime - plotTimeInMilliSeconds, lastDataTtime);
         } else {
             if (numDegrees.y() > 0) {
                 ui->plot->xAxis->setRange(ui->plot->xAxis->range().lower - inc, ui->plot->xAxis->range().upper + inc);

@@ -1,7 +1,7 @@
 #include "yaspgraph.h"
 
 yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemStraightLine* rLine, QString plotStr,
-                     QColor color, double plotTimeInSeconds)
+                     QColor color, double plotTimeInMilliSeconds)
     : id(id), infoGraph(g), infoText(info), refLine(rLine) {
     yOffset = 0;
     yMult = 1.0;
@@ -24,7 +24,7 @@ yaspGraph::yaspGraph(int id, QCPGraph* g, QCPItemText* info, QCPItemStraightLine
     rLine->setPen(pen);
 //    rLine->setSelectable(false);
     rLine->point1->setCoords(0,0);
-    rLine->point2->setCoords(plotTimeInSeconds, 0);
+    rLine->point2->setCoords(plotTimeInMilliSeconds, 0);
     hidden = false;
    // textTicker = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText());
 //    dataContainer = QSharedPointer<QCPGraphDataContainer>(new QCPGraphDataContainer());
@@ -143,7 +143,7 @@ void yaspGraph::updateLabel(QString str, int margin) {
 }
 
 //-----------------------------------------------------------------------------------------
-void yaspGraph::addData(double v) {
+void yaspGraph::updateMinMax(double v) {
     if (v < minY) minY = v;
     if (v > maxY) maxY = v;
 //    if (qFuzzyCompare(minY, maxY)) {
@@ -154,9 +154,6 @@ void yaspGraph::addData(double v) {
 //            maxY = yOffset;
 //        }
 //    }
-//    v *= yMult;
-//    v += yOffset;
-//    infoGraph->addData(t, v);
 }
 
 //-----------------------------------------------------------------------------------------
