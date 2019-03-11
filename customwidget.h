@@ -29,14 +29,14 @@ protected:
     // pages
     QWidget *cmdPage;
     QWidget *settingsPage;
-    QWidget *helpPage;
+//    QWidget *helpPage;
     QVBoxLayout *vBoxCommands;
     QHBoxLayout* hBoxInfos;
     QHBoxLayout* hBoxValue;
     QHBoxLayout* hBoxCommands;
     QVBoxLayout *vBoxSettings;
     QGridLayout *controlsLayout;
-    QTextEdit *help;
+//    QTextEdit *help;
     QLineEdit* cmdLabelLine;
     void sendToPort(double v);
 

@@ -34,7 +34,7 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     // Create pages
     cmdPage = new QWidget();
     settingsPage = new QWidget();
-    helpPage = new QWidget();
+//    helpPage = new QWidget();
 
     hBoxInfos = new QHBoxLayout();
     hBoxCommands = new QHBoxLayout();
@@ -65,26 +65,26 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     vBoxSettings->addLayout(controlsLayout);
     settingsPage->setLayout(vBoxSettings);
 
-    // helpPage
-    QVBoxLayout *vboxHelp = new QVBoxLayout;
-    QIcon appIcon(":/Icons/Icons/serial_port_icon.icns"); // Get the icon
-    //lab3->setPixmap(QPixmap(appIcon.pixmap(appIcon.actualSize(QSize(64, 64)))));
-    help = new QTextEdit;
-    help->setAlignment(Qt::AlignCenter);
-    help->setReadOnly(true);
-    QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
-    sizePolicy.setHorizontalStretch(0);
-    sizePolicy.setVerticalStretch(0);
-    help->setSizePolicy(sizePolicy);
-    help->setMaximumHeight(80);
-    //vboxHelp->addWidget(lab3);
-    vboxHelp->addWidget(help);
-    helpPage->setLayout(vboxHelp);
+//    // helpPage
+//    QVBoxLayout *vboxHelp = new QVBoxLayout;
+//    QIcon appIcon(":/Icons/Icons/serial_port_icon.icns"); // Get the icon
+//    //lab3->setPixmap(QPixmap(appIcon.pixmap(appIcon.actualSize(QSize(64, 64)))));
+//    help = new QTextEdit;
+//    help->setAlignment(Qt::AlignCenter);
+//    help->setReadOnly(true);
+//    QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+//    sizePolicy.setHorizontalStretch(0);
+//    sizePolicy.setVerticalStretch(0);
+//    help->setSizePolicy(sizePolicy);
+//    help->setMaximumHeight(80);
+//    //vboxHelp->addWidget(lab3);
+//    vboxHelp->addWidget(help);
+//    helpPage->setLayout(vboxHelp);
 
     // Add Tabs
     onglets->addTab(cmdPage, "Command");
     onglets->addTab(settingsPage, "Settings");
-    onglets->addTab(helpPage, "Help");
+//    onglets->addTab(helpPage, "Help");
     onglets->setTabEnabled(0, (!cmdLabelLine->text().isEmpty()));
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),

@@ -184,7 +184,7 @@ void yaspGraph::save(QTextStream& streamData) {
 //            streamData << "NAME" << ";" << "TIME" << ";" << "VALUE" << "\n";
     streamData << "TIME" << ";" << "VALUE" << "\n";
     QSharedPointer<QCPGraphDataContainer> gData = infoGraph->data();
-    qDebug() << "SAVE PLOT: " << gData->size();
+//    qDebug() << "SAVE PLOT: " << gData->size();
     for (QCPDataContainer<QCPGraphData>::iterator it = gData->begin(); it != gData->end(); ++it){
         streamData << it->key << ";" << it->value  << "\n";
     }

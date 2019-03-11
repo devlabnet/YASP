@@ -12,8 +12,8 @@
 
 dialwidget::dialwidget(QWidget *parent, QDomElement *domElt) : customWidget (parent, domElt)
 {
-    // help Page
-    help->setHtml("<h2>Help dialwidget</h2>");
+//    // help Page
+//    help->setHtml("<h2>Help dialwidget</h2>");
 
     if (domElt != nullptr) {
         QDomElement Child = *domElt;

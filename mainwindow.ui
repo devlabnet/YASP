@@ -268,7 +268,7 @@
                <bold>true</bold>
               </font>
              </property>
-             <widget class="QWidget" name="AboutTab" native="true">
+             <widget class="QWidget" name="AboutTab">
               <attribute name="title">
                <string>About</string>
               </attribute>
@@ -1057,6 +1057,8 @@
      <string>Help</string>
     </property>
     <addaction name="actionHow_to_use"/>
+    <addaction name="separator"/>
+    <addaction name="actionOnline_Documentation"/>
    </widget>
    <widget class="QMenu" name="menuWidgets">
     <property name="title">
@@ -1075,6 +1077,11 @@
   <action name="actionShowWidgets">
    <property name="text">
     <string>Show Hide Widgets</string>
+   </property>
+  </action>
+  <action name="actionOnline_Documentation">
+   <property name="text">
+    <string>Online Documentation</string>
    </property>
   </action>
  </widget>

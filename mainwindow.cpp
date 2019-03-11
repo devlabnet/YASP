@@ -32,7 +32,7 @@
 
 static const QString DEFS_URL = "https://www.devlabnet.eu/softdev/yasp/updates.json";
 static const QString YASP_VERSION = "1.0";
-
+static const QString DOC_URL = "https://gdoc.pub/doc/e/2PACX-1vQmyyZDie11-NvYd0V3Ry10cUGisbMw1lMT7EOq4qnecPBSdgyicpQix47Plv0QDT93KMiAFPEK7MNc";
 /******************************************************************************************************************/
 /* Constructor */
 /******************************************************************************************************************/
@@ -46,7 +46,6 @@ MainWindow::MainWindow(QWidget *parent) :
     createUI();      // Create the UI
 //    resize(minimumSize());
 //    ui->terminalWidget->setVisible(false);
-    qDebug() << "YAXIS_MAX_RANGE " << YAXIS_MAX_RANGE;
     QColor gridColor = QColor(170,170,170);
     ui->bgColorButton->setAutoFillBackground(true);
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
@@ -1377,7 +1376,7 @@ void MainWindow::doMenuPlotResetAction() {
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotShowHideAction() {
-    qDebug() << "doMenuPlotShowHideAction: " << workingGraph->plot()->name();
+//    qDebug() << "doMenuPlotShowHideAction: " << workingGraph->plot()->name();
     resetMouseWheelState();
     Q_ASSERT(workingGraph);
     if (workingGraph->plot()->visible()) {
@@ -2377,4 +2376,9 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 /******************************************************************************************************************/
 void MainWindow::on_aboutNevVersionButton_clicked() {
     QDesktopServices::openUrl(QUrl (downloadUrl));
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_actionOnline_Documentation_triggered() {
+    QDesktopServices::openUrl(QUrl(DOC_URL, QUrl::TolerantMode));
 }
