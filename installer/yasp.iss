@@ -43,6 +43,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "S:\yasp\deploy\*"; DestDir: "{app}"; Flags: recursesubdirs
 ;Source: "S:\yasp\Icons\Oscilloscope-128.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "S:\yasp\Icons\Oscilloscope-128.ico"; DestDir: "{app}";
+Source: "S:\yasp\installer\yaspLib.zip"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

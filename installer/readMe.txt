@@ -6,3 +6,7 @@ TO DO When New Update :
 4) Put the new install file on download server
 
 That's All Folks, Enjoy !!
+
+UPDATE YASP Arduino Library
+1) Update files in yaspLib directory
+2) ZIP this directory to Installer/yaspLib.zip
