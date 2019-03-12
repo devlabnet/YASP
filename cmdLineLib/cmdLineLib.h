@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <Arduino.h>
-#define print2(x, y) (stream.print(x), stream.println(y))
-
-namespace CmdLineLibSpace {
 //this following macro is good for debugging, e.g.  print2("myVar= ", myVar);
+#define print2(x, y) (stream.print(x), stream.println(y))
+#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
+
+//namespace CmdLineLibSpace {
 
 const unsigned int CR = '\r';
 const unsigned int LF = '\n';
@@ -22,6 +23,9 @@ const unsigned int NULLCHAR = '\0';
 const unsigned int SPACE = ' ';
 const unsigned int COMMAND_BUFFER_LENGTH = 32;
 
+typedef void (*num_func)();
+extern num_func functions[];
+
 // Generic template
 template<class T> 
 inline Print &operator <<(Print &stream, T arg) 
@@ -29,7 +33,7 @@ inline Print &operator <<(Print &stream, T arg)
 
 class cmdLineLib : public Stream {
   public:
-    cmdLineLib(Stream& dev);
+    cmdLineLib(Stream& dev, num_func* func, char** toks, size_t s);
     ~cmdLineLib();
   	/***************************************************************************
   	    getCommandLineFromSerialPort()
@@ -42,13 +46,7 @@ class cmdLineLib : public Stream {
   	long readLong();
   	char *readWord();
   	void checkCommands();
-  	/****************************************************
-  	   Add your commands here
-  	*/
-  	void setPfmVal();
-  	void setInfoPeriod();
-  	void setMinPulseWidth();
-  	void doPwm();
+   bool readOk() { return ok; }
 
   private:
     Stream &stream;
@@ -56,6 +54,9 @@ class cmdLineLib : public Stream {
     int available();
     int peek();
     size_t write(uint8_t b);
+    num_func* userFunc;
+    char** tokens;
+    size_t userFuncSize;
   	char commandLine[COMMAND_BUFFER_LENGTH + 1]; //Read commands into this buffer from Serial.  +1 in length for a termination char
   	uint8_t charsRead = 0;						 //note: COMAND_BUFFER_LENGTH must be less than 255 chars long
   	bool ok;
@@ -64,16 +65,8 @@ class cmdLineLib : public Stream {
   	int isNumericString(char *s);
   	void nullCommand(char *ptrToCommandName);
   	void DoMyCommand();
- 
-  	/*************************************************************************************************************
-  	     your Command Names Here
-  	*************************************************************************************************************/
-  	const char *robotWaitCmdToken = "$";
-  	const char *lnfoPeriodCmdToken = "i";
-  	const char *minPulseWidthCmdToken = "p";
-  	const char *pwmCmdToken = "w";
 };
 
-}
+//}
 
 #endif /* CMDLINELIB_H_ */

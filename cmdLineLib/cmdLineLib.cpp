@@ -7,11 +7,13 @@
 
 #include "cmdLineLib.h"
 
-namespace CmdLineLibSpace {
+//namespace CmdLineLibSpace {
 
 /************************************************/
-cmdLineLib::cmdLineLib(Stream& dev) : stream(dev) {
+cmdLineLib::cmdLineLib(Stream& dev, num_func* func, char** toks, size_t s) 
+  : stream(dev), userFunc(func), userFuncSize(s), tokens(toks) {
 	ok = true;
+//  s_hookObj = this;
 }
 
 /************************************************/
@@ -137,21 +139,18 @@ int cmdLineLib::isNumericString(char *s) {
  DoMyCommand
  */
 void cmdLineLib::DoMyCommand() {
-	print2("\nCommand: ", commandLine);
+	print2("\nCommand: ", commandLine);  
 	char *ptrToCommandName = strtok(commandLine, delimiters);
 	//  print2("commandName= ", ptrToCommandName);
 
-	if (strcmp(ptrToCommandName, robotWaitCmdToken) == 0)	{
-		setPfmVal();
-	}	else if (strcmp(ptrToCommandName, lnfoPeriodCmdToken) == 0)	{
-		setInfoPeriod();
-	}	else if (strcmp(ptrToCommandName, minPulseWidthCmdToken) == 0) {
-		setMinPulseWidth();
-	}	else if (strcmp(ptrToCommandName, pwmCmdToken) == 0) {
-		doPwm();
-	} else {
-		nullCommand(ptrToCommandName);
-	}
+  for (int i = 0; i < userFuncSize; ++i) {
+      if (strcmp(ptrToCommandName, tokens[i]) == 0) {
+//            stream.println("OK");
+            userFunc[i]();
+            return;
+      }
+  }
+   nullCommand(ptrToCommandName);
 }
 
 /************************************************/
@@ -164,34 +163,5 @@ void cmdLineLib::checkCommands() {
 	// enable all interrupts
 }
 
-void cmdLineLib::setInfoPeriod() {
-	long p = readNumber();
-	if ((ok == false) || (p < 100))	{
-		p = 10000;
-	}
-	stream.print(F("-> Info Period "));
-	stream.println(p);
-}
 
-/************************************************/
-void cmdLineLib::setPfmVal() {
-	int w = readNumber();
-	stream.print(F("-> pfm "));
-	stream.println(w);
-}
-
-/************************************************/
-void cmdLineLib::setMinPulseWidth() {
-	int w = readNumber();
-	stream.print(F("-> mpw "));
-	stream.println(w);
-}
-
-/************************************************/
-void cmdLineLib::doPwm() {
-	int w = readNumber();
-	stream.print(F("-> Pwm "));
-	stream.println(w);
-}
-
-} /* namespace robot */
+//} /* namespace robot */
