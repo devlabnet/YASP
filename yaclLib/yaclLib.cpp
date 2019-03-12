@@ -1,43 +1,43 @@
 /*
- * cmdLineLib.cpp
+ * yaclLib.cpp
  *
  *  Created on: 11 03 2019
  *      Author: Cricri042
  */
 
-#include "cmdLineLib.h"
+#include "yaclLib.h"
 
-namespace CmdLineLibSpace {
+namespace yaclLibSpace {
 
 ///************************************************/
-//cmdLineLib::cmdLineLib(Stream& dev, num_func* func, char** toks, size_t s) 
+//yaclLib::yaclLib(Stream& dev, num_func* func, char** toks, size_t s) 
 //  : stream(dev), userFunc(func), userFuncSize(s), tokens(toks) {
 //  ok = true;
 //}
 /************************************************/
-cmdLineLib::cmdLineLib(Stream& dev, cmdLineCommand* cmds, size_t s) 
+yaclLib::yaclLib(Stream& dev, cmdLineCommand* cmds, size_t s) 
   : stream(dev), commands(cmds), userFuncSize(s) {
   ok = true;
 }
 
 /************************************************/
-cmdLineLib::~cmdLineLib() {
+yaclLib::~yaclLib() {
 }
 
 /************************************************/
-int cmdLineLib::read() {
+int yaclLib::read() {
   return stream.read();
 }
 /************************************************/
-int cmdLineLib::available() {
+int yaclLib::available() {
   return stream.available();
 }
 /************************************************/
-int cmdLineLib::peek() {
+int yaclLib::peek() {
   return stream.peek();
 }
 /************************************************/
-size_t cmdLineLib::write(uint8_t b) {
+size_t yaclLib::write(uint8_t b) {
   return stream.write(b);
 }
 
@@ -47,7 +47,7 @@ size_t cmdLineLib::write(uint8_t b) {
  Handle BackSpace character
  Make all chars lowercase
  *************************************************************************************************************/
-bool cmdLineLib::getCommandLineFromSerialPort() {
+bool yaclLib::getCommandLineFromSerialPort() {
 	//    static uint8_t charsRead = 0;                      //note: COMAND_BUFFER_LENGTH must be less than 255 chars long
 	//    Serial.println("CHECK");
 	//read asynchronously until full command input
@@ -89,7 +89,7 @@ bool cmdLineLib::getCommandLineFromSerialPort() {
  readNumber: return a 16bit (for Arduino Uno) signed integer from the command line
  readWord: get a text word from the command line
  */
-int cmdLineLib::readNumber() {
+int yaclLib::readNumber() {
 	ok = true;
 	char *numTextPtr = strtok(NULL, delimiters); //K&R string.h  pg. 250
 	if (numTextPtr == NULL) {
@@ -99,7 +99,7 @@ int cmdLineLib::readNumber() {
 }
 
 /************************************************/
-long cmdLineLib::readLong() {
+long yaclLib::readLong() {
 	ok = true;
 	char *numTextPtr = strtok(NULL, delimiters); //K&R string.h  pg. 250
 	if (numTextPtr == NULL) {
@@ -109,18 +109,18 @@ long cmdLineLib::readLong() {
 }
 
 /************************************************/
-char *cmdLineLib::readWord() {
+char *yaclLib::readWord() {
 	char *word = strtok(NULL, delimiters); //K&R string.h  pg. 250
 	return word;
 }
 
 /************************************************/
-void cmdLineLib::nullCommand(char *ptrToCommandName) {
+void yaclLib::nullCommand(char *ptrToCommandName) {
 	print2(F("Command not found: "), ptrToCommandName); //see above for macro print2
 }
 
 /************************************************/
-int cmdLineLib::isNumericString(char *s) {
+int yaclLib::isNumericString(char *s) {
 	int i = 0, isNumeric = 1, ctDecimalPointsSeen = 0;
 	if (s[i] == '+' || s[i] == '-')	{
 		i += 1;
@@ -142,7 +142,7 @@ int cmdLineLib::isNumericString(char *s) {
 /****************************************************
  DoMyCommand
  */
-void cmdLineLib::DoMyCommand() {
+void yaclLib::DoMyCommand() {
 	print2("\nCommand: ", commandLine);  
 	char *ptrToCommandName = strtok(commandLine, delimiters);
 	//  print2("commandName= ", ptrToCommandName);
@@ -160,7 +160,7 @@ void cmdLineLib::DoMyCommand() {
 }
 
 /************************************************/
-void cmdLineLib::checkCommands() {
+void yaclLib::checkCommands() {
 	noInterrupts();
 	// disable all interrupts
 	bool received = getCommandLineFromSerialPort();
@@ -169,4 +169,4 @@ void cmdLineLib::checkCommands() {
 	// enable all interrupts
 }
 
-} /* namespace CmdLineLibSpace */
+} /* namespace yaclLibSpace */

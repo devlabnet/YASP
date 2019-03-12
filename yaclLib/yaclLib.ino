@@ -1,8 +1,5 @@
-#include "cmdLineLib.h"
-
-
-//cmdLineLib* cmdEngine;
-USE_CMDLINELIB;
+#include "yaclLib.h"
+USE_YACLLIB;
 
 //******************************
 // Add your commands function code here
@@ -45,7 +42,7 @@ CMDS_LIST myCommands[] = {
 void setup() {
   Serial.begin(115200);
   Serial.println("Start ...");
-//  cmdEngine = new cmdLineLib(Serial, myCommands, NELEMS(myCommands));
+//  cmdEngine = new yaclLib(Serial, myCommands, NELEMS(myCommands));
   INIT_CMDS(Serial, myCommands);
 //  functions[0]();
 //  Serial.print(NELEMS(functions));

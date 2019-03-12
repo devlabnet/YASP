@@ -1,11 +1,11 @@
 /*
- * CmdLineLib.h
+ * yaclLib.h
  *
  *  Created on: 11 03 2019
  *      Author: Cricri042
  */
-#ifndef CMDLINELIB_H_
-#define CMDLINELIB_H_
+#ifndef YACLLIB_H_
+#define YACLLIB_H_
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -15,16 +15,16 @@
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
 
 #define ENGINE cmdEngine
-#define USE_CMDLINELIB CmdLineLibSpace::cmdLineLib* ENGINE;  
-#define CMDS_LIST CmdLineLibSpace::cmdLineCommand
-#define INIT_CMDS(s, c) cmdEngine = new CmdLineLibSpace::cmdLineLib(s, c, NELEMS(c));
+#define USE_YACLLIB yaclLibSpace::yaclLib* ENGINE;  
+#define CMDS_LIST yaclLibSpace::cmdLineCommand
+#define INIT_CMDS(s, c) cmdEngine = new yaclLibSpace::yaclLib(s, c, NELEMS(c));
 #define CHECK_CMDS cmdEngine->checkCommands();
 #define CMD_GETINT ENGINE->readNumber()  
 #define CMD_GETLONG ENGINE->readLong()  
 #define CMD_GETSTR ENGINE->readWord()  
 #define CMD_OK ENGINE->readOk()
 
-namespace CmdLineLibSpace {
+namespace yaclLibSpace {
 
 const unsigned int CR = '\r';
 const unsigned int LF = '\n';
@@ -46,11 +46,11 @@ template<class T>
 inline Print &operator <<(Print &stream, T arg) 
 { stream.print(arg); return stream; }
 
-class cmdLineLib : public Stream {
+class yaclLib : public Stream {
   public:
-//    cmdLineLib(Stream& dev, num_func* func, char** toks, size_t s);
-    cmdLineLib(Stream& dev, cmdLineCommand* cmds, size_t s);
-   ~cmdLineLib();
+//    yaclLib(Stream& dev, num_func* func, char** toks, size_t s);
+    yaclLib(Stream& dev, cmdLineCommand* cmds, size_t s);
+   ~yaclLib();
   	/***************************************************************************
   	    getCommandLineFromSerialPort()
   	      Return the string of the next command. Commands are delimited by return"
@@ -85,5 +85,5 @@ class cmdLineLib : public Stream {
   	void DoMyCommand();
 };
 
-} /* namespace CmdLineLibSpace */
-#endif /* CMDLINELIB_H_ */
+} /* namespace yaclLibSpace */
+#endif /* YACLLIB_H_ */
