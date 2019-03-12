@@ -7,7 +7,7 @@
 
 #include "cmdLineLib.h"
 
-//namespace CmdLineLibSpace {
+namespace CmdLineLibSpace {
 
 ///************************************************/
 //cmdLineLib::cmdLineLib(Stream& dev, num_func* func, char** toks, size_t s) 
@@ -169,5 +169,4 @@ void cmdLineLib::checkCommands() {
 	// enable all interrupts
 }
 
-
-//} /* namespace robot */
+} /* namespace CmdLineLibSpace */

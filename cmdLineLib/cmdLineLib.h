@@ -15,16 +15,16 @@
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
 
 #define ENGINE cmdEngine
-#define USE_CMDLINELIB cmdLineLib* ENGINE;  
-#define CMDS_LIST cmdLineCommand
-#define INIT_CMDS(s, c) cmdEngine = new cmdLineLib(s, c, NELEMS(c));
+#define USE_CMDLINELIB CmdLineLibSpace::cmdLineLib* ENGINE;  
+#define CMDS_LIST CmdLineLibSpace::cmdLineCommand
+#define INIT_CMDS(s, c) cmdEngine = new CmdLineLibSpace::cmdLineLib(s, c, NELEMS(c));
 #define CHECK_CMDS cmdEngine->checkCommands();
 #define CMD_GETINT ENGINE->readNumber()  
 #define CMD_GETLONG ENGINE->readLong()  
 #define CMD_GETSTR ENGINE->readWord()  
 #define CMD_OK ENGINE->readOk()
 
-//namespace CmdLineLibSpace {
+namespace CmdLineLibSpace {
 
 const unsigned int CR = '\r';
 const unsigned int LF = '\n';
@@ -85,6 +85,5 @@ class cmdLineLib : public Stream {
   	void DoMyCommand();
 };
 
-//}
-
+} /* namespace CmdLineLibSpace */
 #endif /* CMDLINELIB_H_ */

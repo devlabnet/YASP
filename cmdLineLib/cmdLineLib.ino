@@ -26,7 +26,12 @@ void setInfoPeriod() {
 }
 //------------------------------
 void test() {
-  Serial.println("test ...");
+  Serial.print("test --> ");
+  char* c = CMD_GETSTR;
+  int v = CMD_GETINT;
+  Serial.print(c);
+  Serial.print("=");
+  Serial.println(v);
 }
 //******************************
 // Add your commands "token" and "function names" here
