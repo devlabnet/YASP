@@ -14,6 +14,16 @@
 #define print2(x, y) (stream.print(x), stream.println(y))
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
 
+#define ENGINE cmdEngine
+#define USE_CMDLINELIB cmdLineLib* ENGINE;  
+#define CMDS_LIST cmdLineCommand
+#define INIT_CMDS(s, c) cmdEngine = new cmdLineLib(s, c, NELEMS(c));
+#define CHECK_CMDS cmdEngine->checkCommands();
+#define CMD_GETINT ENGINE->readNumber()  
+#define CMD_GETLONG ENGINE->readLong()  
+#define CMD_GETSTR ENGINE->readWord()  
+#define CMD_OK ENGINE->readOk()
+
 //namespace CmdLineLibSpace {
 
 const unsigned int CR = '\r';
@@ -26,6 +36,11 @@ const unsigned int COMMAND_BUFFER_LENGTH = 32;
 typedef void (*num_func)();
 extern num_func functions[];
 
+typedef struct cmdLineCommand {
+    char* tokens;
+    num_func userFunc;
+} cmdLineCommand;
+
 // Generic template
 template<class T> 
 inline Print &operator <<(Print &stream, T arg) 
@@ -33,8 +48,9 @@ inline Print &operator <<(Print &stream, T arg)
 
 class cmdLineLib : public Stream {
   public:
-    cmdLineLib(Stream& dev, num_func* func, char** toks, size_t s);
-    ~cmdLineLib();
+//    cmdLineLib(Stream& dev, num_func* func, char** toks, size_t s);
+    cmdLineLib(Stream& dev, cmdLineCommand* cmds, size_t s);
+   ~cmdLineLib();
   	/***************************************************************************
   	    getCommandLineFromSerialPort()
   	      Return the string of the next command. Commands are delimited by return"
@@ -54,8 +70,10 @@ class cmdLineLib : public Stream {
     int available();
     int peek();
     size_t write(uint8_t b);
-    num_func* userFunc;
-    char** tokens;
+//    num_func* userFunc;
+//    char** tokens;
+    cmdLineCommand* commands;
+//    cmdLineCommand* cmdLineCommands;
     size_t userFuncSize;
   	char commandLine[COMMAND_BUFFER_LENGTH + 1]; //Read commands into this buffer from Serial.  +1 in length for a termination char
   	uint8_t charsRead = 0;						 //note: COMAND_BUFFER_LENGTH must be less than 255 chars long

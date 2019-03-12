@@ -9,11 +9,15 @@
 
 //namespace CmdLineLibSpace {
 
+///************************************************/
+//cmdLineLib::cmdLineLib(Stream& dev, num_func* func, char** toks, size_t s) 
+//  : stream(dev), userFunc(func), userFuncSize(s), tokens(toks) {
+//  ok = true;
+//}
 /************************************************/
-cmdLineLib::cmdLineLib(Stream& dev, num_func* func, char** toks, size_t s) 
-  : stream(dev), userFunc(func), userFuncSize(s), tokens(toks) {
-	ok = true;
-//  s_hookObj = this;
+cmdLineLib::cmdLineLib(Stream& dev, cmdLineCommand* cmds, size_t s) 
+  : stream(dev), commands(cmds), userFuncSize(s) {
+  ok = true;
 }
 
 /************************************************/
@@ -144,9 +148,11 @@ void cmdLineLib::DoMyCommand() {
 	//  print2("commandName= ", ptrToCommandName);
 
   for (int i = 0; i < userFuncSize; ++i) {
-      if (strcmp(ptrToCommandName, tokens[i]) == 0) {
+//      if (strcmp(ptrToCommandName, tokens[i]) == 0) {
+      if (strcmp(ptrToCommandName, commands[i].tokens) == 0) {
+        
 //            stream.println("OK");
-            userFunc[i]();
+            commands[i].userFunc();
             return;
       }
   }
