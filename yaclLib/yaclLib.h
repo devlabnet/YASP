@@ -15,14 +15,14 @@
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
 
 #define ENGINE cmdEngine
-#define USE_YACLLIB yaclLibSpace::yaclLib* ENGINE;  
-#define CMDS_LIST yaclLibSpace::cmdLineCommand
-#define INIT_CMDS(s, c) cmdEngine = new yaclLibSpace::yaclLib(s, c, NELEMS(c));
-#define CHECK_CMDS cmdEngine->checkCommands();
-#define CMD_GETINT ENGINE->readNumber()  
-#define CMD_GETLONG ENGINE->readLong()  
-#define CMD_GETSTR ENGINE->readWord()  
-#define CMD_OK ENGINE->readOk()
+#define YACL_USE_YACLLIB yaclLibSpace::yaclLib* ENGINE;
+#define YACL_CMDS_LIST yaclLibSpace::cmdLineCommand
+#define YACL_INIT_CMDS(s, c) cmdEngine = new yaclLibSpace::yaclLib(s, c, NELEMS(c));
+#define YACL_CHECK_CMDS cmdEngine->checkCommands();
+#define YACL_GETINT ENGINE->readNumber()
+#define YACL_GETLONG ENGINE->readLong()
+#define YACL_GETSTR ENGINE->readWord()
+#define YACL_OK ENGINE->readOk()
 #define YACL_PRINT(x) ENGINE->stream.print(x)
 #define YACL_PRINTLN(x) ENGINE->stream.println(x)
 #define YACL_WRITE(x) ENGINE->stream.write(x)

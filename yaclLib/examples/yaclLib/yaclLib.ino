@@ -1,21 +1,21 @@
 #include <yaclLib.h>
-USE_YACLLIB;
+YACL_USE_YACLLIB;
 
 //******************************
 // Add your commands function code here
 //------------------------------
 void setPfmVal() {
     YACL_PRINT(F("-> PFM "));
-    int v = CMD_GETINT;
-    if (!CMD_OK) {
+    int v = YACL_GETINT;
+    if (!YACL_OK) {
         v = -25;
     }
     YACL_PRINTLN(v);
 }
 //------------------------------
 void setInfoPeriod() {
-    long p = CMD_GETLONG;
-    if (!CMD_OK || (p < 100)) {
+    long p = YACL_GETLONG;
+    if (!YACL_OK || (p < 100)) {
         p = 10000;
     }
     YACL_PRINT(F("-> Info Period "));
@@ -24,8 +24,8 @@ void setInfoPeriod() {
 //------------------------------
 void test() {
     YACL_PRINT("test --> ");
-    char* c = CMD_GETSTR;
-    int v = CMD_GETINT;
+    char* c = YACL_GETSTR;
+    int v = YACL_GETINT;
     YACL_PRINT(c);
     YACL_PRINT("=");
     YACL_PRINTLN(v);
@@ -34,7 +34,7 @@ void test() {
 }
 //******************************
 // Add your commands "token" and "function names" here
-CMDS_LIST myCommands[] = {
+YACL_CMDS_LIST myCommands[] = {
     {"pfm", setPfmVal},
     {"per", setInfoPeriod},
     {"t", test}
@@ -43,10 +43,10 @@ CMDS_LIST myCommands[] = {
 
 void setup() {
     Serial.begin(115200);
-    INIT_CMDS(Serial, myCommands);
+    YACL_INIT_CMDS(Serial, myCommands);
     YACL_PRINTLN("Start ...");
 }
 
 void loop() {
-    CHECK_CMDS;
+    YACL_CHECK_CMDS;
 }
