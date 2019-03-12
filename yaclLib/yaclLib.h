@@ -23,6 +23,9 @@
 #define CMD_GETLONG ENGINE->readLong()  
 #define CMD_GETSTR ENGINE->readWord()  
 #define CMD_OK ENGINE->readOk()
+#define YACL_PRINT(x) ENGINE->stream.print(x)
+#define YACL_PRINTLN(x) ENGINE->stream.println(x)
+#define YACL_WRITE(x) ENGINE->stream.write(x)
 
 namespace yaclLibSpace {
 
@@ -47,42 +50,37 @@ inline Print &operator <<(Print &stream, T arg)
 { stream.print(arg); return stream; }
 
 class yaclLib : public Stream {
-  public:
-//    yaclLib(Stream& dev, num_func* func, char** toks, size_t s);
+public:
     yaclLib(Stream& dev, cmdLineCommand* cmds, size_t s);
-   ~yaclLib();
-  	/***************************************************************************
-  	    getCommandLineFromSerialPort()
-  	      Return the string of the next command. Commands are delimited by return"
-  	      Handle BackSpace character
-  	      Make all chars lowercase
-  	****************************************************************************/
-  	bool getCommandLineFromSerialPort();
-  	int readNumber();
-  	long readLong();
-  	char *readWord();
-  	void checkCommands();
-   bool readOk() { return ok; }
-
-  private:
+    ~yaclLib();
     Stream &stream;
+    /***************************************************************************
+        getCommandLineFromSerialPort()
+          Return the string of the next command. Commands are delimited by return"
+          Handle BackSpace character
+          Make all chars lowercase
+    ****************************************************************************/
+    bool getCommandLineFromSerialPort();
+    int readNumber();
+    long readLong();
+    char *readWord();
+    void checkCommands();
+    bool readOk() { return ok; }
+
+private:
     int read();
     int available();
     int peek();
     size_t write(uint8_t b);
-//    num_func* userFunc;
-//    char** tokens;
     cmdLineCommand* commands;
-//    cmdLineCommand* cmdLineCommands;
     size_t userFuncSize;
-  	char commandLine[COMMAND_BUFFER_LENGTH + 1]; //Read commands into this buffer from Serial.  +1 in length for a termination char
-  	uint8_t charsRead = 0;						 //note: COMAND_BUFFER_LENGTH must be less than 255 chars long
-  	bool ok;
-    //const char *delimiters = ", \n"; //commands can be separated by return, space or comma
+    char commandLine[COMMAND_BUFFER_LENGTH + 1]; //Read commands into this buffer from Serial.  +1 in length for a termination char
+    uint8_t charsRead = 0;						 //note: COMAND_BUFFER_LENGTH must be less than 255 chars long
+    bool ok;
     const char *delimiters = " "; //commands must be separated by space
-  	int isNumericString(char *s);
-  	void nullCommand(char *ptrToCommandName);
-  	void DoMyCommand();
+    int isNumericString(char *s);
+    void nullCommand(char *ptrToCommandName);
+    void DoMyCommand();
 };
 
 } /* namespace yaclLibSpace */
