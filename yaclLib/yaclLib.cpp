@@ -130,15 +130,17 @@ int yaclLib::isNumericString(char *s) {
  */
 void yaclLib::DoMyCommand() {
     print2("\nCommand: ", commandLine);
-    char *ptrToCommandName = strtok(commandLine, delimiters);
+    char* ptrToCommandName = strtok(commandLine, delimiters);
     //  print2("commandName= ", ptrToCommandName);
 
     for (int i = 0; i < userFuncSize; ++i) {
         if (strcmp(ptrToCommandName, commands[i].tokens) == 0) {
+            cmdToken = commands[i].tokens;
             commands[i].userFunc();
             return;
         }
     }
+    cmdToken = "";
     nullCommand(ptrToCommandName);
 }
 

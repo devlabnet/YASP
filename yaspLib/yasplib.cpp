@@ -42,7 +42,29 @@ void yaspLib::Data(int ind, double val) {
   stream.write(START_MSG);
   stream.print(ind);
   stream.write(SPACE_MSG);
-  stream.print(millis());
+  stream.print(micros());
+  stream.write(SPACE_MSG);
+  stream.print(val);
+  stream.write(END_MSG);
+}
+
+/************************************************/
+void yaspLib::DataMicros(int ind, double m, double val) {
+  stream.write(START_MSG);
+  stream.print(ind);
+  stream.write(SPACE_MSG);
+  stream.print(m);
+  stream.write(SPACE_MSG);
+  stream.print(val);
+  stream.write(END_MSG);
+}
+
+/************************************************/
+void yaspLib::DataMillis(int ind, double m, double val) {
+  stream.write(START_MSG);
+  stream.print(ind);
+  stream.write(SPACE_MSG);
+  stream.print(m * 1000);
   stream.write(SPACE_MSG);
   stream.print(val);
   stream.write(END_MSG);

@@ -26,6 +26,7 @@
 #define YACL_PRINT(x) ENGINE->stream.print(x)
 #define YACL_PRINTLN(x) ENGINE->stream.println(x)
 #define YACL_WRITE(x) ENGINE->stream.write(x)
+#define YACL_TOKEN ENGINE->token()
 
 namespace yaclLibSpace {
 
@@ -63,7 +64,8 @@ public:
     bool getCommandLineFromSerialPort();
     int readNumber();
     long readLong();
-    char *readWord();
+    char* readWord();
+    char* token() { return cmdToken; };
     void checkCommands();
     bool readOk() { return ok; }
 
@@ -78,6 +80,7 @@ private:
     uint8_t charsRead = 0;						 //note: COMAND_BUFFER_LENGTH must be less than 255 chars long
     bool ok;
     const char *delimiters = " "; //commands must be separated by space
+    char *cmdToken = "";
     int isNumericString(char *s);
     void nullCommand(char *ptrToCommandName);
     void DoMyCommand();

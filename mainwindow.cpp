@@ -931,7 +931,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
                 qDebug() << currentTime <<  " ============================ CLEAN OVERFLOW ============================ " << lastDataTtime;
                 cleanDataGraphs();
             }
-            lastDataTtime = currentTime;
+            lastDataTtime = currentTime/1000.0;
             cleanDataGraphsBefore(lastDataTtime);
             double val = newData[2].toDouble();
             // Add data to graphs according plot Id
