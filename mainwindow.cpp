@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     createUI();      // Create the UI
 //    resize(minimumSize());
 //    ui->terminalWidget->setVisible(false);
+    ui->autoScrollCheckBox->setVisible(false);
     QColor gridColor = QColor(170,170,170);
     ui->bgColorButton->setAutoFillBackground(true);
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
@@ -315,7 +316,11 @@ void MainWindow::createUI() {
     ui->comboBaud->addItem("38400");
     ui->comboBaud->addItem("57600");
     ui->comboBaud->addItem("115200");
-    ui->comboBaud->setCurrentIndex(7);                                                    // Select 9600 bits by default
+    ui->comboBaud->addItem("230400");
+    ui->comboBaud->addItem("500000");
+    ui->comboBaud->addItem("1000000");
+    ui->comboBaud->addItem("2000000");
+    ui->comboBaud->addItem("2400000");
     ui->comboData->addItem("8 bits");                                                     // Populate data bits combo box
     ui->comboData->addItem("7 bits");
     ui->comboParity->addItem("none");                                                     // Populate parity combo box
@@ -323,6 +328,7 @@ void MainWindow::createUI() {
     ui->comboParity->addItem("even");
     ui->comboStop->addItem("1 bit");                                                      // Populate stop bits combo box
     ui->comboStop->addItem("2 bits");
+    ui->comboBaud->setCurrentIndex(7);                                                    // Select 9600 bits by default
 }
 
 /******************************************************************************************************************/
@@ -922,7 +928,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
 //        qDebug() << "NEW DATA : " << plotId << " / " << dataListSize << " --> " << newData;
         dataPointNumber++;
         if (dataListSize == 3) {
-            double currentTime = newData[1].toDouble();
+            double currentTime = newData[1].toDouble()/1000.0;
             if (currentTime < lastDataTtime) {
                 // Will normally never (or rarely) append
                 // Means that current millis() returned is lower than the previous one !!
@@ -931,7 +937,8 @@ void MainWindow::onNewDataArrived(QStringList newData) {
                 qDebug() << currentTime <<  " ============================ CLEAN OVERFLOW ============================ " << lastDataTtime;
                 cleanDataGraphs();
             }
-            lastDataTtime = currentTime/1000.0;
+            bool canReplot = ((currentTime - lastDataTtime) > 25);
+            lastDataTtime = currentTime;
             cleanDataGraphsBefore(lastDataTtime);
             double val = newData[2].toDouble();
             // Add data to graphs according plot Id
@@ -954,6 +961,13 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             if (yGraph->getMax() > -DBL_MAX) {
                 plotInfoStr +=  + " max: ";
                 plotInfoStr += QString::number(yGraph->getMax(), 'f', 3);
+            }
+            if (ui->autoScrollCheckBox->isChecked() == false) {
+                if (plotting) {
+                    if (canReplot) {
+                        replot();
+                    }
+                }
             }
             updateLabel(plotId, plotInfoStr);
         } else {
@@ -2381,4 +2395,13 @@ void MainWindow::on_aboutNevVersionButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_actionOnline_Documentation_triggered() {
     QDesktopServices::openUrl(QUrl(DOC_URL, QUrl::TolerantMode));
+}
+
+void MainWindow::on_autoScrollCheckBox_stateChanged(int arg1) {
+    if (arg1) {
+        updateTimer.start();
+    } else {
+        updateTimer.stop();
+    }
+
 }

@@ -50,7 +50,7 @@
 #define DEF_YAXIS_RANGE 4000
 #define YAXIS_MAX_RANGE 1000000
 #define PLOT_TIME_DEF 15000.0                           // Default time Displayed in Plot in MilliSeconds
-#define PLOT_TIME_MIN_DEF 10.0                          // Minimum Range in MilliSeconds
+#define PLOT_TIME_MIN_DEF 1.0                          // Minimum Range in MilliSeconds
 #define PLOT_TIME_MAX_DEF 1000.0 * 3600                 // Maximum Range in MilliSeconds -> 1 Hour
 #define PLOT_TIME_MAX_CLEAN_DEF PLOT_TIME_MAX_DEF * 2   // Max Before Clean Range in MilliSeconds
 
@@ -127,6 +127,8 @@ private slots:
     void on_aboutNevVersionButton_clicked();
 
     void on_actionOnline_Documentation_triggered();
+
+    void on_autoScrollCheckBox_stateChanged(int arg1);
 
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
