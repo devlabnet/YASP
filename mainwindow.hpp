@@ -73,8 +73,8 @@ protected:
 
 private slots:
     void replot();
-    void onNewDataArrived(QStringList newData);                    // Slot for new data from serial port
-    void onNewPlotDataArrived(QStringList newData);                // Slot for new data from serial port
+//    void onNewDataArrived(QStringList newData);                    // Slot for new data from serial port
+//    void onNewPlotDataArrived(QStringList newData);                // Slot for new data from serial port
     void readData();                                               // Slot for inside serial port
     void dataTerminalReadyChanged(bool dtr);
     void messageSent(QString str);
@@ -132,8 +132,8 @@ private slots:
 
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
-    void newData(QStringList data);                                                       // Emitted when new data has arrived
-    void newPlotData(QStringList data);                                                       // Emitted when new data has arrived
+//    void newData(QStringList data);                                                       // Emitted when new data has arrived
+//    void newPlotData(QStringList data);                                                       // Emitted when new data has arrived
 
 private:
     Ui::MainWindow *ui;
@@ -216,6 +216,9 @@ private:
     void loadHelpFile();
     void initTracer();
     yaspGraph *addGraph(int id);
+//    void onNewPacketArrived();
+    void onNewDataArrived(const QString& str);
+    void onNewPlotDataArrived(const QString &str);
     void updateLabel(int id, QString plotInfoStr);
     void doContextMenuHeader(yaspGraph* yGraph);
     bool isColor(QString str);

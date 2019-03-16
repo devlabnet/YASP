@@ -347,7 +347,7 @@ void MainWindow::cleanGraphs() {
     ui->plot->clearItems();
     ui->plot->clearGraphs();
     ui->plot->clearPlottables();
-    ui->plot->hide();
+//    ui->plot->hide();
     foreach (yaspGraph* yGraph, graphs) {
         Q_ASSERT(yGraph);
         delete yGraph;
@@ -640,8 +640,8 @@ void MainWindow::portOpenedSuccess() {
     ui->tabWidget->setCurrentIndex(1);
     // Reset the Device via DTR
     serialPort->setDataTerminalReady(true);
-    connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
-    connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
+//    connect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
+//    connect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
     QWidget* tabW = ui->tabWidget->findChild<QWidget *>("tabPlots");
     ui->tabWidget->insertTab(1, tabW, "Plots");
     ui->tabWidget->setCurrentIndex(1);
@@ -738,6 +738,7 @@ void MainWindow::dataTerminalReadyChanged(bool dtr) {
 /******************************************************************************************************************/
 void MainWindow:: closePort() {
     cleanGraphs();
+    ui->plot->hide();
     ui->tabWidget->removeTab(1);
     ui->tabWidget->setCurrentIndex(0);
     if (logFile != nullptr) {
@@ -756,8 +757,8 @@ void MainWindow:: closePort() {
     updateTimer.stop();
     connected = false;
     disconnect(serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
-    disconnect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
-    disconnect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
+//    disconnect(this, SIGNAL(newData(QStringList)), this, SLOT(onNewDataArrived(QStringList)));
+//    disconnect(this, SIGNAL(newPlotData(QStringList)), this, SLOT(onNewPlotDataArrived(QStringList)));
     serialPort->close();                                                              // Close serial port
     delete serialPort;                                                                // Delete the pointer
     serialPort = nullptr;                                                                // Assign NULL to dangling pointer
@@ -868,7 +869,8 @@ yaspGraph* MainWindow::getGraph(int id) {
 }
 
 /******************************************************************************************************************/
-void MainWindow::onNewPlotDataArrived(QStringList newData) {
+void MainWindow::onNewPlotDataArrived(const QString& str) {
+    QStringList newData = str.split(SPACE_MSG);               // Split string received from port and put it into list
     if (newData.size() > 1) {
         int plotId = newData.at(0).toInt();
         if ((plotId < 0) || (plotId > 9)) {
@@ -915,7 +917,8 @@ void MainWindow::onNewPlotDataArrived(QStringList newData) {
 /******************************************************************************************************************/
 /* Slot for new data from serial port . Data is comming in QStringList and needs to be parsed */
 /******************************************************************************************************************/
-void MainWindow::onNewDataArrived(QStringList newData) {
+void MainWindow::onNewDataArrived(const QString &str) {
+    QStringList newData = str.split(SPACE_MSG);               // Split string received from port and put it into list
     Q_ASSERT(newData.size() > 0);
     int plotId = newData.at(0).toInt();
     if ((plotId < 0) || (plotId > 9)) {
@@ -930,9 +933,9 @@ void MainWindow::onNewDataArrived(QStringList newData) {
         if (dataListSize == 3) {
             double currentTime = newData[1].toDouble()/1000.0;
             if (currentTime < lastDataTtime) {
-                // Will normally never (or rarely) append
+                // Will normally rarely append
                 // Means that current millis() returned is lower than the previous one !!
-                // --> millis() overflow !!
+                // --> millis() overflow !! or Device Reset (which lead to millis() / micros() reset to 0) !!
                 // So just clean everything in graph
                 qDebug() << currentTime <<  " ============================ CLEAN OVERFLOW ============================ " << lastDataTtime;
                 cleanDataGraphs();
@@ -971,7 +974,7 @@ void MainWindow::onNewDataArrived(QStringList newData) {
             }
             updateLabel(plotId, plotInfoStr);
         } else {
-            qDebug() << "------------> BAD DATA : " << plotId << " / " << dataListSize << " --> " << newData;
+            qDebug() << "------------> BAD DATA : " << plotId << " / " << dataListSize << " --> " << str;
         }
     }
 }
@@ -1013,7 +1016,7 @@ bool MainWindow::checkEndMsgMissed( char cc) {
         // Houps, seems we missed the END_MSG (maybe an external reset of the device !)
         // Just start MSG scanning again
         //addMessageText(data, "red");
-        qDebug() << "MISSED IN_MESSAGE !!";
+        qDebug() << "MISSED IN_MESSAGE !! State: " << STATE;
         QString recoverStr = data;
         int index = recoverStr.indexOf(START_MSG);
         QString msg = recoverStr.left(index);
@@ -1026,7 +1029,7 @@ bool MainWindow::checkEndMsgMissed( char cc) {
      } else if ( cc == PLOT_MSG) {
         // Houps, seems we missed the END_MSG (maybe an external reset of the device !)
         // Just start PLOT_MSG scanning again
-        qDebug() << "MISSED IN_PLOT_MSG !!";
+        qDebug() << "MISSED IN_PLOT_MSG !! State: " << STATE;
         int index = data.indexOf(PLOT_MSG);
         QString msg = data.left(index);
         QString recoverStr = data.mid(index);
@@ -1035,6 +1038,8 @@ bool MainWindow::checkEndMsgMissed( char cc) {
         receivedData.clear();
         STATE = IN_PLOT_MSG;
         return true;
+    } else {
+        //qDebug() << "MISSED -> " << STATE << " / " << hex << cc;
     }
     return false;
 }
@@ -1076,7 +1081,8 @@ void MainWindow::readData() {
                     if ((STATE != IN_MESSAGE) && (STATE != IN_PLOT_MSG)) {
                         if (checkEndMsgMissed(cc)) {
                             break;
-                        } else if ( cc == '\n') {
+                        } else
+                          if ( cc == '\n') {
                             if (!noMsgReceivedData.isEmpty()) {
                                 addMessageText(noMsgReceivedData, "blue");
                             }
@@ -1094,8 +1100,9 @@ void MainWindow::readData() {
                 case IN_MESSAGE:                                                          // If state is IN_MESSAGE
                     if( cc == END_MSG) {                                              // If char examined is ;, switch state to END_MSG
                         STATE = WAIT_START;
-                        QStringList incomingData = receivedData.split(SPACE_MSG);               // Split string received from port and put it into list
-                        emit newData(incomingData);                                       // Emit signal for data received with the list
+                        onNewDataArrived(receivedData);
+//                        QStringList incomingData = receivedData.split(SPACE_MSG);               // Split string received from port and put it into list
+//                        emit newData(incomingData);                                       // Emit signal for data received with the list
                         break;
                     } else if (checkEndMsgMissed(cc)) {
                         break;
@@ -1109,8 +1116,10 @@ void MainWindow::readData() {
                     if( cc == END_MSG) {                                              // If char examined is ;, switch state to END_MSG
                         STATE = WAIT_START;
 //                        qDebug() << "receivedPlot: " << receivedData;
-                        QStringList incomingData = receivedData.split(SPACE_MSG);               // Split string received from port and put it into list
-                        emit newPlotData(incomingData);                                       // Emit signal for data received with the list
+//                        QStringList incomingData = receivedData.split(SPACE_MSG);               // Split string received from port and put it into list
+//                        emit newPlotData(incomingData);
+                        onNewPlotDataArrived(receivedData);
+                        // Emit signal for data received with the list
                         break;
                     } else if (checkEndMsgMissed(cc)) {
                         break;
@@ -1119,7 +1128,7 @@ void MainWindow::readData() {
                     }
                     break;
                 default:
-//                    qDebug() << "++++ " << data;
+                    qDebug() << "++++ " << data;
                     break;
                 }
             }
@@ -2376,6 +2385,9 @@ void MainWindow::on_saveTermButton_clicked() {
 
 /******************************************************************************************************************/
 void MainWindow::on_restartDeviceButton_clicked() {
+    cleanGraphs();
+    initTracer();
+    on_resetPlotButton_clicked();
     serialPort->setDataTerminalReady(false);
     serialPort->setDataTerminalReady(true);
 }
@@ -2397,6 +2409,7 @@ void MainWindow::on_actionOnline_Documentation_triggered() {
     QDesktopServices::openUrl(QUrl(DOC_URL, QUrl::TolerantMode));
 }
 
+/******************************************************************************************************************/
 void MainWindow::on_autoScrollCheckBox_stateChanged(int arg1) {
     if (arg1) {
         updateTimer.start();
