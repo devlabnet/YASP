@@ -320,7 +320,7 @@ void MainWindow::createUI() {
     ui->comboBaud->addItem("500000");
     ui->comboBaud->addItem("1000000");
     ui->comboBaud->addItem("2000000");
-    ui->comboBaud->addItem("2400000");
+//    ui->comboBaud->addItem("2400000");
     ui->comboData->addItem("8 bits");                                                     // Populate data bits combo box
     ui->comboData->addItem("7 bits");
     ui->comboParity->addItem("none");                                                     // Populate parity combo box
@@ -2299,6 +2299,8 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
                     plotMeasureBoxAction->setIcon(QIcon(":/Icons/Icons/icons8-caliper-48.png"));
                     plotMeasureAction = contextMenu->addAction("Start Measure Arrow", this, SLOT(doMenuPlotMeasureAction()));
                     plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-design-40.png"));
+//                    plotMeasureAction = contextMenu->addAction("Start Measure Freq", this, SLOT(doMenuPlotMeasureFreqAction()));
+//                    plotMeasureAction->setIcon(QIcon(":/Icons/Icons/icons8-sonometer-48.png"));
                 }
             }
         } else {

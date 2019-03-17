@@ -21,10 +21,13 @@
 #define YACL_CHECK_CMDS cmdEngine->checkCommands();
 #define YACL_GETINT ENGINE->readNumber()
 #define YACL_GETLONG ENGINE->readLong()
+#define YACL_GETFLOAT ENGINE->readFloat()
 #define YACL_GETSTR ENGINE->readWord()
 #define YACL_OK ENGINE->readOk()
 #define YACL_PRINT(x) ENGINE->stream.print(x)
 #define YACL_PRINTLN(x) ENGINE->stream.println(x)
+#define YACL_PRINT2(x, y) ENGINE->stream.print(x, y)
+#define YACL_PRINTLN2(x, y) ENGINE->stream.println(x, y)
 #define YACL_WRITE(x) ENGINE->stream.write(x)
 #define YACL_TOKEN ENGINE->token()
 
@@ -46,8 +49,8 @@ typedef struct cmdLineCommand {
 } cmdLineCommand;
 
 // Generic template
-template<class T> 
-inline Print &operator <<(Print &stream, T arg) 
+template<class T>
+inline Print &operator <<(Print &stream, T arg)
 { stream.print(arg); return stream; }
 
 class yaclLib : public Stream {
@@ -64,6 +67,7 @@ public:
     bool getCommandLineFromSerialPort();
     int readNumber();
     long readLong();
+    float readFloat();
     char* readWord();
     char* token() { return cmdToken; };
     void checkCommands();

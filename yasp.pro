@@ -84,12 +84,14 @@ DISTFILES += \
     yaspLib/keywords.txt \
     yaspLib/library.properties \
     yaspLib/examples/plotTest/plotTest.ino \
-    yaspLib/examples/widgetTest/widgetTest.ino \
+    yaspLib/examples/modulation/modulation.ino \
+    yaspLib/examples/widget/widget.ino \
     yaclLib/yaclLib.cpp \
     yaclLib/yaclLib.h \
     yaclLib/keywords.txt \
     yaclLib/library.properties \
-    yaclLib/examples/yaclLib/yaclLib.ino
+    yaclLib/examples/simple/simple.ino \
+    yaclLib/examples/calculator/calculator.ino
 
 
 

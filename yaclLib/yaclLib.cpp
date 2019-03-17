@@ -8,7 +8,7 @@
 
 namespace yaclLibSpace {
 /************************************************/
-yaclLib::yaclLib(Stream& dev, cmdLineCommand* cmds, size_t s) 
+yaclLib::yaclLib(Stream& dev, cmdLineCommand* cmds, size_t s)
     : stream(dev), commands(cmds), userFuncSize(s) {
     ok = true;
 }
@@ -95,6 +95,16 @@ long yaclLib::readLong() {
 }
 
 /************************************************/
+float yaclLib::readFloat() {
+    ok = true;
+    char *numTextPtr = strtok(NULL, delimiters); //K&R string.h  pg. 250
+    if (numTextPtr == NULL) {
+        ok = false;
+    }
+    return atof(numTextPtr); //K&R string.h  pg. 251
+}
+
+/************************************************/
 char *yaclLib::readWord() {
     char *word = strtok(NULL, delimiters); //K&R string.h  pg. 250
     return word;
@@ -136,6 +146,7 @@ void yaclLib::DoMyCommand() {
     for (int i = 0; i < userFuncSize; ++i) {
         if (strcmp(ptrToCommandName, commands[i].tokens) == 0) {
             cmdToken = commands[i].tokens;
+            //strcpy(cmdToken, ptrToCommandName);
             commands[i].userFunc();
             return;
         }
