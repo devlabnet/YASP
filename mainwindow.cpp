@@ -46,7 +46,11 @@ MainWindow::MainWindow(QWidget *parent) :
     createUI();      // Create the UI
 //    resize(minimumSize());
 //    ui->terminalWidget->setVisible(false);
+    // ----------------------------------------
+    // Hide dynamicFrame and autoScrollCheckBox
+    ui->dynamicFrame->setVisible(false);
     ui->autoScrollCheckBox->setVisible(false);
+    // ----------------------------------------
     QColor gridColor = QColor(170,170,170);
     ui->bgColorButton->setAutoFillBackground(true);
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
