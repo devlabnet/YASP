@@ -45,6 +45,8 @@ Source: "S:\yasp\deploy\*"; DestDir: "{app}"; Flags: recursesubdirs
 Source: "S:\yasp\Icons\Oscilloscope-128.ico"; DestDir: "{app}";
 Source: "S:\yasp\installer\yaspLib.zip"; DestDir: "{app}";
 Source: "S:\yasp\installer\yaclLib.zip"; DestDir: "{app}";
+Source: "S:\yasp\installer\modulation.xml"; DestDir: "{app}";
+Source: "S:\yasp\installer\widget.xml"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

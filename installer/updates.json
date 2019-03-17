@@ -9,7 +9,9 @@
       <li>Added ability to Reset (Reboot) Device</li>
       <li>Added Frequency MODE Measure</li>
       <li>Fixed Zoom problems</li>
-	  </ol></FONT>"
+      <li>Added YASP Arduino Library</li>
+      <li>Added YACL Arduino Library</li>
+      </ol></FONT>"
     }
   }
 }
