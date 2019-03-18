@@ -5,6 +5,7 @@
       "latest-version": "1.1",
       "download-url": "https://github.com/devlabnet/YASP/blob/master/installer/YASP_Setup.exe?raw=true",
       "changelog": "<FONT COLOR='#800000'><ol>
+      <li>Added to GITHUB</li>
       <li>Added ability to Save log</li>
       <li>Added ability to Reset (Reboot) Device</li>
       <li>Added Frequency MODE Measure</li>
