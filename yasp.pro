@@ -86,6 +86,7 @@ DISTFILES += \
     yaspLib/examples/plotTest/plotTest.ino \
     yaspLib/examples/modulation/modulation.ino \
     yaspLib/examples/widget/widget.ino \
+    yaspLib/examples/simple/simple.ino \
     yaclLib/yaclLib.cpp \
     yaclLib/yaclLib.h \
     yaclLib/keywords.txt \

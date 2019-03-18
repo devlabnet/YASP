@@ -20,8 +20,8 @@ class yaspLib : public Stream {
     void Setup(int ind, char* name, char* color);
     void Color(int ind, char* color);
     void Data(int ind, double val);
-    void DataMicros(int ind, double m, double val);
-    void DataMillis(int ind, double m, double val);
+    void DataMicros(int ind, unsigned long m, double val);
+    void DataMillis(int ind, unsigned long m, double val);
 };
 
 #endif // YASPLIB_H

@@ -936,10 +936,10 @@ void MainWindow::onNewDataArrived(const QString &str) {
         dataPointNumber++;
         if (dataListSize == 3) {
             double currentTime = newData[1].toDouble()/1000.0;
-            if (currentTime < lastDataTtime) {
+            if (currentTime < (lastDataTtime - YASP_OVERFLOW_TIME)) {
                 // Will normally rarely append
-                // Means that current millis() returned is lower than the previous one !!
-                // --> millis() overflow !! or Device Reset (which lead to millis() / micros() reset to 0) !!
+                // Means that current millis() returned is more than YASP_OVERFLOW_TIME (1 Hour) in the past  !!
+                // --> millis() overflow !! or Device Reset after more than 1 Hour logging (which lead to millis() / micros() reset to 0) !!
                 // So just clean everything in graph
                 qDebug() << currentTime <<  " ============================ CLEAN OVERFLOW ============================ " << lastDataTtime;
                 cleanDataGraphs();

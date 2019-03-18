@@ -49,7 +49,7 @@ void yaspLib::Data(int ind, double val) {
 }
 
 /************************************************/
-void yaspLib::DataMicros(int ind, double m, double val) {
+void yaspLib::DataMicros(int ind, unsigned long m, double val) {
   stream.write(START_MSG);
   stream.print(ind);
   stream.write(SPACE_MSG);
@@ -60,7 +60,7 @@ void yaspLib::DataMicros(int ind, double m, double val) {
 }
 
 /************************************************/
-void yaspLib::DataMillis(int ind, double m, double val) {
+void yaspLib::DataMillis(int ind, unsigned long m, double val) {
   stream.write(START_MSG);
   stream.print(ind);
   stream.write(SPACE_MSG);

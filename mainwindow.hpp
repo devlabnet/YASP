@@ -53,7 +53,7 @@
 #define PLOT_TIME_MIN_DEF 1.0                          // Minimum Range in MilliSeconds
 #define PLOT_TIME_MAX_DEF 1000.0 * 3600                 // Maximum Range in MilliSeconds -> 1 Hour
 #define PLOT_TIME_MAX_CLEAN_DEF PLOT_TIME_MAX_DEF * 2   // Max Before Clean Range in MilliSeconds
-
+#define YASP_OVERFLOW_TIME PLOT_TIME_MAX_DEF
 namespace Ui {
 class MainWindow;
 }
