@@ -1,0 +1,7 @@
+deploy/
+xml/
+tmp/
+SerialPortPlotter.pro.user.*
+*.zip
+doc/~*
+
