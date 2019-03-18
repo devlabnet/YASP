@@ -3,7 +3,7 @@
     "windows": {
       "open-url": "",
       "latest-version": "1.1",
-      "download-url": "https://devlabnet.eu/softdev/yasp/1.jpg",
+      "download-url": "https://github.com/devlabnet/YASP/blob/master/installer/YASP_Setup.exe?raw=true",
       "changelog": "<FONT COLOR='#800000'><ol>
       <li>Added ability to Save log</li>
       <li>Added ability to Reset (Reboot) Device</li>
