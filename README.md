@@ -14,6 +14,7 @@ an Arduino, or any serial source, by parsing specially formatted messages.
 All the source code for the plotter and for the “YASP” arduino library can be downloaded Here.
 For those who don’t like to compile it, an installer is also downloadable [Windows Version](https://github.com/devlabnet/YASP/blob/master/installer/YASP_Setup.exe?raw=true).
 Simple sketches example are also available under the “yasplib/example” subdirectory.
+The easiest way to send data to the plots is using the provided [YASP Arduino Library](https://github.com/devlabnet/YASP/blob/master/installer/yaspLib.zip?raw=true).
 
 ## Documentation
 
