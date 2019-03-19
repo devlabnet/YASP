@@ -1,9 +1,10 @@
-TO DO When New Update :
+TO DO When Putting New Update on GitHub :
 
-1) Update file "update.json" on download server.
-2) Edit "yasp.iss" to change Version
-3) Run the new "yasp.iss" to create new YASP_Setup.exe
-4) Put the new install file on download server
+1) Update Version YASP_VERSION in mainwindow.cpp.
+2) Update file "update.json" on download server.
+3) Edit "yasp.iss" to change Version
+4) Run the new "yasp.iss" to create new YASP_Setup.exe
+5) Put the new install file on download server
 
 That's All Folks, Enjoy !!
 
