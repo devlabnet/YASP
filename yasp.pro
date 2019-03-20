@@ -93,7 +93,8 @@ DISTFILES += \
     yaclLib/keywords.txt \
     yaclLib/library.properties \
     yaclLib/examples/simple/simple.ino \
-    yaclLib/examples/calculator/calculator.ino
+    yaclLib/examples/calculator/calculator.ino \
+    yaclLib/README.md
 
 
 

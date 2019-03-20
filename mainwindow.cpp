@@ -30,7 +30,8 @@
 #include <QPen>
 #include <QNetworkReply>
 
-static const QString DEFS_URL = "https://www.devlabnet.eu/softdev/yasp/updates.json";
+//static const QString DEFS_URL = "https://www.devlabnet.eu/softdev/yasp/updates.json";
+static const QString DEFS_URL = "https://raw.githubusercontent.com/devlabnet/YASP/master/installer/updates.json";
 static const QString YASP_VERSION = "1.0";
 static const QString DOC_URL = "https://gdoc.pub/doc/e/2PACX-1vQmyyZDie11-NvYd0V3Ry10cUGisbMw1lMT7EOq4qnecPBSdgyicpQix47Plv0QDT93KMiAFPEK7MNc";
 /******************************************************************************************************************/

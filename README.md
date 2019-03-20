@@ -1,6 +1,6 @@
 # YASP
 <p align="center">
-<img src="/doc/cover.jpg" alt="Yet Another Serial Plotter" width="480"/>
+<img src="/doc/cover.jpg" alt="Yet Another Serial Plotter" width="600"/>
 </p>
 
 ## YASP Application
