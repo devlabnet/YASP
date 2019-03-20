@@ -63,6 +63,8 @@ myCallbackP.loopCmdProcessing(&myParser, &myBuffer, &Serial);
 // Manual
 myCallbackP.processCmd(cstrCmd);
 ```
+
+```c++
 #include <yaclLib.h>
 YACL_USE_YACLLIB;
 
@@ -154,3 +156,4 @@ void setup() {
 void loop() {
   YACL_CHECK_CMDS;
 }
+```
