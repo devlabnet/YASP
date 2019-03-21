@@ -37,21 +37,22 @@ For a more complex exemple, look at samples in the examples directory. All sampl
 <h4>Public Member Functions</h4>
 <ul>
 <li>
-yaspLib (Stream &dev)
+<strong>yaspLib (Stream &dev)</strong> Plot Engine Contructor
 </li>
 <li>
-void Setup (int ind, char *name, char *color)
+<strong>void Setup (int ind, char *name, char *color)</strong> Setup a plot by assigning an indice, name and color.
 </li>
 <li>
-void Color (int ind, char *color)
+<strong>void Color (int ind, char *color)</strong> Change color of the related plot.
 </li>
 <li>
-void Data (int ind, double val)
+<strong>void Data (int ind, double val)</strong> Send Data to the plot (Here the timeStamp will be the time (microseconds) where the instruction is executed.
 </li>
 <li>
-void DataMicros (int ind, unsigned long m, double val)
+<strong>void DataMicros (int ind, unsigned long m, double val)</strong> Send Data to the plot with a specified timestamp (in microseconds)
 </li>
 <li>
-void DataMillis (int ind, unsigned long m, double val)
+<strong>void DataMillis (int ind, unsigned long m, double val)</strong> Send Data to the plot with a specified timestamp (in milliseconds)
+</li>
 </li>
 </ul>
