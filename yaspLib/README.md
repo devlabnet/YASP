@@ -33,32 +33,25 @@ void loop() {
 }
 ```
 For a more complex exemple, look at samples in the examples directory. All samples are heavily documented and should be self explanatory.
-<h3>Predefined MACROS</h3>
-To ease coding, some <strong>Predefined Macros</strong> are available:
+<h3>yaspLib Class Reference</h3>
+<h4>Public Member Functions</h4>
 <ul>
-    <li>Get Numeric Value (if no numeric is available or if not a well formatted, YACL_OK will return false):</li>
-    <ul>
-    <li><strong>YACL_GETINT</strong>: Return the next INT in the command Line</li>
-    <li><strong>YACL_GETLONG</strong>: Return the next LONG in the command Line</li>
-    <li><strong>YACL_GETFLOAT</strong>: Return the next FLOAT in the command Line</li>
-    <li><strong>YACL_OK</strong>: Return false if expected number is not found or is not well formatted.</li>
-    </ul>
-    <li>Get String Value:</li>
-    <ul>
-    <li><strong>YACL_GETSTR</strong>: Return the next STRING in the command Line</li>
-    </ul>
-    <li>Print/Write:</li>
-    <ul>
-    <li><strong>YACL_PRINT(x)</strong>: Print x value, this is the same as Serial.print(x)</li>
-    <li><strong>YACL_PRINTLN(x)</strong>: same as Serial.println(x)</li>
-    <li><strong>YACL_PRINT2(x, y)</strong>: Print x value in specific format, this is the same as Serial.print(x, FORMAT)</li>
-    <li><strong>YACL_PRINTLN2(x, y)</strong>: same as Serial.println(x, FORMAT)</li>
-    <li><strong>YACL_WRITE(x)</strong>: Writes binary data to the serial port</li>
-    </ul>
-    <li>Last Token:</li>
-    <ul>
-    <li><strong>YACL_TOKEN</strong>: Return the last command line token found</li>
-    </ul>
+<li>
+yaspLib (Stream &dev)
+</li>
+<li>
+void Setup (int ind, char *name, char *color)
+</li>
+<li>
+void Color (int ind, char *color)
+</li>
+<li>
+void Data (int ind, double val)
+</li>
+<li>
+void DataMicros (int ind, unsigned long m, double val)
+</li>
+<li>
+void DataMillis (int ind, unsigned long m, double val)
+</li>
 </ul>
-
-
