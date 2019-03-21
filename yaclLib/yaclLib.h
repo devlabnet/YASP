@@ -72,6 +72,7 @@ public:
     char* token() { return cmdToken; };
     void checkCommands();
     bool readOk() { return ok; }
+    virtual void flush() { /* Empty implementation for backward compatibility */ }
 
 private:
     int read();

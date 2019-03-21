@@ -7,98 +7,45 @@ This library is for handling commands over i.e. serial and short data transfers.
 
 For handling show all examples.
 
-## Simple Claculator Example
+## Getting Started
 
+To start using YACL, just include the library header and initialize the Command Line Engine "YACL_USE_YACLLIB" in your sketch file :
 ```c++
 #include <yaclLib.h>
 YACL_USE_YACLLIB;
-
-bool getOperands(float& op1, float& op2) {
-  op1 = YACL_GETFLOAT;
-  if (!YACL_OK) {
-    YACL_PRINTLN(F("Mising first operand ! "));
-    return false;
-  }
-  op2 = YACL_GETFLOAT;
-  if (!YACL_OK) {
-    YACL_PRINTLN(F("Mising second operand ! "));
-    return false;
-  }
-  YACL_PRINT2(op1, 5);
-  YACL_PRINT(F(" and "));
-  YACL_PRINT2(op2, 5);
-  return true;
-}
-
+```
+Then Define the functions to call for each command TOKEN"
+```c++
 //******************************
 // Add your commands function code here
 //------------------------------
-void addition() {
-  float op1, op2;
-  YACL_PRINT(F("-> ADD "));
-  if (getOperands(op1, op2)) {
-    YACL_PRINT(F(" = "));
-    YACL_PRINTLN2(op1 + op2, 5);
-  }
+void myCommandTest() {
+    // Here the command code to run
+    // .....
 }
-//------------------------------
-void substraction() {
-  float op1, op2;
-  YACL_PRINT(F("-> SUB "));
-  if (getOperands(op1, op2)) {
-    YACL_PRINT(F(" = "));
-    YACL_PRINTLN2(op1 - op2, 5);
-  }
-}
-//------------------------------
-void division() {
-  float op1, op2;
-  YACL_PRINT(F("-> DIV "));
-  if (getOperands(op1, op2)) {
-    YACL_PRINT(F(" = "));
-    YACL_PRINTLN2(op1 / op2, 5);
-  }
-}
-//------------------------------
-void multiplication() {
-  float op1, op2;
-  YACL_PRINT(F("-> MULT "));
-  if (getOperands(op1, op2)) {
-    YACL_PRINT(F(" = "));
-    YACL_PRINTLN2(op1 * op2, 5);
-  }
-}
-//------------------------------
-void help() {
-  YACL_PRINTLN(F("-----------------------------------"));
-  YACL_PRINTLN(F("Enter op OP1 OP2"));
-  YACL_PRINTLN(F("  -> where OP1 and OP2 are float"));
-  YACL_PRINTLN(F("  -> and op is one of the following operation:"));
-  YACL_PRINTLN(F("      + : Addition"));
-  YACL_PRINTLN(F("      - : Substraction"));
-  YACL_PRINTLN(F("      * : Multiplication"));
-  YACL_PRINTLN(F("      / : Division"));
-  YACL_PRINTLN(F("-----------------------------------"));
-}
+```
+Then Add your commands "token" and corresponding  "function names"
+```c++
 //******************************
 // Add your commands "token" and "function names" here
+//------------------------------
 YACL_CMDS_LIST myCommands[] = {
-  {"+", addition},
-  {"-", substraction},
-  {"*", multiplication},
-  {"/", division},
-  {"?", help}
+    {"Test", myCommandTest}
 };
 //******************************
-
+```
+Then init the commanf line in your setup() function
+and Check for any commands from the serial in the loop function
+```c++
 void setup() {
-  Serial.begin(115200);
-  YACL_INIT_CMDS(Serial, myCommands);
-  // Show HELP
-  help();
+    Serial.begin(115200);
+    // INIT THE COMMANDS
+    YACL_INIT_CMDS(Serial, myCommands);
 }
 
 void loop() {
-  YACL_CHECK_CMDS;
+    // Check for commands as often as possible
+    YACL_CHECK_CMDS;
 }
 ```
+
