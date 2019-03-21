@@ -20,11 +20,11 @@ Then Define the functions to call for each command TOKEN"
 // Add your commands function code here
 //------------------------------
 void myCommandTest() {
-    // Here the command code to run
+    // Here the command code to run when receiving the <strong>"Test"</strong> token
     // .....
 }
 ```
-Then Add your commands "token" and corresponding  "function names"
+Then Add your commands <strong>"token"</strong> and related <strong>"function names"</strong>
 ```c++
 //******************************
 // Add your commands "token" and "function names" here
@@ -34,8 +34,8 @@ YACL_CMDS_LIST myCommands[] = {
 };
 //******************************
 ```
-Then init the commanf line in your setup() function
-and Check for any commands from the serial in the loop function
+Then init the command line in your <strong>setup()</strong> function
+and Check (as often as possible) for any commands from the serial in the <strong>loop()</strong> function
 ```c++
 void setup() {
     Serial.begin(115200);
@@ -44,7 +44,7 @@ void setup() {
 }
 
 void loop() {
-    // Check for commands as often as possible
+    // CHECK FOR COMMANDS AS OFTEN AS POSSIBLE
     YACL_CHECK_CMDS;
 }
 ```
