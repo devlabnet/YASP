@@ -1,5 +1,9 @@
 TO DO When Putting New Update on GitHub :
 
+----------- DO NOT FORGET TO COMMIT ALL CHANGES ON GITHUB -----------
+----------- DO NOT FORGET TO COMMIT ALL CHANGES ON GITHUB -----------
+----------- DO NOT FORGET TO COMMIT ALL CHANGES ON GITHUB -----------
+
 1) Update Version YASP_VERSION in mainwindow.cpp.
 2) Update file "update.json" on download server.
 3) Edit "yasp.iss" to change Version
@@ -15,3 +19,7 @@ UPDATE YASP Arduino Library
 UPDATE YACL Arduino Library
 1) Update files in yaclLib directory
 2) ZIP this directory to Installer/yaclLib.zip
+
+----------- DO NOT FORGET TO COMMIT ALL CHANGES ON GITHUB -----------
+----------- DO NOT FORGET TO COMMIT ALL CHANGES ON GITHUB -----------
+----------- DO NOT FORGET TO COMMIT ALL CHANGES ON GITHUB -----------

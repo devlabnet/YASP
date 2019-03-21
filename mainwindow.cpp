@@ -32,7 +32,7 @@
 
 //static const QString DEFS_URL = "https://www.devlabnet.eu/softdev/yasp/updates.json";
 static const QString DEFS_URL = "https://raw.githubusercontent.com/devlabnet/YASP/master/installer/updates.json";
-static const QString YASP_VERSION = "1.0";
+static const QString YASP_VERSION = "1.1.0";
 static const QString DOC_URL = "https://gdoc.pub/doc/e/2PACX-1vQmyyZDie11-NvYd0V3Ry10cUGisbMw1lMT7EOq4qnecPBSdgyicpQix47Plv0QDT93KMiAFPEK7MNc";
 /******************************************************************************************************************/
 /* Constructor */
@@ -229,6 +229,13 @@ void MainWindow::setUpdateAvailable(bool available, QString latestVersion, QStri
     text += "<div style=\"text-align:center;\">";
     text += "<img src=\":/Icons/Icons/logo_devlabnet_small.png\" alt=\"Smiley face\">";
     text += "</div>";
+    text += "<hr/>";
+    text += "<div style=\"text-align:center;color:black;font-size:20px;background-color:#ffffb3;\">";
+    text += "<br>";
+    text += tr ("%1 Version: %2").arg(qApp->applicationName()).arg(YASP_VERSION);
+    text += "<br>";
+    text += "</div>";
+
     if (available) {
         text += "<div style=\"text-align:center;color:black;font-size:20px;background-color:#ffb3b3;\">";
         text += "<br>";
