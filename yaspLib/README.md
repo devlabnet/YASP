@@ -58,7 +58,9 @@ For a more complex exemple, look at samples in the examples directory. All sampl
 </ul>
 
 <h3>YASP Plotting Message Reference</h3>
-YASP gets information for plotting data from specially formatted commands in serial streams. Here is the code details  for each YASP Methods used when sending messages:
+YASP gets information for plotting data from specially formatted commands in serial streams. Here is the code details
+for each YASP Methods used when sending messages:
+
 ```c++
   enum MsgType {
        START_MSG = 0x10,
