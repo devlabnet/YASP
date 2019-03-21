@@ -94,7 +94,8 @@ DISTFILES += \
     yaclLib/library.properties \
     yaclLib/examples/simple/simple.ino \
     yaclLib/examples/calculator/calculator.ino \
-    yaclLib/README.md
+    yaclLib/README.md \
+    yaspLib/README.md
 
 
 

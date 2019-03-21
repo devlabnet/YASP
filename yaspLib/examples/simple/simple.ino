@@ -1,7 +1,6 @@
 #include <yasplib.h>
 yaspLib myPlot(Serial);
 unsigned long loopMillis;
-unsigned long plotMillis;
 int val = 500;
 
 void setup() {
@@ -15,9 +14,9 @@ void setup() {
 
 void loop() {
     if (millis() >= loopMillis) {
-       myPlot.DataMillis(1, loopMillis, val);
-      loopMillis = millis() + 50;
-       myPlot.Data(0, val);
-       val = -val;
+        myPlot.DataMillis(1, loopMillis, val);
+        loopMillis = millis() + 50;
+        myPlot.Data(0, val);
+        val = -val;
     }
 }
