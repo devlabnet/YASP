@@ -47,6 +47,8 @@
 #define IN_PLOT_MSG     3
 #define UNDEFINED       4
 
+#define YASP_MAXPLOT_IND 9 // 0 to 9
+
 #define DEF_YAXIS_RANGE 4000
 #define YAXIS_MAX_RANGE 1000000
 #define PLOT_TIME_DEF 15000.0                           // Default time Displayed in Plot in MilliSeconds

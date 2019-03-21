@@ -56,3 +56,62 @@ For a more complex exemple, look at samples in the examples directory. All sampl
 </li>
 </li>
 </ul>
+
+<h3>YASP Plotting Message Reference</h3>
+YASP gets information for plotting data from specially formatted commands in serial streams. Here is the code details  for each YASP Methods used when sending messages:
+```c++
+  enum MsgType {
+       START_MSG = 0x10,
+       PLOT_MSG = 0x11,
+       END_MSG = 0x12,
+       SPACE_MSG = 0x13
+   };
+
+void yaspLib::Setup(int ind, char* name, char* color) {
+ stream.write(PLOT_MSG);
+ stream.print(ind);
+ stream.write(SPACE_MSG);
+ stream.print(name);
+ stream.write(SPACE_MSG);
+ stream.print(color);
+ stream.write(END_MSG);
+}
+
+void yaspLib::Color(int ind, char* color) {
+ stream.write(PLOT_MSG);
+ stream.print(ind);
+ stream.write(SPACE_MSG);
+ stream.print(color);
+ stream.write(END_MSG);
+}
+
+void yaspLib::Data(int ind, double val) {
+ stream.write(START_MSG);
+ stream.print(ind);
+ stream.write(SPACE_MSG);
+ stream.print(micros());
+ stream.write(SPACE_MSG);
+ stream.print(val);
+ stream.write(END_MSG);
+}
+
+void yaspLib::DataMicros(int ind, unsigned long m, double val) {
+ stream.write(START_MSG);
+ stream.print(ind);
+ stream.write(SPACE_MSG);
+ stream.print(m);
+ stream.write(SPACE_MSG);
+ stream.print(val);
+ stream.write(END_MSG);
+}
+
+void yaspLib::DataMillis(int ind, unsigned long m, double val) {
+ stream.write(START_MSG);
+ stream.print(ind);
+ stream.write(SPACE_MSG);
+ stream.print(m * 1000);
+ stream.write(SPACE_MSG);
+ stream.print(val);
+ stream.write(END_MSG);
+}
+```

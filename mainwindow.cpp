@@ -878,7 +878,7 @@ void MainWindow::onNewPlotDataArrived(const QString& str) {
     QStringList newData = str.split(SPACE_MSG);               // Split string received from port and put it into list
     if (newData.size() > 1) {
         int plotId = newData.at(0).toInt();
-        if ((plotId < 0) || (plotId > 9)) {
+        if ((plotId < 0) || (plotId > YASP_MAXPLOT_IND)) {
             qDebug() << " BAD PLOT ID : " << plotId << " --> " << newData;
             addMessageText(" BAD PLOT ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
             return;
@@ -926,7 +926,7 @@ void MainWindow::onNewDataArrived(const QString &str) {
     QStringList newData = str.split(SPACE_MSG);               // Split string received from port and put it into list
     Q_ASSERT(newData.size() > 0);
     int plotId = newData.at(0).toInt();
-    if ((plotId < 0) || (plotId > 9)) {
+    if ((plotId < 0) || (plotId > YASP_MAXPLOT_IND)) {
         addMessageText(" BAD DATA ID : " + QString::number(plotId) + " --> " + newData.join(" / "), "tomato");
         return;
     }
