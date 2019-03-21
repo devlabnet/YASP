@@ -52,25 +52,30 @@ For a more complex exemple, look at the <strong>"Calculator"</strong> in the exa
 <h3>Predifined MACROS</h3>
 To ease coding, some <strong>Predifined Macros</strong> are available:
 <ul>
-    <li><strong>Get Number</strong> (if no number is available or if not a good number format, YACL_OK will return false) :</li>
+    <li>Get Numeric Value (if no numeric is available or if not a well formated, YACL_OK will return false):</li>
     <ul>
     <li><strong>YACL_GETINT</strong>: Return the next INT in the command Line</li>
     <li><strong>YACL_GETLONG</strong>: Return the next LONG in the command Line</li>
     <li><strong>YACL_GETFLOAT</strong>: Return the next FLOAT in the command Line</li>
+    <li><strong>YACL_OK</strong>: Return false if expected number is not found or is not well formated</li>
     </ul>
+    <li>Get String Value:</li>
+    <ul>
     <li><strong>YACL_GETSTR</strong>: Return the next STRING in the command Line</li>
+    </ul>
+    <li>Print/Write:</li>
+    <ul>
+    <li><strong>YACL_PRINT(x)</strong>: Print x value, this is the same as Serial.print(x)</li>
+    <li><strong>YACL_PRINTLN(x)</strong>: same as Serial.println(x)</li>
+    <li><strong>YACL_PRINT2(x, y)</strong>: Print x value in specific format, this is the same as Serial.print(x, FORMAT)</li>
+    <li><strong>YACL_PRINTLN2(x, y)</strong>: same as Serial.println(x, FORMAT)</li>
+    <li><strong>YACL_WRITE(x)</strong>: Writes binary data to the serial port</li>
+    </ul>
+    </ul>
+    <li>Last Token:</li>
+    <ul>
+    <li><strong>YACL_TOKEN</strong>: Retuen the last command line token found</li>
     </ul>
 </ul>
 
-#define YACL_GETINT ENGINE->readNumber()
-#define YACL_GETLONG ENGINE->readLong()
-#define YACL_GETFLOAT ENGINE->readFloat()
-#define YACL_GETSTR ENGINE->readWord()
-#define YACL_OK ENGINE->readOk()
-#define YACL_PRINT(x) ENGINE->stream.print(x)
-#define YACL_PRINTLN(x) ENGINE->stream.println(x)
-#define YACL_PRINT2(x, y) ENGINE->stream.print(x, y)
-#define YACL_PRINTLN2(x, y) ENGINE->stream.println(x, y)
-#define YACL_WRITE(x) ENGINE->stream.write(x)
-#define YACL_TOKEN ENGINE->token()
 
