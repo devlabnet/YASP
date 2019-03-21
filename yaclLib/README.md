@@ -71,7 +71,6 @@ To ease coding, some <strong>Predifined Macros</strong> are available:
     <li><strong>YACL_PRINTLN2(x, y)</strong>: same as Serial.println(x, FORMAT)</li>
     <li><strong>YACL_WRITE(x)</strong>: Writes binary data to the serial port</li>
     </ul>
-    </ul>
     <li>Last Token:</li>
     <ul>
     <li><strong>YACL_TOKEN</strong>: Retuen the last command line token found</li>
