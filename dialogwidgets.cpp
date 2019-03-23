@@ -9,6 +9,7 @@
 // Widgets
 #include "sliderwidget.h"
 #include "dialwidget.h"
+#include "buttonwidget.h"
 
 DialogWidgets::DialogWidgets(QSerialPort* p, QWidget *parent) :
     QDialog(parent),
@@ -72,6 +73,9 @@ void DialogWidgets::createWidget(QString type, QDomElement* domElt) {
     } else if (type == "Slider") {
         widget = new sliderWidget(this, domElt);
         widget->show();
+    } else if (type == "Button") {
+        widget = new buttonWidget(this, domElt);
+        widget->show();
     }
     if (widget != nullptr) {
         widget->setFocus();
@@ -79,7 +83,17 @@ void DialogWidgets::createWidget(QString type, QDomElement* domElt) {
         ui->tableWidgets->setRowCount(rCount + 1);
         ui->tableWidgets->setCellWidget(rCount, 0, widget);
         ui->tableWidgets->resizeRowsToContents();
+        QTableWidgetItem* item = ui->tableWidgets->item(rCount, 0);
+        qDebug() << "-->" << ui->tableWidgets->rowCount() << " item " << item;
+        ui->tableWidgets->scrollToItem(item);
     }
+}
+
+void DialogWidgets::adjustSize() {
+    ui->tableWidgets->resizeRowsToContents();
+//    for (int i = ui->tableWidgets->rowCount()-1; i >= 0; i--) {
+//    ui->tableWidgets->resizeRowToContents(i);
+//    }
 }
 
 void DialogWidgets::on_addWidgetBtn_clicked()

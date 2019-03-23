@@ -20,6 +20,7 @@ public:
     ~DialogWidgets();
     QTableWidget* getTableWidget();
     void sendToPort(QString msg);
+    void adjustSize();
 public slots:
 //    void deleteRow(QWidget* w);
     void setSerialPort(QSerialPort* p) {

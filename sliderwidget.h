@@ -9,8 +9,7 @@
 
 #define sliderDivider 1000.0
 
-class sliderWidget : public customWidget
-{
+class sliderWidget : public customWidget {
     Q_OBJECT
 public:
     explicit sliderWidget(QWidget *parent, QDomElement* domElt = nullptr);
@@ -38,7 +37,6 @@ public slots:
 private slots:
     void slideValue(int value);
     void trackingToggle(bool t);
-
     void setMinimumSlide(double v);
     void setMaximumSlide(double v);
     void setSingleStepSlide(double v);

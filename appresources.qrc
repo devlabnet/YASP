@@ -20,6 +20,11 @@
         <file>Icons/Oscilloscope-128.ico</file>
         <file>Icons/icons8-line-width-40.png</file>
         <file>Icons/icons8-sonometer-48.png</file>
+        <file>Icons/icons8-natural-user-interface-2-48.png</file>
+        <file>Icons/icons8-toggle-on-48.png</file>
+        <file>Icons/icons8-toggle-off-48.png</file>
+        <file>Icons/icons8-bouton-de-radio-non-coché-48.png</file>
+        <file>Icons/icons8-bouton-urgence-48.png</file>
     </qresource>
     <qresource prefix="/StyleSheet">
         <file>StyleSheet/style.qss</file>

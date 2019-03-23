@@ -9,9 +9,9 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     dw = qobject_cast<DialogWidgets*>(parent);
     Q_ASSERT( dw != nullptr ); // Check that a cast was successfull
 
-    qDebug() << "customWidget ----> " << domElt;
 
     if (domElt != nullptr) {
+        qDebug() << "customWidget ----> " << domElt;
         QDomElement Child = *domElt;
         bool cmdIdFound = false;
         while (!Child.isNull() && !cmdIdFound) {
@@ -27,6 +27,7 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
         }
     }
 
+    this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     layout = new QVBoxLayout();
     onglets = new QTabWidget();
     layout->addWidget(onglets);
@@ -48,6 +49,7 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     cmdLabelId->setStyleSheet("font-weight: bold; color: blue");
     cmdLabelLine = new QLineEdit();
     cmdLabelValue = new QLabel(commandIdStr);
+    cmdLabelValue->setStyleSheet("font-weight: bold;");
     cmdLabelLine->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     cmdLabelLine->setText(commandIdStr);
     cmdLabelLine->setMaxLength(5);
@@ -55,6 +57,7 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     hBoxInfos->addWidget(cmdLabelValue);
     controlsLayout = new QGridLayout;
     commandLabel = new QLabel("Command Label");
+    commandLabel->setStyleSheet("font-weight: bold;");
     controlsLayout->addWidget(commandLabel, 0, 0);
     controlsLayout->addWidget(cmdLabelLine, 0, 1);
     connect(cmdLabelLine, SIGNAL(editingFinished()), this, SLOT(cmdIdEditingFinished()));
@@ -64,6 +67,7 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     vBoxSettings = new QVBoxLayout;
     vBoxSettings->addLayout(controlsLayout);
     settingsPage->setLayout(vBoxSettings);
+    settingsPage->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
 //    // helpPage
 //    QVBoxLayout *vboxHelp = new QVBoxLayout;
@@ -85,10 +89,17 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     onglets->addTab(cmdPage, "Command");
     onglets->addTab(settingsPage, "Settings");
 //    onglets->addTab(helpPage, "Help");
+    onglets->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     onglets->setTabEnabled(0, (!cmdLabelLine->text().isEmpty()));
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
             this, SLOT(ShowContextMenu(const QPoint &)));
+    connect(onglets, SIGNAL(currentChanged(int)), this, SLOT(currentTabChanged(int)));
+}
+
+void customWidget::currentTabChanged(int i) {
+//    qDebug()  << "currentTabChanged " << i << " -> sizeHint " << sizeHint();
+    adjustSize();
 }
 
 void customWidget::ShowContextMenu(const QPoint &pos)
@@ -112,6 +123,16 @@ void customWidget::deleteWidget() {
             }
         }
     }
+}
+
+void customWidget::adjustSize() {
+//    qDebug() << "layout->totalSizeHint " << layout->totalSizeHint();
+//    qDebug() << "sizeHint " << sizeHint();
+    hide();
+    show();
+//    qDebug() << "sizeHint " << sizeHint();
+//    qDebug() << vBoxSettings->totalSizeHint();
+    dw->adjustSize();
 }
 
 void customWidget::sendToPort(double v) {

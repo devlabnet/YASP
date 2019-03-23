@@ -2,8 +2,8 @@
   "updates": {
     "windows": {
       "open-url": "",
-      "latest-version": "1.1",
-      "download-url": "https://github.com/devlabnet/YASP/blob/master/installer/YASP_Setup.exe?raw=true",
+      "latest-version": "1.1.0",
+      "download-url": "https://www.devlabnet.eu/softdev/yasp/yasp.php",
       "changelog": "<FONT COLOR='#800000'><ol>
       <li>Added to GITHUB</li>
       <li>Added ability to Save log</li>

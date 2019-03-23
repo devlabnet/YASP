@@ -10,8 +10,7 @@
 #include <QDoubleSpinBox>
 #include <QRadioButton>
 
-sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget (parent, domElt)
-{
+sliderWidget::sliderWidget(QWidget *parent, QDomElement *domElt) : customWidget (parent, domElt) {
 //    // help Page
 //    help->setHtml("<h2>Help sliderWidget</h2>");
 

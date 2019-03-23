@@ -39,15 +39,15 @@ protected:
 //    QTextEdit *help;
     QLineEdit* cmdLabelLine;
     void sendToPort(double v);
-
+    void adjustSize();
 signals:
 
 public slots:
+    void currentTabChanged(int i);
 private slots:
     void deleteWidget();
     void ShowContextMenu(const QPoint &pos);
     void cmdIdEditingFinished();
-
 };
 
 #endif // CUSTOMWIDGET_H

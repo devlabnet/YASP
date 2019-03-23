@@ -30,6 +30,11 @@
        <widget class="QComboBox" name="comboBoxWidgets">
         <item>
          <property name="text">
+          <string>Button</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>Slider</string>
          </property>
         </item>
@@ -54,7 +59,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="tableWidgets"/>
+    <widget class="QTableWidget" name="tableWidgets">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

@@ -40,7 +40,8 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     qcustomplot.cpp \
     sliderwidget.cpp \
-    yaspgraph.cpp
+    yaspgraph.cpp \
+    buttonwidget.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
@@ -61,7 +62,8 @@ HEADERS  += mainwindow.hpp \
     qcustomplot.h \
     sliderwidget.h \
     tabwidget.h \
-    yaspgraph.h
+    yaspgraph.h \
+    buttonwidget.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
