@@ -98,6 +98,7 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
 }
 
 void customWidget::currentTabChanged(int i) {
+    Q_UNUSED(i);
 //    qDebug()  << "currentTabChanged " << i << " -> sizeHint " << sizeHint();
     adjustSize();
 }
