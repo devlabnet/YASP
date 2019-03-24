@@ -95,6 +95,16 @@ customWidget::customWidget(QWidget *parent, QDomElement *domElt) : QWidget(paren
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
             this, SLOT(ShowContextMenu(const QPoint &)));
     connect(onglets, SIGNAL(currentChanged(int)), this, SLOT(currentTabChanged(int)));
+//    // Add Border
+//    this->setObjectName("hello");
+//    this->setWindowFlags(Qt::FramelessWindowHint);
+// qDebug()  << "border " << this->objectName();
+//    this->setStyleSheet(
+//                "#hello{"
+//                "border: 4px solid red;"
+//                "padding: 6px; }"
+//                );
+
 }
 
 void customWidget::currentTabChanged(int i) {
