@@ -36,6 +36,7 @@
 #include <QTime>
 #include "yaspgraph.h"
 #include <QNetworkAccessManager>
+#include "widgetsWindow.h"
 
 #define START_MSG      0x10
 #define PLOT_MSG       0X11
@@ -176,6 +177,7 @@ private:
     QByteArray data;
     HelpWindow *helpWindow = nullptr;
     DialogWidgets *widgets = nullptr;
+    widgetsWindow* widgetsW = nullptr;
     QFile* logFile = nullptr;
     QTextStream streamLog;
     QFile* logData = nullptr;

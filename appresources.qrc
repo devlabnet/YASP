@@ -25,6 +25,8 @@
         <file>Icons/icons8-toggle-off-48.png</file>
         <file>Icons/icons8-bouton-de-radio-non-coché-48.png</file>
         <file>Icons/icons8-bouton-urgence-48.png</file>
+        <file>Icons/icons8-données-dans-les-deux-directions-48.png</file>
+        <file>Icons/icons8-supprimer-pour-toujours-48.png</file>
     </qresource>
     <qresource prefix="/StyleSheet">
         <file>StyleSheet/style.qss</file>

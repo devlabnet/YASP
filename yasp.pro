@@ -41,7 +41,12 @@ SOURCES += main.cpp\
     qcustomplot.cpp \
     sliderwidget.cpp \
     yaspgraph.cpp \
-    buttonwidget.cpp
+    buttonwidget.cpp \
+    clickablelabel.cpp \
+    dialw.cpp \
+    sliderw.cpp \
+    widgetsWindow.cpp \
+    widgetsarealayout.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
@@ -63,12 +68,20 @@ HEADERS  += mainwindow.hpp \
     sliderwidget.h \
     tabwidget.h \
     yaspgraph.h \
-    buttonwidget.h
+    buttonwidget.h \
+    clickablelabel.h \
+    dialw.h \
+    sliderw.h \
+    widgetsarealayout.h \
+    widgetsWindow.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
     dialogwidgets.ui \
-    formsliderinfo.ui
+    formsliderinfo.ui \
+    sliderW.ui \
+    dialW.ui \
+    widgetsWindow.ui
 
 RESOURCES += \
     appresources.qrc \
