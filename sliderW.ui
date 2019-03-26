@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>sliderw</class>
- <widget class="QWidget" name="sliderw">
+ <widget class="boxWidget" name="sliderw">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -148,7 +148,7 @@ border: 2px solid rgb(0, 170, 255);
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tabCommand">
          <property name="sizePolicy">
@@ -188,6 +188,43 @@ border: 2px solid rgb(0, 170, 255);
            <widget class="QSlider" name="slider">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Command Id</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_4">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>00</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -241,7 +278,7 @@ border: 2px solid rgb(0, 170, 255);
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+           <widget class="QDoubleSpinBox" name="minSpin"/>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="Max">
@@ -257,7 +294,7 @@ border: 2px solid rgb(0, 170, 255);
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+           <widget class="QDoubleSpinBox" name="maxSpin"/>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="Step">
@@ -273,7 +310,7 @@ border: 2px solid rgb(0, 170, 255);
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_3"/>
+           <widget class="QDoubleSpinBox" name="stepSpin"/>
           </item>
           <item row="4" column="0">
            <widget class="QRadioButton" name="Tracking">
@@ -302,6 +339,12 @@ border: 2px solid rgb(0, 170, 255);
    <class>ClickableLabel</class>
    <extends>QLabel</extends>
    <header>clickablelabel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>boxWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">boxwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

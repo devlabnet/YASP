@@ -19,7 +19,7 @@ WidgetsAreaLayout::~WidgetsAreaLayout() {
         delete item;
 }
 
-void WidgetsAreaLayout::widgetMoveClicked(QWidget *li, Qt::MouseButton b) {
+void WidgetsAreaLayout::widgetMoveClicked(boxWidget *li, Qt::MouseButton b) {
     if (widgetsList.size() <2) return;
     int ind = widgetsList.indexOf(li);
     if (b == Qt::LeftButton) {
@@ -35,7 +35,7 @@ void WidgetsAreaLayout::widgetMoveClicked(QWidget *li, Qt::MouseButton b) {
      qDebug() << "FlowLayout::labelClicked " << ind;
 }
 
-void WidgetsAreaLayout::widgetDelClicked(QWidget *li) {
+void WidgetsAreaLayout::widgetDelClicked(boxWidget *li) {
      qDebug() << "WidgetsAreaLayout::widgetDelClicked " << li;
      if (widgetsList.removeOne(li)) {
         delete li;
@@ -43,16 +43,33 @@ void WidgetsAreaLayout::widgetDelClicked(QWidget *li) {
      }
 }
 
+bool WidgetsAreaLayout::checkWidgetId(boxWidget* wFrom, QString id) {
+    if (id.isEmpty()) {
+        QMessageBox msgBox;
+        msgBox.setText("Command ID cannot be empty !!!.");
+        msgBox.exec();
+        return false;
+    }
+    foreach (boxWidget* w, widgetsList) {
+        if (w == wFrom) continue;
+        if (w->getId() == id) {
+            QMessageBox msgBox;
+            msgBox.setText("Command ID already used by another Widget !!!.");
+            msgBox.exec();
+            return false;
+        }
+    }
+    return true;
+}
+
 void WidgetsAreaLayout::addItem(QLayoutItem*) {
 }
 
-void WidgetsAreaLayout::addWidget(QWidget *w) {
+void WidgetsAreaLayout::addWidget(boxWidget *w) {
     QLayout::addWidget(w);
     widgetsList.append(w);
 }
-//! [3]
 
-//! [4]
 int WidgetsAreaLayout::horizontalSpacing() const
 {
     if (m_hSpace >= 0) {

@@ -1,26 +1,26 @@
 #ifndef DIALW_H
 #define DIALW_H
 
-#include <QWidget>
+#include "boxwidget.h"
 
 namespace Ui {
 class dialw;
 }
 
-class dialW : public QWidget
+class dialW : public boxWidget
 {
     Q_OBJECT
 
 public:
-    explicit dialW(QString name, QWidget *parent = nullptr);
+    explicit dialW(QString name, boxWidget *parent = nullptr);
     ~dialW();
-
-private:
+    QString getId();
+protected:
     Ui::dialw *ui;
 private slots:
     void updateTabSizes(int index);
-    void labelMoveClicked(Qt::MouseButton b);
-    void labelDelClicked(Qt::MouseButton b);
+//    void labelMoveClicked(Qt::MouseButton b);
+//    void labelDelClicked(Qt::MouseButton b);
     void on_cmdLabel_editingFinished();
 };
 

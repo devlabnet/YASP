@@ -4,22 +4,7 @@
 #include <QLayout>
 #include <QRect>
 #include <QStyle>
-#include <QWidget>
-
-template <typename T>
-void packTabs(T *stacked)
-{
-   for(int i=0; i<stacked->count(); i++) {
-       stacked->widget(i)->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-   }
-   QWidget *widget=stacked->currentWidget();
-   widget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-   widget->resize(widget->minimumSizeHint());
-   widget->adjustSize();
-   stacked->resize(stacked->minimumSizeHint());
-   stacked->adjustSize();
-}
-
+#include "boxwidget.h"
 
 class WidgetsAreaLayout : public QLayout
 {
@@ -32,7 +17,7 @@ public:
 
 
     void addItem(QLayoutItem *) override;
-    void addWidget(QWidget *w);
+    void addWidget(boxWidget *w);
 
     int horizontalSpacing() const;
     int verticalSpacing() const;
@@ -45,14 +30,15 @@ public:
     void setGeometry(const QRect &rect) override;
     QSize sizeHint() const override;
     QLayoutItem *takeAt(int index) override;
-    void widgetMoveClicked(QWidget *li, Qt::MouseButton b);
-    void widgetDelClicked(QWidget *li);
+    void widgetMoveClicked(boxWidget *li, Qt::MouseButton b);
+    void widgetDelClicked(boxWidget *li);
+    bool checkWidgetId(boxWidget* wFrom, QString id);
 
 private:
     int doLayout(const QRect &rect, bool testOnly) const;
     int smartSpacing(QStyle::PixelMetric pm) const;
 
-    QList<QWidget *> widgetsList;
+    QList<boxWidget*> widgetsList;
     int m_hSpace;
     int m_vSpace;
 

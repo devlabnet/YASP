@@ -3,9 +3,7 @@
 #include <QDebug>
 #include "widgetsarealayout.h"
 
-dialW::dialW(QString name, QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::dialw) {
+dialW::dialW(QString name, boxWidget *parent) : boxWidget(parent), ui(new Ui::dialw) {
     ui->setupUi(this);
     ui->label->setText(name);
     ui->tabBox->setTabEnabled(0, !ui->cmdLabel->text().isEmpty());
@@ -18,21 +16,30 @@ dialW::~dialW() {
     delete ui;
 }
 
+QString dialW::getId() {
+    return ui->cmdLabel->text();
+}
+
 void dialW::updateTabSizes(int index) {
     Q_UNUSED(index);
     packTabs(ui->tabBox);
 }
 
-void dialW::labelMoveClicked(Qt::MouseButton b) {
-    dynamic_cast<WidgetsAreaLayout*>(this->parentWidget()->layout())->widgetMoveClicked(this, b);
-}
-
-void dialW::labelDelClicked(Qt::MouseButton b) {
-    Q_UNUSED(b);
-    qDebug() << "dialW::labelDelClicked";
-    dynamic_cast<WidgetsAreaLayout*>(this->parentWidget()->layout())->widgetDelClicked(this);
-}
-
 void dialW::on_cmdLabel_editingFinished() {
-    ui->tabBox->setTabEnabled(0, !ui->cmdLabel->text().isEmpty());
+    // Check for duplicate
+    QString newId = ui->cmdLabel->text();
+    if (checkId(newId)) {
+        id = newId;
+        ui->tabBox->setTabEnabled(0, true);
+    } else {
+        // restore last id
+        ui->cmdLabel->setText(id);
+        if (id.isEmpty()) {
+            ui->tabBox->setTabEnabled(0, false);
+        }
+    }
+    ui->cmdLabelId->setText(id);
+//    ui->cmdLabelId.
+//    ui->cmd->setText(cmdLabelLine->text());
+
 }

@@ -46,7 +46,8 @@ SOURCES += main.cpp\
     widgetsWindow.cpp \
     widgetsarealayout.cpp \
     dialw.cpp \
-    sliderw.cpp
+    sliderw.cpp \
+    boxwidget.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
@@ -73,7 +74,8 @@ HEADERS  += mainwindow.hpp \
     widgetsarealayout.h \
     widgetsWindow.h \
     sliderw.h \
-    dialw.h
+    dialw.h \
+    boxwidget.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \

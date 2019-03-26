@@ -1,26 +1,25 @@
 #ifndef SLIDERW_H
 #define SLIDERW_H
 
-#include <QWidget>
-#include <QLayoutItem>
+#include "boxwidget.h"
 
 namespace Ui {
 class sliderw;
 }
 
-class SliderW : public QWidget {
+class SliderW : public boxWidget {
     Q_OBJECT
 
 public:
-    explicit SliderW(QString name, QWidget *parent = nullptr);
+    explicit SliderW(QString name, boxWidget *parent = nullptr);
     ~SliderW();
 signals:
 
 private slots:
     void updateTabSizes(int index);
-    void labelMoveClicked(Qt::MouseButton b);
-    void labelDelClicked(Qt::MouseButton b);
     void on_cmdLabel_editingFinished();
+    void slideValueChanged(int v);
+    void slideStepChanged(double v);
 
 protected:
 //    void enterEvent(QEvent * event);
@@ -28,6 +27,11 @@ protected:
 
 private:
     Ui::sliderw *ui;
+    double sliderDivider = 1000;
+    double maxValRange = 1000;
+    double minValRange = -1000;
+    int singleStep;
+    double value;
 };
 
 #endif // SLIDERW_H
