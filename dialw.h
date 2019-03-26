@@ -18,6 +18,7 @@ public:
 private:
     Ui::dialw *ui;
 private slots:
+    void updateTabSizes(int index);
     void labelMoveClicked(Qt::MouseButton b);
     void labelDelClicked(Qt::MouseButton b);
     void on_cmdLabel_editingFinished();

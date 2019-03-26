@@ -208,7 +208,8 @@ bool MainWindow::compareVersions(const QString& x, const QString& y) {
         int b = QString (versionsY.at (i)).toInt();
         if (a > b) {
             return true;
-        } else if (b > a) {
+        }
+        if (b > a) {
             return false;
         }
     }
@@ -675,9 +676,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
                 resetTracer();
                 plotLabelSelectionChanged(true);
                 return;
-            } else {
-                unselectGraphs();
             }
+            unselectGraphs();
         }
     }
     if( event->modifiers() == Qt::ShiftModifier ) {
@@ -1038,7 +1038,8 @@ bool MainWindow::checkEndMsgMissed( char cc) {
         receivedData.clear();
         STATE = IN_MESSAGE;
         return true;
-     } else if ( cc == PLOT_MSG) {
+     }
+     if ( cc == PLOT_MSG) {
         // Houps, seems we missed the END_MSG (maybe an external reset of the device !)
         // Just start PLOT_MSG scanning again
         qDebug() << "MISSED IN_PLOT_MSG !! State: " << STATE;
@@ -1050,8 +1051,6 @@ bool MainWindow::checkEndMsgMissed( char cc) {
         receivedData.clear();
         STATE = IN_PLOT_MSG;
         return true;
-    } else {
-        //qDebug() << "MISSED -> " << STATE << " / " << hex << cc;
     }
     return false;
 }

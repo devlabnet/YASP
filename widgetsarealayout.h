@@ -4,9 +4,23 @@
 #include <QLayout>
 #include <QRect>
 #include <QStyle>
-#include "sliderw.h"
+#include <QWidget>
 
-//! [0]
+template <typename T>
+void packTabs(T *stacked)
+{
+   for(int i=0; i<stacked->count(); i++) {
+       stacked->widget(i)->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+   }
+   QWidget *widget=stacked->currentWidget();
+   widget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+   widget->resize(widget->minimumSizeHint());
+   widget->adjustSize();
+   stacked->resize(stacked->minimumSizeHint());
+   stacked->adjustSize();
+}
+
+
 class WidgetsAreaLayout : public QLayout
 {
     Q_OBJECT
@@ -15,6 +29,7 @@ public:
     explicit WidgetsAreaLayout(QWidget *parent, int margin = -1, int hSpacing = -1, int vSpacing = -1);
     explicit WidgetsAreaLayout(int margin = -1, int hSpacing = -1, int vSpacing = -1);
     ~WidgetsAreaLayout() override;
+
 
     void addItem(QLayoutItem *) override;
     void addWidget(QWidget *w);

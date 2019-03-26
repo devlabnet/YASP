@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>200</width>
-    <height>254</height>
+    <height>0</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -151,7 +151,7 @@ border: 2px solid rgb(0, 255, 127);
          </font>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="usesScrollButtons">
          <bool>true</bool>
