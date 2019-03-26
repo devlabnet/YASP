@@ -30,7 +30,9 @@ public:
     void setGeometry(const QRect &rect) override;
     QSize sizeHint() const override;
     QLayoutItem *takeAt(int index) override;
-    void formClicked(QWidget *li, Qt::MouseButton b);
+    void widgetMoveClicked(QWidget *li, Qt::MouseButton b);
+    void widgetDelClicked(QWidget *li);
+
 private:
     int doLayout(const QRect &rect, bool testOnly) const;
     int smartSpacing(QStyle::PixelMetric pm) const;

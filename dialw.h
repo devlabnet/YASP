@@ -1,10 +1,10 @@
-#ifndef DIALWIDGET_H
-#define DIALWIDGET_H
+#ifndef DIALW_H
+#define DIALW_H
 
 #include <QWidget>
 
 namespace Ui {
-class dialW;
+class dialw;
 }
 
 class dialW : public QWidget
@@ -16,10 +16,11 @@ public:
     ~dialW();
 
 private:
-    Ui::dialW *ui;
+    Ui::dialw *ui;
 private slots:
-    void on_checkBox_stateChanged(int arg1);
-    void labelClicked(Qt::MouseButton b);
+    void labelMoveClicked(Qt::MouseButton b);
+    void labelDelClicked(Qt::MouseButton b);
+    void on_cmdLabel_editingFinished();
 };
 
-#endif // DIALWIDGET_H
+#endif // DIALW_H

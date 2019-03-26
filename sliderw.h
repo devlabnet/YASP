@@ -1,11 +1,11 @@
-#ifndef FORM_H
-#define FORM_H
+#ifndef SLIDERW_H
+#define SLIDERW_H
 
 #include <QWidget>
 #include <QLayoutItem>
 
 namespace Ui {
-class sliderW;
+class sliderw;
 }
 
 class SliderW : public QWidget {
@@ -17,14 +17,16 @@ public:
 signals:
 
 private slots:
-    void on_checkBox_stateChanged(int arg1);
-    void labelClicked(Qt::MouseButton b);
+    void labelMoveClicked(Qt::MouseButton b);
+    void labelDelClicked(Qt::MouseButton b);
+    void on_cmdLabel_editingFinished();
+
 protected:
 //    void enterEvent(QEvent * event);
 //    void mouseMoveEvent(QMouseEvent * event);
 
 private:
-    Ui::sliderW *ui;
+    Ui::sliderw *ui;
 };
 
-#endif // FORM_H
+#endif // SLIDERW_H

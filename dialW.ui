@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>dialW</class>
- <widget class="QWidget" name="dialW">
+ <class>dialw</class>
+ <widget class="QWidget" name="dialw">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>200</width>
+    <height>254</height>
+   </rect>
+  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
     <horstretch>0</horstretch>
     <verstretch>14</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>200</width>
+    <height>254</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -14,6 +28,12 @@
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
     <widget class="QFrame" name="frame">
+     <property name="minimumSize">
+      <size>
+       <width>186</width>
+       <height>240</height>
+      </size>
+     </property>
      <property name="font">
       <font>
        <family>Tahoma</family>
@@ -66,7 +86,7 @@ border: 2px solid rgb(0, 255, 127);
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>40</width>
+            <width>10</width>
             <height>20</height>
            </size>
           </property>
@@ -96,16 +116,19 @@ border: 2px solid rgb(0, 255, 127);
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>40</width>
+            <width>10</width>
             <height>20</height>
            </size>
           </property>
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="ClickableLabel" name="labelDel">
           <property name="text">
            <string/>
           </property>
@@ -128,7 +151,7 @@ border: 2px solid rgb(0, 255, 127);
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <property name="usesScrollButtons">
          <bool>true</bool>

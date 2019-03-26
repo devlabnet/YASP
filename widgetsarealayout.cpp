@@ -19,7 +19,7 @@ WidgetsAreaLayout::~WidgetsAreaLayout() {
         delete item;
 }
 
-void WidgetsAreaLayout::formClicked(QWidget *li, Qt::MouseButton b) {
+void WidgetsAreaLayout::widgetMoveClicked(QWidget *li, Qt::MouseButton b) {
     if (widgetsList.size() <2) return;
     int ind = widgetsList.indexOf(li);
     if (b == Qt::LeftButton) {
@@ -33,6 +33,14 @@ void WidgetsAreaLayout::formClicked(QWidget *li, Qt::MouseButton b) {
         update();
     }
      qDebug() << "FlowLayout::labelClicked " << ind;
+}
+
+void WidgetsAreaLayout::widgetDelClicked(QWidget *li) {
+     qDebug() << "WidgetsAreaLayout::widgetDelClicked " << li;
+     if (widgetsList.removeOne(li)) {
+        delete li;
+        update();
+     }
 }
 
 void WidgetsAreaLayout::addItem(QLayoutItem*) {
