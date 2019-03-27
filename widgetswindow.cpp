@@ -1,5 +1,5 @@
-#include "widgetsWindow.h"
-#include "ui_widgetsWindow.h"
+#include "widgetswindow.h"
+#include "ui_widgetswindow.h"
 #include "sliderw.h"
 #include "dialw.h"
 #include <QDebug>

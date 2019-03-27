@@ -1,6 +1,6 @@
 #include <QtWidgets>
 #include "widgetsarealayout.h"
-#include "widgetsWindow.h"
+#include "widgetswindow.h"
 
 WidgetsAreaLayout::WidgetsAreaLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
     : QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing)

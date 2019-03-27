@@ -43,11 +43,11 @@ SOURCES += main.cpp\
     yaspgraph.cpp \
     buttonwidget.cpp \
     clickablelabel.cpp \
-    widgetsWindow.cpp \
     widgetsarealayout.cpp \
     dialw.cpp \
     sliderw.cpp \
-    boxwidget.cpp
+    boxwidget.cpp \
+    widgetswindow.cpp
 
 HEADERS  += mainwindow.hpp \
     		qcustomplot.h \
@@ -72,10 +72,10 @@ HEADERS  += mainwindow.hpp \
     buttonwidget.h \
     clickablelabel.h \
     widgetsarealayout.h \
-    widgetsWindow.h \
     sliderw.h \
     dialw.h \
-    boxwidget.h
+    boxwidget.h \
+    widgetswindow.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \

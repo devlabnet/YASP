@@ -36,7 +36,7 @@
 #include <QTime>
 #include "yaspgraph.h"
 #include <QNetworkAccessManager>
-#include "widgetsWindow.h"
+#include "widgetswindow.h"
 
 #define START_MSG      0x10
 #define PLOT_MSG       0X11
