@@ -18,7 +18,7 @@ SliderW::SliderW(QDomElement* dom, boxWidget *parent) :
         while (!Child.isNull()) {
             // Read Name and value
             if (Child.tagName() == "CMD_ID") {
-                QString id = Child.firstChild().toText().data();
+                id = Child.firstChild().toText().data();
                 ui->labelId->setText(id);
                 ui->cmdLabel->setText(id);
                 ui->label->setText("Slider " + id);
