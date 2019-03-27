@@ -19,6 +19,7 @@ public:
     void addItem(QLayoutItem *) override;
     void addWidget(boxWidget *w);
     void sendToPort(QString str);
+    void saveXml(QDomDocument& doc);
 
     int horizontalSpacing() const;
     int verticalSpacing() const;
@@ -34,6 +35,7 @@ public:
     void widgetMoveClicked(boxWidget *li, Qt::MouseButton b);
     void widgetDelClicked(boxWidget *li);
     bool checkWidgetId(boxWidget* wFrom, QString id);
+    void cleanWidgets();
 
 private:
     int doLayout(const QRect &rect, bool testOnly) const;

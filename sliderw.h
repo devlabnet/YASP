@@ -11,7 +11,7 @@ class SliderW : public boxWidget {
     Q_OBJECT
 
 public:
-    explicit SliderW(QString name, boxWidget *parent = nullptr);
+    explicit SliderW(QDomElement* dom = nullptr, boxWidget *parent = nullptr);
     ~SliderW();
 signals:
 
@@ -36,6 +36,7 @@ private:
     int singleStep;
     int value;
     void updateInfo();
+    void buildXml(QDomDocument& doc);
 };
 
 #endif // SLIDERW_H

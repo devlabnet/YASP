@@ -15,9 +15,20 @@ WidgetsAreaLayout::WidgetsAreaLayout(int margin, int hSpacing, int vSpacing)
 }
 
 WidgetsAreaLayout::~WidgetsAreaLayout() {
+    cleanWidgets();
+}
+
+void WidgetsAreaLayout::cleanWidgets() {
     QLayoutItem *item;
-    while ((item = takeAt(0)))
+    while ((item = takeAt(0))) {
         delete item;
+    }
+}
+
+void WidgetsAreaLayout::saveXml(QDomDocument& doc) {
+    foreach (boxWidget* bw, widgetsList) {
+        bw->buildXml(doc);
+    }
 }
 
 void WidgetsAreaLayout::sendToPort(QString str) {

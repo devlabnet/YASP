@@ -2,6 +2,7 @@
 #define BOWWIDGET_H
 
 #include <QWidget>
+#include <QDomDocument>
 
 template <typename T>
 void packTabs(T *stacked) {
@@ -22,6 +23,7 @@ class boxWidget : public QWidget
 public:
     explicit boxWidget(QWidget *parent = nullptr);
     QString getId() { return id; }
+    virtual void buildXml(QDomDocument& doc) = 0;
 
 private:
 

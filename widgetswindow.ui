@@ -60,17 +60,25 @@
    </property>
    <widget class="QMenu" name="menuWidgets">
     <property name="title">
-     <string>Widgets</string>
+     <string>Add Widget</string>
     </property>
     <addaction name="actionAdd_SliderWidget"/>
     <addaction name="actionAdd_Dial_Widget"/>
    </widget>
+   <widget class="QMenu" name="menuWidgets_2">
+    <property name="title">
+     <string>Widgets</string>
+    </property>
+    <addaction name="actionLoad"/>
+    <addaction name="actionSave"/>
+   </widget>
+   <addaction name="menuWidgets_2"/>
    <addaction name="menuWidgets"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAdd_SliderWidget">
    <property name="text">
-    <string>Add Slider Widget</string>
+    <string>Slider</string>
    </property>
    <property name="toolTip">
     <string>Add Slider Widget</string>
@@ -78,7 +86,17 @@
   </action>
   <action name="actionAdd_Dial_Widget">
    <property name="text">
-    <string>Add Dial Widget</string>
+    <string>Dial</string>
+   </property>
+  </action>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
    </property>
   </action>
  </widget>

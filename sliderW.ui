@@ -148,7 +148,7 @@ border: 2px solid rgb(0, 170, 255);
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tabCommand">
          <property name="sizePolicy">

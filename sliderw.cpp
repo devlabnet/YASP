@@ -3,16 +3,40 @@
 #include <QDebug>
 #include "widgetsarealayout.h"
 
-SliderW::SliderW(QString name, boxWidget *parent) :
+SliderW::SliderW(QDomElement* dom, boxWidget *parent) :
     boxWidget(parent),
     ui(new Ui::sliderw) {
     ui->setupUi(this);
-    ui->label->setText(name);
+    ui->label->setText("Slider");
     ui->labelId->setText("");
+    ui->Tracking->setChecked(false);
     ui->slider->setTracking(false);
-    ui->tabBox->setTabEnabled(0, !ui->cmdLabel->text().isEmpty());
     value = (maxValRange + minValRange)/2;
     singleStep = abs(maxValRange - minValRange)/20;
+    if (dom != nullptr) {
+        QDomElement Child = *dom;
+        while (!Child.isNull()) {
+            // Read Name and value
+            if (Child.tagName() == "CMD_ID") {
+                QString id = Child.firstChild().toText().data();
+                ui->labelId->setText(id);
+                ui->cmdLabel->setText(id);
+                ui->label->setText("Slider " + id);
+            }
+            if (Child.tagName() == "VALUE") value = Child.firstChild().toText().data().toInt();
+            if (Child.tagName() == "VALUE_MIN") minValRange = Child.firstChild().toText().data().toInt();
+            if (Child.tagName() == "VALUE_MAX") maxValRange = Child.firstChild().toText().data().toInt();
+            if (Child.tagName() == "VALUE_STEP") singleStep = Child.firstChild().toText().data().toInt();
+            if (Child.tagName() == "TRACKING") {
+                bool track = (Child.firstChild().toText().data() == "1");
+                ui->slider->setTracking(track);
+                ui->Tracking->setChecked(track);
+            }
+            // Next child
+            Child = Child.nextSibling().toElement();
+        }
+    }
+    ui->tabBox->setTabEnabled(0, !ui->cmdLabel->text().isEmpty());
     qDebug() << "singleStep " << singleStep;
     ui->minSpin->setRange(minValRange, maxValRange);
     ui->minSpin->setValue(minValRange);
@@ -41,6 +65,38 @@ SliderW::SliderW(QString name, boxWidget *parent) :
 
 SliderW::~SliderW() {
     delete ui;
+}
+
+void SliderW::buildXml(QDomDocument& doc) {
+//    customWidget::buildXml(doc);
+    qDebug() << "sliderWidget::buildXml";
+    QDomNode root = doc.firstChild();
+    QDomElement r = doc.firstChildElement("00");
+    QDomElement widget = doc.createElement("WIDGET");
+    widget.setAttribute("TYPE", "Slider");
+    QDomElement tag = doc.createElement("CMD_ID");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(ui->labelId->text()));
+    root.appendChild(widget);
+    tag = doc.createElement("VALUE");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(ui->slider->value())));
+    root.appendChild(widget);
+    tag = doc.createElement("VALUE_MIN");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(ui->minSpin->value())));
+    root.appendChild(widget);
+    tag = doc.createElement("VALUE_MAX");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(ui->maxSpin->value())));
+    root.appendChild(widget);
+    tag = doc.createElement("VALUE_STEP");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(ui->stepSpin->value())));
+    tag = doc.createElement("TRACKING");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(ui->Tracking->isChecked())));
+    root.appendChild(widget);
 }
 
 void SliderW::updateInfo() {
@@ -132,5 +188,6 @@ void SliderW::on_cmdLabel_editingFinished() {
         }
     }
     ui->labelId->setText(id);
+    ui->label->setText("Slider " + id);
 }
 

@@ -115,7 +115,7 @@ void DialogWidgets::sendToPort(QString msg) {
     if (result != -1) {
         // If data was sent successfully, clear line edit
         //ui->receiveTerminal->appendHtml("&rarr;&nbsp;");
-        qDebug() << "MSG Sent : " << msg;
+//        qDebug() << "MSG Sent : " << msg;
         emit messageSent(msg);
     }
 }
