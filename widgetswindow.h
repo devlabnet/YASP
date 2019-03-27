@@ -21,6 +21,7 @@ private slots:
     void on_actionAdd_Dial_Widget_triggered();
     void on_actionSave_triggered();
     void on_actionLoad_triggered();
+    void on_actionRemove_All_triggered();
 
 signals:
     void messageSent(QString msg);

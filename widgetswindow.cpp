@@ -116,7 +116,11 @@ void widgetsWindow::on_actionLoad_triggered() {
     if (openXml()) {
         doXml();
     }
+}
 
+void widgetsWindow::on_actionRemove_All_triggered() {
+    // remove all widgets
+    widgetsLayout->cleanWidgets();
 }
 
 void widgetsWindow::on_actionAdd_SliderWidget_triggered() {

@@ -19,9 +19,11 @@ WidgetsAreaLayout::~WidgetsAreaLayout() {
 }
 
 void WidgetsAreaLayout::cleanWidgets() {
-    QLayoutItem *item;
-    while ((item = takeAt(0))) {
-        delete item;
+    boxWidget *bw;
+    for (int i = widgetsList.size()-1; i >= 0; --i) {
+        bw = widgetsList.takeAt(i);
+        widgetsList.removeOne(bw);
+        delete bw;
     }
 }
 
