@@ -23,9 +23,12 @@ public:
     explicit boxWidget(QWidget *parent = nullptr);
     QString getId() { return id; }
 
+private:
+
 protected:
     QString id;
     bool checkId(QString newId);
+    void sendToPort(QString str);
 
 private slots:
     void labelMoveClicked(Qt::MouseButton b);

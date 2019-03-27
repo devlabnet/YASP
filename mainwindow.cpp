@@ -2128,8 +2128,8 @@ void MainWindow::on_actionShowWidgets_triggered() {
         }
     }
     if (widgetsW == nullptr) {
-        widgetsW = new widgetsWindow(this);
-//        connect(widgetsW, SIGNAL( messageSent(QString)), this, SLOT(messageSent(QString)));
+        widgetsW = new widgetsWindow(serialPort, this);
+        connect(widgetsW, SIGNAL( messageSent(QString)), this, SLOT(messageSent(QString)));
         widgetsW->setWindowTitle("Widgets");
         widgetsW->show();
     }

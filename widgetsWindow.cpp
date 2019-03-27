@@ -2,12 +2,13 @@
 #include "ui_widgetsWindow.h"
 #include "sliderw.h"
 #include "dialw.h"
+#include <QDebug>
 
-widgetsWindow::widgetsWindow(QWidget *parent) :
+widgetsWindow::widgetsWindow(QSerialPort* p, QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::widgetsWindow) {
+    ui(new Ui::widgetsWindow), port(p) {
     ui->setupUi(this);
-    QWidget* topWidget = new QWidget();
+    QWidget* topWidget = new QWidget(this);
     widgetsLayout = new WidgetsAreaLayout();
     topWidget->setLayout(widgetsLayout);
     ui->scrollArea->setWidget(topWidget);
@@ -15,6 +16,19 @@ widgetsWindow::widgetsWindow(QWidget *parent) :
 
 widgetsWindow::~widgetsWindow() {
     delete ui;
+}
+
+void widgetsWindow::sendToPort(QString msg) {
+    if (msg.isEmpty()) return; // Nothing to send
+    msg += "\n";
+    // Send data
+    qint64 result = port->write(msg.toLocal8Bit());
+    if (result != -1) {
+        // If data was sent successfully, clear line edit
+        //ui->receiveTerminal->appendHtml("&rarr;&nbsp;");
+        qDebug() << "MSG Sent : " << msg;
+        emit messageSent(msg);
+    }
 }
 
 void widgetsWindow::on_actionAdd_SliderWidget_triggered() {

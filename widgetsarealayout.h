@@ -18,6 +18,7 @@ public:
 
     void addItem(QLayoutItem *) override;
     void addWidget(boxWidget *w);
+    void sendToPort(QString str);
 
     int horizontalSpacing() const;
     int verticalSpacing() const;

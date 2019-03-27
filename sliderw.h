@@ -18,8 +18,12 @@ signals:
 private slots:
     void updateTabSizes(int index);
     void on_cmdLabel_editingFinished();
+    void valueBoxEditingFinished();
     void slideValueChanged(int v);
-    void slideStepChanged(double v);
+    void slideStepChanged(int v);
+    void trackingToggle(bool t);
+    void setMinimumSlide(int v);
+    void setMaximumSlide(int v);
 
 protected:
 //    void enterEvent(QEvent * event);
@@ -27,11 +31,11 @@ protected:
 
 private:
     Ui::sliderw *ui;
-    double sliderDivider = 1000;
-    double maxValRange = 1000;
-    double minValRange = -1000;
+    int maxValRange = 1000;
+    int minValRange = -1000;
     int singleStep;
-    double value;
+    int value;
+    void updateInfo();
 };
 
 #endif // SLIDERW_H

@@ -148,7 +148,7 @@ border: 2px solid rgb(0, 170, 255);
          </font>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tabCommand">
          <property name="sizePolicy">
@@ -161,37 +161,7 @@ border: 2px solid rgb(0, 170, 255);
           <string>Command</string>
          </attribute>
          <layout class="QFormLayout" name="formLayout_2">
-          <item row="2" column="0">
-           <widget class="QLabel" name="Value">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>VALUE</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="ValueLine">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QSlider" name="slider">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_2">
             <property name="font">
              <font>
@@ -208,8 +178,8 @@ border: 2px solid rgb(0, 170, 255);
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="label_4">
+          <item row="1" column="1">
+           <widget class="QLabel" name="labelId">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
@@ -225,6 +195,59 @@ border: 2px solid rgb(0, 170, 255);
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QSlider" name="slider">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="Value">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>VALUE</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="ValueLine">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QLabel" name="labelInfo">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="text">
+             <string>Min:-1000 Max:1000
+Step:100 Track:NO</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="margin">
+             <number>2</number>
             </property>
            </widget>
           </item>
@@ -277,9 +300,6 @@ border: 2px solid rgb(0, 170, 255);
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="minSpin"/>
-          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="Max">
             <property name="font">
@@ -292,9 +312,6 @@ border: 2px solid rgb(0, 170, 255);
              <string>Maximum</string>
             </property>
            </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="maxSpin"/>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="Step">
@@ -309,9 +326,6 @@ border: 2px solid rgb(0, 170, 255);
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="stepSpin"/>
-          </item>
           <item row="4" column="0">
            <widget class="QRadioButton" name="Tracking">
             <property name="font">
@@ -324,6 +338,15 @@ border: 2px solid rgb(0, 170, 255);
              <string>Tracking</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="minSpin"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="maxSpin"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="stepSpin"/>
           </item>
          </layout>
         </widget>

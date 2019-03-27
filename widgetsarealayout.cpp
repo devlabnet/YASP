@@ -1,5 +1,6 @@
 #include <QtWidgets>
 #include "widgetsarealayout.h"
+#include "widgetsWindow.h"
 
 WidgetsAreaLayout::WidgetsAreaLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
     : QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing)
@@ -17,6 +18,10 @@ WidgetsAreaLayout::~WidgetsAreaLayout() {
     QLayoutItem *item;
     while ((item = takeAt(0)))
         delete item;
+}
+
+void WidgetsAreaLayout::sendToPort(QString str) {
+    dynamic_cast<widgetsWindow*>(this->parentWidget()->topLevelWidget())->sendToPort(str);
 }
 
 void WidgetsAreaLayout::widgetMoveClicked(boxWidget *li, Qt::MouseButton b) {
