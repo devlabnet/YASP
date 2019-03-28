@@ -64,6 +64,7 @@
     </property>
     <addaction name="actionAdd_SliderWidget"/>
     <addaction name="actionAdd_Dial_Widget"/>
+    <addaction name="actionButton"/>
    </widget>
    <widget class="QMenu" name="menuWidgets_2">
     <property name="title">
@@ -104,6 +105,11 @@
   <action name="actionRemove_All">
    <property name="text">
     <string>Remove All</string>
+   </property>
+  </action>
+  <action name="actionButton">
+   <property name="text">
+    <string>Button</string>
    </property>
   </action>
  </widget>

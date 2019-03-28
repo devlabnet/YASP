@@ -2,6 +2,7 @@
 #include "ui_widgetswindow.h"
 #include "sliderw.h"
 #include "dialw.h"
+#include "buttonw.h"
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -70,7 +71,6 @@ bool widgetsWindow::openXml() {
 }
 
 void widgetsWindow::createWidget(QString type, QDomElement* domElt) {
-    QWidget* widget = nullptr;
     qDebug() << "Add Widget : " << type;
     if (type == "Dial") {
         dialW* f = new dialW(domElt);
@@ -79,6 +79,8 @@ void widgetsWindow::createWidget(QString type, QDomElement* domElt) {
         SliderW* f = new SliderW(domElt);
         widgetsLayout->addWidget(f);
     } else if (type == "Button") {
+        ButtonW* f = new ButtonW(domElt);
+        widgetsLayout->addWidget(f);
     }
 }
 
@@ -130,5 +132,10 @@ void widgetsWindow::on_actionAdd_SliderWidget_triggered() {
 
 void widgetsWindow::on_actionAdd_Dial_Widget_triggered() {
     dialW* f = new dialW();
+    widgetsLayout->addWidget(f);
+}
+
+void widgetsWindow::on_actionButton_triggered() {
+    ButtonW* f = new ButtonW();
     widgetsLayout->addWidget(f);
 }
