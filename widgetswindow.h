@@ -16,6 +16,10 @@ public:
     explicit widgetsWindow(QSerialPort *p, QWidget *parent = nullptr);
     ~widgetsWindow();
     void sendToPort(QString msg);
+    void setSerialPort(QSerialPort* p) {
+        port = p;
+    }
+
 private slots:
     void on_actionAdd_SliderWidget_triggered();
     void on_actionAdd_Dial_Widget_triggered();

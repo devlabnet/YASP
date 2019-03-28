@@ -637,8 +637,8 @@ void MainWindow::portOpenedSuccess() {
     connect(serialPort, SIGNAL(dataTerminalReadyChanged(bool)), this, SLOT(dataTerminalReadyChanged(bool)));
     serialPort->setDataTerminalReady(false);
     ui->menuWidgets->menuAction()->setVisible(true);
-    if ((widgets != nullptr)) {
-        widgets->setSerialPort(serialPort);
+    if ((widgetsW != nullptr)) {
+        widgetsW->setSerialPort(serialPort);
     }
     ui->connectButton->setText("Disconnect");                                             // Change buttons
     ui->statusBar->setStyleSheet("background-color: SpringGreen ; font-weight:bold;");
@@ -763,8 +763,8 @@ void MainWindow:: closePort() {
     // Clear the terminal
     on_clearTermButton_clicked();
     ui->menuWidgets->menuAction()->setVisible(false);
-    if ((widgets != nullptr) && widgets->isVisible()) {
-            widgets->hide();
+    if ((widgetsW != nullptr) && widgetsW->isVisible()) {
+            widgetsW->hide();
     }
     updateTimer.stop();
     connected = false;
@@ -2114,19 +2114,19 @@ void MainWindow::on_clearTermButton_clicked() {
 
 /******************************************************************************************************************/
 void MainWindow::on_actionShowWidgets_triggered() {
-    if (widgets == nullptr) {
-        widgets = new DialogWidgets(serialPort, this);
-        connect(widgets, SIGNAL( messageSent(QString)), this, SLOT(messageSent(QString)));
-        widgets->setWindowTitle("Widgets");
-        widgets->show();
-    }
-    else {
-        if (widgets->isHidden()) {
-            widgets->show();
-        } else {
-            widgets->hide();
-        }
-    }
+//    if (widgets == nullptr) {
+//        widgets = new DialogWidgets(serialPort, this);
+//        connect(widgets, SIGNAL( messageSent(QString)), this, SLOT(messageSent(QString)));
+//        widgets->setWindowTitle("Widgets");
+//        widgets->show();
+//    }
+//    else {
+//        if (widgets->isHidden()) {
+//            widgets->show();
+//        } else {
+//            widgets->hide();
+//        }
+//    }
     if (widgetsW == nullptr) {
         widgetsW = new widgetsWindow(serialPort, this);
         connect(widgetsW, SIGNAL( messageSent(QString)), this, SLOT(messageSent(QString)));
