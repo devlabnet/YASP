@@ -48,9 +48,6 @@ SliderW::SliderW(QDomElement* dom, boxWidget *parent) :
     ui->slider->setRange(minValRange, maxValRange);
     ui->slider->setSingleStep(singleStep);
     ui->ValueLine->setText(QString::number(value));
-//    ui->labelInfo->setText("Min:" + QString::number(minValRange)
-//                           + " Max:" + QString::number(minValRange)
-//                           + " Track: No");
     updateInfo();
     connect(ui->labelPos, SIGNAL(clicked(Qt::MouseButton)), this, SLOT(labelMoveClicked(Qt::MouseButton)));
     connect(ui->labelDel, SIGNAL(clicked(Qt::MouseButton)), this, SLOT(labelDelClicked(Qt::MouseButton)));
@@ -71,7 +68,6 @@ void SliderW::buildXml(QDomDocument& doc) {
 //    customWidget::buildXml(doc);
     qDebug() << "sliderWidget::buildXml";
     QDomNode root = doc.firstChild();
-    QDomElement r = doc.firstChildElement("00");
     QDomElement widget = doc.createElement("WIDGET");
     widget.setAttribute("TYPE", "Slider");
     QDomElement tag = doc.createElement("CMD_ID");

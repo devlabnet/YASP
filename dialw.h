@@ -16,13 +16,27 @@ public:
     ~dialW();
     QString getId();
 protected:
-    Ui::dialw *ui;
 private slots:
     void updateTabSizes(int index);
-    void buildXml(QDomDocument& doc);
 //    void labelMoveClicked(Qt::MouseButton b);
 //    void labelDelClicked(Qt::MouseButton b);
     void on_cmdLabel_editingFinished();
+    void valueBoxEditingFinished();
+    void slideValueChanged(int v);
+    void slideStepChanged(int v);
+    void trackingToggle(bool t);
+    void wrappingToggle(bool t);
+    void setMinimumSlide(int v);
+    void setMaximumSlide(int v);
+private:
+    Ui::dialw *ui;
+    int maxValRange = 1000;
+    int minValRange = -1000;
+    int singleStep;
+    int value;
+    void updateInfo();
+    void buildXml(QDomDocument& doc);
+
 };
 
 #endif // DIALW_H

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>200</width>
-    <height>279</height>
+    <height>311</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -151,7 +151,7 @@ border: 2px solid rgb(0, 255, 127);
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <property name="usesScrollButtons">
          <bool>true</bool>
@@ -288,9 +288,6 @@ Step:100 Track:NO</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
-          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="Max">
             <property name="font">
@@ -303,9 +300,6 @@ Step:100 Track:NO</string>
              <string>Maximum</string>
             </property>
            </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="Step">
@@ -320,9 +314,6 @@ Step:100 Track:NO</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_3"/>
-          </item>
           <item row="4" column="0">
            <widget class="QRadioButton" name="Tracking">
             <property name="font">
@@ -333,6 +324,34 @@ Step:100 Track:NO</string>
             </property>
             <property name="text">
              <string>Tracking</string>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="MinVal"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="MaxVal"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="StepVal"/>
+          </item>
+          <item row="4" column="1">
+           <widget class="QRadioButton" name="Wrapping">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Wrapping</string>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
