@@ -337,19 +337,6 @@ Step:100 Track:NO</string>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ClickableLabel</class>
-   <extends>QLabel</extends>
-   <header>clickablelabel.h</header>
-  </customwidget>
-  <customwidget>
-   <class>boxWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">boxwidget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="appresources.qrc"/>
  </resources>

@@ -151,7 +151,7 @@ border: 2px solid rgb(0, 255, 127);
          </font>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="usesScrollButtons">
          <bool>true</bool>

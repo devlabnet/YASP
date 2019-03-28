@@ -2114,19 +2114,6 @@ void MainWindow::on_clearTermButton_clicked() {
 
 /******************************************************************************************************************/
 void MainWindow::on_actionShowWidgets_triggered() {
-//    if (widgets == nullptr) {
-//        widgets = new DialogWidgets(serialPort, this);
-//        connect(widgets, SIGNAL( messageSent(QString)), this, SLOT(messageSent(QString)));
-//        widgets->setWindowTitle("Widgets");
-//        widgets->show();
-//    }
-//    else {
-//        if (widgets->isHidden()) {
-//            widgets->show();
-//        } else {
-//            widgets->hide();
-//        }
-//    }
     if (widgetsW == nullptr) {
         widgetsW = new widgetsWindow(serialPort, this);
         connect(widgetsW, SIGNAL( messageSent(QString)), this, SLOT(messageSent(QString)));

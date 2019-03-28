@@ -30,7 +30,6 @@
 #include <QtSerialPort/QtSerialPort>
 #include <QSerialPortInfo>
 #include "helpwindow.hpp"
-#include "dialogwidgets.h"
 #include <QToolBox>
 #include <QTextEdit>
 #include <QTime>
@@ -176,7 +175,6 @@ private:
     QString noMsgReceivedData;      // Used for reading from the port
     QByteArray data;
     HelpWindow *helpWindow = nullptr;
-    DialogWidgets *widgets = nullptr;
     widgetsWindow* widgetsW = nullptr;
     QFile* logFile = nullptr;
     QTextStream streamLog;

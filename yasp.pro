@@ -21,27 +21,16 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 TARGET = yasp
 TEMPLATE = app
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    	qcustomplot.cpp \
+SOURCES += \
     helpwindow.cpp \
-    dialogwidgets.cpp \
-    sliderwidget.cpp \
-    customwidget.cpp \
-    dialwidget.cpp \
     formsliderinfo.cpp \
     yaspgraph.cpp \
-    customwidget.cpp \
-    dialogwidgets.cpp \
-    dialwidget.cpp \
     formsliderinfo.cpp \
     helpwindow.cpp \
     main.cpp \
     mainwindow.cpp \
     qcustomplot.cpp \
-    sliderwidget.cpp \
     yaspgraph.cpp \
-    buttonwidget.cpp \
     clickablelabel.cpp \
     widgetsarealayout.cpp \
     dialw.cpp \
@@ -50,27 +39,16 @@ SOURCES += main.cpp\
     widgetswindow.cpp \
     buttonw.cpp
 
-HEADERS  += mainwindow.hpp \
-    		qcustomplot.h \
-    helpwindow.hpp \
-    dialogwidgets.h \
-    sliderwidget.h \
-    customwidget.h \
-    dialwidget.h \
+HEADERS  += \
     formsliderinfo.h \
     tabwidget.h \
     yaspgraph.h \
-    customwidget.h \
-    dialogwidgets.h \
-    dialwidget.h \
     formsliderinfo.h \
     helpwindow.hpp \
     mainwindow.hpp \
     qcustomplot.h \
-    sliderwidget.h \
     tabwidget.h \
     yaspgraph.h \
-    buttonwidget.h \
     clickablelabel.h \
     widgetsarealayout.h \
     sliderw.h \
@@ -81,7 +59,6 @@ HEADERS  += mainwindow.hpp \
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
-    dialogwidgets.ui \
     formsliderinfo.ui \
     widgetswindow.ui \
     dialW.ui \
