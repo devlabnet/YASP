@@ -2,6 +2,7 @@
 #include "ui_siggenW.h"
 #include <QDebug>
 #include "widgetsarealayout.h"
+#include <QTimer>
 
 siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     boxWidget(parent),
@@ -29,6 +30,9 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     ui->sampleRateVal->setRange(100, sampleRate);
     ui->sampleRateVal->setSingleStep(sampleRate/10);
     ui->freqVal->setValidator(frequencyValidator);
+//    ui->freqSpin->setStyleSheet("border: 5px solid rgb(255, 0, 0);");
+    ui->freqSpin->setStyleSheet("QDial{color:black; background-color:rgb(255, 255, 102);border-radius:10px;border:2px solid red} ");
+
     ui->Sinus->setChecked(true);
     mode = "Sinus";
     ui->resVal->addItem("256");
@@ -87,13 +91,15 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     connect(ui->labelDel, SIGNAL(clicked(Qt::MouseButton)), this, SLOT(labelDelClicked(Qt::MouseButton)));
     connect(ui->tabBox, SIGNAL(currentChanged(int)),this, SLOT(updateTabSizes(int)));
     connect(ui->freqSpin, SIGNAL(valueChanged(int)),this, SLOT(freqValueChanged(int)));
+//    connect(ui->freqSpin, SIGNAL(sliderPressed()),this, SLOT(freqSpinPressed()));
+
     connect(ui->pulseTrack, SIGNAL(toggled(bool)), this, SLOT(pulseTrackingToggle(bool)));
     connect(ui->freqTracking, SIGNAL(toggled(bool)), this, SLOT(freqTrackingToggle(bool)));
     connect(ui->Pulse, SIGNAL(toggled(bool)), this, SLOT(pulseToggle(bool)));
     connect(ui->Triangle, SIGNAL(toggled(bool)), this, SLOT(triangleToggle(bool)));
     connect(ui->Saw, SIGNAL(toggled(bool)), this, SLOT(sawToggle(bool)));
     connect(ui->Sinus, SIGNAL(toggled(bool)), this, SLOT(sinusToggle(bool)));
-    connect(ui->SampleRate, SIGNAL(valueChanged(int)), this, SLOT(sampleRateChanged(int)));
+    connect(ui->sampleRateVal, SIGNAL(valueChanged(int)), this, SLOT(sampleRateChanged(int)));
     connect(ui->pulseSpin, SIGNAL(valueChanged(int)), this, SLOT(pulsePcChanged(int)));
     connect(ui->freqVal, SIGNAL(editingFinished()), this, SLOT(freqValLineChanged()));
     connect(ui->pulsePC, SIGNAL(editingFinished()), this, SLOT(pulsePcValLineChanged()));
@@ -137,7 +143,7 @@ void siggenW::updateInfo() {
 //    Min:-1000 Max:1000\nStep:100 Track:NO
     QString txt = "Mode: " + mode;
     txt += "\nSample Rate:" + QString::number(ui->sampleRateVal->value())
-            + " Res:" + ui->resVal->currentText();
+            + " Res:" + QString::number(resolution);
     if (ui->freqTracking->isChecked()) {
         txt += "\nFreq Track: YES";
     } else {
@@ -218,6 +224,7 @@ void siggenW::pulsePcChanged(int v) {
 }
 
 void siggenW::freqValLineChanged() {
+    qDebug() << "freqValLineChanged " << ui->freqVal->text();
     ui->freqSpin->setValue(ui->freqVal->text().toInt());
 }
 
@@ -225,8 +232,20 @@ void siggenW::pulsePcValLineChanged() {
     ui->pulseSpin->setValue(ui->pulsePC->text().toInt());
 }
 
+void siggenW::slideMoveOk() {
+    qDebug() << "slideMoveOk";
+//    connect(ui->freqSpin, SIGNAL(sliderMoved(int)),this, SLOT(freqValueChanged(int)));
+}
+
+//void siggenW::freqSpinPressed() {
+//    qDebug() << "freqSpinPressed";
+//    disconnect(ui->freqSpin, SIGNAL(sliderMoved(int)),this, SLOT(freqValueChanged(int)));
+//    QTimer::singleShot(500, this, SLOT(slideMoveOk()));
+//}
+
 void siggenW::freqValueChanged(int v) {
-    value = v;
+//    if (moveOk == false) return;
+    qDebug() << "freqValueChanged " << v << " str " << QString::number(v);
     ui->freqVal->setText(QString::number(v));
 //    QString msg =  ui->cmdLabelId->text() + " " + QString::number(v);
 //    sendToPort(msg);

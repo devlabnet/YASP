@@ -34,6 +34,8 @@ private slots:
     void pulsePcValLineChanged();
     void resChanged(const QString& s);
     void pulsePcChanged(int v);
+//    void freqSpinPressed();
+    void slideMoveOk();
 
 private:
     Ui::siggenw *ui;
@@ -45,6 +47,7 @@ private:
     int pulsePerCent = 50;
     int singleStep;
     int value;
+    bool moveOk = false;
     QIntValidator* pulsePcValidator;
     QIntValidator* frequencyValidator;
     void updateInfo();
