@@ -23,15 +23,16 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     ui->pulseSpin->setSingleStep(1);
     ui->pulsePC->setVisible(false);
     ui->pulsePC->setValidator(pulsePcValidator);
-    ui->pulseTrack->setVisible(false);
-
+    ui->framePulse->setVisible(false);
     ui->pulseLabel->setVisible(false);
     ui->pulseSpin->setVisible(false);
+    ui->pulseTrack->setVisible(false);
+
     ui->sampleRateVal->setRange(100, sampleRate);
     ui->sampleRateVal->setSingleStep(sampleRate/10);
     ui->freqVal->setValidator(frequencyValidator);
 //    ui->freqSpin->setStyleSheet("border: 5px solid rgb(255, 0, 0);");
-    ui->freqSpin->setStyleSheet("QDial{color:black; background-color:rgb(255, 255, 102);border-radius:10px;border:2px solid red} ");
+//    ui->frameFreq->setStyleSheet("QFrame{padding:0px; margin:0px; background-color:rgb(255, 255, 102);border-radius:50px;border:2px solid red} ");
 
     ui->Sinus->setChecked(true);
     mode = "Sinus";
@@ -177,6 +178,7 @@ void siggenW::pulseToggle(bool b) {
     Q_UNUSED(b);
     mode = "Pulse";
     ui->pulsePC->setVisible(true);
+    ui->framePulse->setVisible(true);
     ui->pulseLabel->setVisible(true);
     ui->pulseSpin->setVisible(true);
     ui->pulseTrack->setVisible(true);
@@ -187,6 +189,7 @@ void siggenW::triangleToggle(bool b) {
     Q_UNUSED(b);
     mode = "Triangle";
     ui->pulsePC->setVisible(false);
+    ui->framePulse->setVisible(false);
     ui->pulseLabel->setVisible(false);
     ui->pulseSpin->setVisible(false);
     ui->pulseTrack->setVisible(false);
@@ -197,6 +200,7 @@ void siggenW::sawToggle(bool b) {
     Q_UNUSED(b);
     mode = "Saw";
     ui->pulsePC->setVisible(false);
+    ui->framePulse->setVisible(false);
     ui->pulseLabel->setVisible(false);
     ui->pulseSpin->setVisible(false);
     ui->pulseTrack->setVisible(false);
@@ -207,6 +211,7 @@ void siggenW::sinusToggle(bool b) {
     Q_UNUSED(b);
     mode = "Sinus";
     ui->pulsePC->setVisible(false);
+    ui->framePulse->setVisible(false);
     ui->pulseLabel->setVisible(false);
     ui->pulseSpin->setVisible(false);
     ui->pulseTrack->setVisible(false);
