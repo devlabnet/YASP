@@ -58,6 +58,7 @@ SliderW::SliderW(QDomElement* dom, boxWidget *parent) :
     connect(ui->minSpin, SIGNAL(valueChanged(int)), this, SLOT(setMinimumSlide(int)));
     connect(ui->maxSpin, SIGNAL(valueChanged(int)), this, SLOT(setMaximumSlide(int)));
     connect(ui->ValueLine, SIGNAL(editingFinished()), this, SLOT(valueBoxEditingFinished()));
+    updateTabSizes(0);
 }
 
 SliderW::~SliderW() {
@@ -65,7 +66,6 @@ SliderW::~SliderW() {
 }
 
 void SliderW::buildXml(QDomDocument& doc) {
-//    customWidget::buildXml(doc);
     qDebug() << "sliderWidget::buildXml";
     QDomNode root = doc.firstChild();
     QDomElement widget = doc.createElement("WIDGET");

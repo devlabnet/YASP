@@ -37,7 +37,8 @@ SOURCES += \
     sliderw.cpp \
     boxwidget.cpp \
     widgetswindow.cpp \
-    buttonw.cpp
+    buttonw.cpp \
+    siggenw.cpp
 
 HEADERS  += \
     formsliderinfo.h \
@@ -55,7 +56,8 @@ HEADERS  += \
     dialw.h \
     boxwidget.h \
     widgetswindow.h \
-    buttonw.h
+    buttonw.h \
+    siggenw.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
@@ -63,7 +65,8 @@ FORMS    += mainwindow.ui \
     widgetswindow.ui \
     dialW.ui \
     sliderW.ui \
-    buttonW.ui
+    buttonW.ui \
+    siggenW.ui
 
 RESOURCES += \
     appresources.qrc \

@@ -22,7 +22,7 @@ dialW::dialW(QDomElement *dom, boxWidget *parent) :
                 id = Child.firstChild().toText().data();
                 ui->cmdLabelId->setText(id);
                 ui->cmdLabel->setText(id);
-                ui->label->setText("Slider " + id);
+                ui->label->setText("Dial " + id);
             }
             if (Child.tagName() == "VALUE") value = Child.firstChild().toText().data().toInt();
             if (Child.tagName() == "VALUE_MIN") minValRange = Child.firstChild().toText().data().toInt();
@@ -69,6 +69,7 @@ dialW::dialW(QDomElement *dom, boxWidget *parent) :
     connect(ui->MinVal, SIGNAL(valueChanged(int)), this, SLOT(setMinimumSlide(int)));
     connect(ui->MaxVal, SIGNAL(valueChanged(int)), this, SLOT(setMaximumSlide(int)));
     connect(ui->ValueLine, SIGNAL(editingFinished()), this, SLOT(valueBoxEditingFinished()));
+    updateTabSizes(0);
 }
 
 dialW::~dialW() {

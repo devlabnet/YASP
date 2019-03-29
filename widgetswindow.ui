@@ -65,6 +65,7 @@
     <addaction name="actionAdd_SliderWidget"/>
     <addaction name="actionAdd_Dial_Widget"/>
     <addaction name="actionButton"/>
+    <addaction name="actionSignal_Generator"/>
    </widget>
    <widget class="QMenu" name="menuWidgets_2">
     <property name="title">
@@ -110,6 +111,11 @@
   <action name="actionButton">
    <property name="text">
     <string>Button</string>
+   </property>
+  </action>
+  <action name="actionSignal_Generator">
+   <property name="text">
+    <string>Signal Generator</string>
    </property>
   </action>
  </widget>

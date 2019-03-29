@@ -3,6 +3,7 @@
 #include "sliderw.h"
 #include "dialw.h"
 #include "buttonw.h"
+#include "siggenw.h"
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -81,6 +82,9 @@ void widgetsWindow::createWidget(QString type, QDomElement* domElt) {
     } else if (type == "Button") {
         ButtonW* f = new ButtonW(domElt);
         widgetsLayout->addWidget(f);
+    } else if (type == "SigGen") {
+        siggenW* f = new siggenW(domElt);
+        widgetsLayout->addWidget(f);
     }
 }
 
@@ -137,5 +141,10 @@ void widgetsWindow::on_actionAdd_Dial_Widget_triggered() {
 
 void widgetsWindow::on_actionButton_triggered() {
     ButtonW* f = new ButtonW();
+    widgetsLayout->addWidget(f);
+}
+
+void widgetsWindow::on_actionSignal_Generator_triggered() {
+    siggenW* f = new siggenW();
     widgetsLayout->addWidget(f);
 }

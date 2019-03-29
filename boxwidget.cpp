@@ -36,7 +36,6 @@ void boxWidget::labelMoveClicked(Qt::MouseButton b) {
 
 void boxWidget::labelDelClicked(Qt::MouseButton b) {
     Q_UNUSED(b);
-    qDebug() << "dialW::labelDelClicked";
     dynamic_cast<WidgetsAreaLayout*>(this->parentWidget()->layout())->widgetDelClicked(this);
 }
 

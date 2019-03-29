@@ -59,7 +59,7 @@ ButtonW::ButtonW(QDomElement* dom, boxWidget *parent) :
     connect(ui->pushButton, SIGNAL(pressed()), this, SLOT(btnPressed()));
     connect(ui->pushButton, SIGNAL(released()), this, SLOT(btnReleased()));
     connect(ui->pushButton, SIGNAL(clicked(bool)), this, SLOT(btnClicked(bool)));
-
+    updateTabSizes(0);
 }
 
 ButtonW::~ButtonW() {
@@ -67,7 +67,6 @@ ButtonW::~ButtonW() {
 }
 
 void ButtonW::buildXml(QDomDocument& doc) {
-//    customWidget::buildXml(doc);
     qDebug() << "ButtonW::buildXml";
     QDomNode root = doc.firstChild();
     QDomElement widget = doc.createElement("WIDGET");
