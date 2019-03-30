@@ -7,6 +7,8 @@ ButtonW::ButtonW(QDomElement* dom, boxWidget *parent) :
     boxWidget(parent),
     ui(new Ui::buttonw) {
     ui->setupUi(this);
+    ui->frameBtn->setObjectName("frameBtn");
+    ui->frameBtn->setStyleSheet("#frameBtn{padding:0px; margin:0px; background-color:rgb(250, 228, 180);border-radius:10px;border:2px solid rgb(250, 165, 0)} ");
     ui->label->setText("Button");
     ui->labelId->setText("");
     ui->AutoRepeat->setChecked(false);

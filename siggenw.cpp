@@ -32,7 +32,10 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     ui->sampleRateVal->setSingleStep(sampleRate/10);
     ui->freqVal->setValidator(frequencyValidator);
 //    ui->freqSpin->setStyleSheet("border: 5px solid rgb(255, 0, 0);");
-//    ui->frameFreq->setStyleSheet("QFrame{padding:0px; margin:0px; background-color:rgb(255, 255, 102);border-radius:50px;border:2px solid red} ");
+    ui->frameFreq->setObjectName("frameFreq");
+    ui->frameFreq->setStyleSheet("#frameFreq{padding:0px; margin:0px; background-color:rgb(255, 230, 230);border-radius:10px;border:2px solid rgb(255, 100, 100)} ");
+    ui->framePulse->setObjectName("framePulse");
+    ui->framePulse->setStyleSheet("#framePulse{padding:0px; margin:0px; background-color:rgb(255, 230, 230);border-radius:10px;border:2px solid rgb(255, 100, 100)} ");
 
     ui->Sinus->setChecked(true);
     mode = "Sinus";

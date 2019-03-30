@@ -12,6 +12,8 @@ dialW::dialW(QDomElement *dom, boxWidget *parent) :
     ui->Tracking->setChecked(false);
     ui->dial->setTracking(false);
     ui->dial->setWrapping(false);
+    ui->frameDial->setObjectName("frameDial");
+    ui->frameDial->setStyleSheet("#frameDial{padding:0px; margin:0px; background-color:rgb(209, 255, 209);border-radius:10px;border:2px solid rgb(80, 200, 80)} ");
     value = (maxValRange + minValRange)/2;
     singleStep = abs(maxValRange - minValRange)/20;
     if (dom != nullptr) {

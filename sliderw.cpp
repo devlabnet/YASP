@@ -11,6 +11,8 @@ SliderW::SliderW(QDomElement* dom, boxWidget *parent) :
     ui->labelId->setText("");
     ui->Tracking->setChecked(false);
     ui->slider->setTracking(false);
+    ui->frameSlider->setObjectName("frameSlider");
+    ui->frameSlider->setStyleSheet("#frameSlider{padding:0px; margin:0px; background-color:rgb(236, 243, 255);border-radius:10px;border:2px solid rgb(100, 150, 255)} ");
     value = (maxValRange + minValRange)/2;
     singleStep = abs(maxValRange - minValRange)/20;
     if (dom != nullptr) {
