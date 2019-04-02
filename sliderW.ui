@@ -147,8 +147,11 @@ border: 2px solid rgb(0, 170, 255);
           <bold>true</bold>
          </font>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tabCommand">
          <property name="sizePolicy">

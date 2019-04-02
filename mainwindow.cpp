@@ -181,6 +181,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
        }
    }
    // or event->accept(); but fine 'moments' are there
+   if (widgetsW != nullptr) widgetsW->deleteLater();
    QMainWindow::closeEvent(event);
 }
 
@@ -2115,7 +2116,8 @@ void MainWindow::on_clearTermButton_clicked() {
 /******************************************************************************************************************/
 void MainWindow::on_actionShowWidgets_triggered() {
     if (widgetsW == nullptr) {
-        widgetsW = new widgetsWindow(serialPort, this);
+//        widgetsW = new widgetsWindow(serialPort, this);
+        widgetsW = new widgetsWindow(serialPort);
         connect(widgetsW, SIGNAL( messageSent(QString)), this, SLOT(messageSent(QString)));
         widgetsW->setWindowTitle("Widgets");
         widgetsW->show();

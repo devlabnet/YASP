@@ -1,6 +1,7 @@
 #include <QtWidgets>
 #include "widgetsarealayout.h"
 #include "widgetswindow.h"
+#include <QMessageBox>
 
 WidgetsAreaLayout::WidgetsAreaLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
     : QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing)
@@ -63,7 +64,7 @@ void WidgetsAreaLayout::widgetDelClicked(boxWidget *li) {
 
 bool WidgetsAreaLayout::checkWidgetId(boxWidget* wFrom, QString id) {
     if (id.isEmpty()) {
-        QMessageBox msgBox;
+        QMessageBox msgBox(parentWidget());
         msgBox.setText("Command ID cannot be empty !!!.");
         msgBox.exec();
         return false;
@@ -71,7 +72,7 @@ bool WidgetsAreaLayout::checkWidgetId(boxWidget* wFrom, QString id) {
     foreach (boxWidget* w, widgetsList) {
         if (w == wFrom) continue;
         if (w->getId() == id) {
-            QMessageBox msgBox;
+            QMessageBox msgBox(parentWidget());
             msgBox.setText("Command ID already used by another Widget !!!.");
             msgBox.exec();
             return false;

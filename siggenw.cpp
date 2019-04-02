@@ -3,6 +3,7 @@
 #include <QDebug>
 #include "widgetsarealayout.h"
 #include <QTimer>
+#include <QDateTime>
 
 siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     boxWidget(parent),
@@ -11,7 +12,7 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     ui->label->setText("SigGen");
     ui->cmdLabelId->setText("");
 //    ui->Tracking->setChecked(false);
-    value = 100;
+    value = 10;
     singleStep = 10;
     resolution = 1024;
     pulsePcValidator = new QIntValidator(1, 99);
@@ -19,6 +20,7 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
 
     ui->freqSpin->setTracking(false);
     ui->freqSpin->setWrapping(false);
+    ui->freqTracking->setChecked(false);
     ui->pulseSpin->setRange(1,99);
     ui->pulseSpin->setSingleStep(1);
     ui->pulsePC->setVisible(false);
@@ -26,8 +28,9 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     ui->framePulse->setVisible(false);
     ui->pulseLabel->setVisible(false);
     ui->pulseSpin->setVisible(false);
+    ui->pulseSpin->setTracking(false);
     ui->pulseTrack->setVisible(false);
-
+    ui->pulseTrack->setChecked(false);
     ui->sampleRateVal->setRange(100, sampleRate);
     ui->sampleRateVal->setSingleStep(sampleRate/10);
     ui->freqVal->setValidator(frequencyValidator);
@@ -43,8 +46,6 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     ui->resVal->addItem("512");
     ui->resVal->addItem("1024");
     ui->resVal->setCurrentIndex(2);
-    ui->freqVal->setText(QString::number(value));
-    ui->freqSpin->setValue(value);
     if (dom != nullptr) {
         QDomElement Child = *dom;
         while (!Child.isNull()) {
@@ -58,8 +59,8 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
             if (Child.tagName() == "MODE") mode = Child.firstChild().toText().data();
             if (Child.tagName() == "FREQ_VAL") value = Child.firstChild().toText().data().toInt();
             if (Child.tagName() == "SAMPLE_RATE") sampleRate = Child.firstChild().toText().data().toInt();
-            if (Child.tagName() == "FREQ_MIN") minFreqRange = Child.firstChild().toText().data().toInt();
-            if (Child.tagName() == "FREQ_MAX") maxFreqRange = Child.firstChild().toText().data().toInt();
+//            if (Child.tagName() == "FREQ_MIN") minFreqRange = Child.firstChild().toText().data().toInt();
+//            if (Child.tagName() == "FREQ_MAX") maxFreqRange = Child.firstChild().toText().data().toInt();
             if (Child.tagName() == "RESOLUTION") resolution = Child.firstChild().toText().data().toInt();
             if (Child.tagName() == "PULSE_PC") pulsePerCent = Child.firstChild().toText().data().toInt();
             if (Child.tagName() == "FREQ_TRACKING") {
@@ -83,13 +84,11 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     ui->sampleRateVal->setValue((sampleRate));
 //    ui->StepVal->setRange(1, singleStep*10);
 //    ui->StepVal->setValue(singleStep);
-    ui->freqSpin->setValue(value);
-    ui->freqSpin->setRange(minFreqRange, maxFreqRange);
     ui->freqSpin->setSingleStep(singleStep);
-//    ui->ValueLine->setText(QString::number(value));
-//    ui->labelInfo->setText("Min:" + QString::number(minValRange)
-//                           + " Max:" + QString::number(minValRange)
-//                           + " Track: No");
+    ui->freqSpin->setRange(minFreqRange, sampleRate/4);
+    ui->freqSpin->setValue(value);
+    tickCnt = maxSampleRate / ui->freqSpin->value();
+    ui->freqVal->setText(QString::number(value));
     updateInfo();
     connect(ui->labelPos, SIGNAL(clicked(Qt::MouseButton)), this, SLOT(labelMoveClicked(Qt::MouseButton)));
     connect(ui->labelDel, SIGNAL(clicked(Qt::MouseButton)), this, SLOT(labelDelClicked(Qt::MouseButton)));
@@ -108,11 +107,31 @@ siggenW::siggenW(QDomElement *dom, boxWidget *parent) :
     connect(ui->freqVal, SIGNAL(editingFinished()), this, SLOT(freqValLineChanged()));
     connect(ui->pulsePC, SIGNAL(editingFinished()), this, SLOT(pulsePcValLineChanged()));
     connect (ui->resVal, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resChanged(const QString&)));
+
+    genTimer.setTimerType(Qt::PreciseTimer);
+    genTimer.setInterval(1);
+    connect(&genTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    checkRadioMode(mode);
     updateTabSizes(0);
+    updateGenValues();
+
+//    timer.setInterval(1);
+//    timer.setTimerType(Qt::PreciseTimer);
+//    QObject::connect(&timer, &QTimer::timeout, &pp, &PrecisePolling::doPolling);
+//    timer.start();
+//    timer.moveToThread(&thread);
+//    pp.moveToThread(&thread);
+    connect(&pp, SIGNAL(send(QString )), this, SLOT(send(QString)));
+    pp.start(QThread::Priority::TimeCriticalPriority);
+
 }
 
 siggenW::~siggenW() {
     delete ui;
+}
+
+void siggenW::send(QString s) {
+    sendToPort(s);
 }
 
 QString siggenW::getId() {
@@ -127,25 +146,85 @@ void siggenW::buildXml(QDomDocument& doc) {
     QDomElement tag = doc.createElement("CMD_ID");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(ui->cmdLabelId->text()));
+//    if (Child.tagName() == "MODE") mode = Child.firstChild().toText().data();
+//    if (Child.tagName() == "FREQ_VAL") value = Child.firstChild().toText().data().toInt();
+//    if (Child.tagName() == "SAMPLE_RATE") sampleRate = Child.firstChild().toText().data().toInt();
+//    if (Child.tagName() == "RESOLUTION") resolution = Child.firstChild().toText().data().toInt();
+//    if (Child.tagName() == "PULSE_PC") pulsePerCent = Child.firstChild().toText().data().toInt();
+//    if (Child.tagName() == "FREQ_TRACKING") {
+
 //    root.appendChild(widget);
-    tag = doc.createElement("VALUE");
+    tag = doc.createElement("MODE");
     widget.appendChild(tag);
-    tag.appendChild(doc.createTextNode(QString::number(ui->freqSpin->value())));
-    tag = doc.createElement("VALUE_STEP");
+    tag.appendChild(doc.createTextNode(mode));
+    tag = doc.createElement("FREQ_VAL");
     widget.appendChild(tag);
-//    tag.appendChild(doc.createTextNode(QString::number(ui->StepVal->value())));
-//    tag = doc.createElement("TRACKING");
-//    widget.appendChild(tag);
-//    tag.appendChild(doc.createTextNode(QString::number(ui->Tracking->isChecked())));
-//    tag = doc.createElement("WRAPPING");
-//    widget.appendChild(tag);
-//    tag.appendChild(doc.createTextNode(QString::number(ui->Wrapping->isChecked())));
-//    root.appendChild(widget);
+    tag.appendChild(doc.createTextNode(ui->freqVal->text()));
+    tag = doc.createElement("SAMPLE_RATE");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(ui->sampleRateVal->value())));
+    tag = doc.createElement("RESOLUTION");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(resolution)));
+    tag = doc.createElement("PULSE_PC");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(pulsePerCent)));
+    tag = doc.createElement("FREQ_TRACKING");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(ui->freqTracking->isChecked())));
+    tag = doc.createElement("PULSE_TRACKING");
+    widget.appendChild(tag);
+    tag.appendChild(doc.createTextNode(QString::number(ui->pulseTrack->isChecked())));
+    root.appendChild(widget);
+}
+
+void siggenW::checkRadioMode(QString m) {
+    if (m == "Pulse") {
+        functionMode = functionType::Pulse;
+        ui->Pulse->setChecked(true);
+    } else if (m == "Triangle") {
+        functionMode = functionType::Triangle;
+        ui->Triangle->setChecked(true);
+    } else if (m == "Saw") {
+        functionMode = functionType::Saw;
+        ui->Saw->setChecked(true);
+    } else { // Sinus
+        functionMode = functionType::Sinus;
+        ui->Sinus->setChecked(true);
+    }
+}
+
+void siggenW::updateGenValues() {
+    frequency = ui->freqSpin->value();//from 1 to ~50,000
+    period = sampleRate/frequency;
+    pulseWidthScaled = (period * pulsePerCent)/100;
+    tickCnt = maxSampleRate / ui->freqSpin->value();
+    switch (functionMode) {
+    case functionType::Pulse :
+        break;
+    case functionType::Triangle :
+        valInc = 10;
+        break;
+    case functionType::Saw :
+        valInc = 255 / period;
+        break;
+    default: // Sinus
+        valInc = 20000 / period;
+        break;
+    }
+    qDebug() << "functionMode: " << functionMode;
+    qDebug() << "sampleRate: " << sampleRate;
+    qDebug() << "frequency: " << frequency;
+    qDebug() << "period: " << period;
+    qDebug() << "tickCnt: " << tickCnt;
+//    qDebug() << "pulsePerCent: " << pulsePerCent;
+//    qDebug() << "pulseWidthScaled: " << pulseWidthScaled;
 }
 
 void siggenW::updateInfo() {
 //    Min:-1000 Max:1000\nStep:100 Track:NO
     QString txt = "Mode: " + mode;
+    txt += "  Freq: " + QString::number(ui->freqSpin->value());
     txt += "\nSample Rate:" + QString::number(ui->sampleRateVal->value())
             + " Res:" + QString::number(resolution);
     if (ui->freqTracking->isChecked()) {
@@ -165,6 +244,7 @@ void siggenW::updateInfo() {
 
 void siggenW::resChanged(const QString& s) {
     resolution = s.toInt();
+    updateInfo();
 }
 
 void siggenW::pulseTrackingToggle(bool t) {
@@ -180,55 +260,65 @@ void siggenW::freqTrackingToggle(bool t) {
 void siggenW::pulseToggle(bool b) {
     Q_UNUSED(b);
     mode = "Pulse";
+    functionMode = functionType::Pulse;
     ui->pulsePC->setVisible(true);
     ui->framePulse->setVisible(true);
     ui->pulseLabel->setVisible(true);
     ui->pulseSpin->setVisible(true);
     ui->pulseTrack->setVisible(true);
+    updateGenValues();
     updateInfo();
 }
 
 void siggenW::triangleToggle(bool b) {
     Q_UNUSED(b);
     mode = "Triangle";
+    functionMode = functionType::Triangle;
     ui->pulsePC->setVisible(false);
     ui->framePulse->setVisible(false);
     ui->pulseLabel->setVisible(false);
     ui->pulseSpin->setVisible(false);
     ui->pulseTrack->setVisible(false);
+    updateGenValues();
     updateInfo();
 }
 
 void siggenW::sawToggle(bool b) {
     Q_UNUSED(b);
     mode = "Saw";
+    functionMode = functionType::Saw;
     ui->pulsePC->setVisible(false);
     ui->framePulse->setVisible(false);
     ui->pulseLabel->setVisible(false);
     ui->pulseSpin->setVisible(false);
     ui->pulseTrack->setVisible(false);
+    updateGenValues();
     updateInfo();
 }
 
 void siggenW::sinusToggle(bool b) {
     Q_UNUSED(b);
     mode = "Sinus";
+    functionMode = functionType::Sinus;
     ui->pulsePC->setVisible(false);
     ui->framePulse->setVisible(false);
     ui->pulseLabel->setVisible(false);
     ui->pulseSpin->setVisible(false);
     ui->pulseTrack->setVisible(false);
+    updateGenValues();
     updateInfo();
 }
 
 void siggenW::sampleRateChanged(int v) {
     sampleRate = v;
+    updateGenValues();
     updateInfo();
 }
 
 void siggenW::pulsePcChanged(int v) {
    pulsePerCent = v;
    ui->pulsePC->setText(QString::number(pulsePerCent));
+   updateGenValues();
 }
 
 void siggenW::freqValLineChanged() {
@@ -239,17 +329,6 @@ void siggenW::freqValLineChanged() {
 void siggenW::pulsePcValLineChanged() {
     ui->pulseSpin->setValue(ui->pulsePC->text().toInt());
 }
-
-void siggenW::slideMoveOk() {
-    qDebug() << "slideMoveOk";
-//    connect(ui->freqSpin, SIGNAL(sliderMoved(int)),this, SLOT(freqValueChanged(int)));
-}
-
-//void siggenW::freqSpinPressed() {
-//    qDebug() << "freqSpinPressed";
-//    disconnect(ui->freqSpin, SIGNAL(sliderMoved(int)),this, SLOT(freqValueChanged(int)));
-//    QTimer::singleShot(500, this, SLOT(slideMoveOk()));
-//}
 
 void siggenW::freqValueChanged(int v) {
 //    if (moveOk == false) return;
@@ -279,4 +358,80 @@ void siggenW::on_cmdLabel_editingFinished() {
     }
     ui->cmdLabelId->setText(id);
     ui->label->setText("SigGen " + id);
+}
+
+void siggenW::timerSlot() {
+//    qDebug() << "mode " << functionMode << " -> pCnt: " << pCnt << " / valByte " << valByte;
+//    if (pCnt > period) {
+//        pCnt = 0;
+//    }
+//    if (tCnt == 0) {
+        switch (functionMode) {
+        case functionType::Pulse:
+//            if (pulseWidthScaled <= pCnt) {
+//                waveOut = 255;
+//            } else {
+//                waveOut = 0;
+//            }
+            break;
+        case functionType::Triangle:
+//            if ((period - pCnt) > pCnt) {
+//                if (pCnt == 0) {
+//                    valByte = 0;
+//                } else {
+//                    valByte += valInc;
+//                }
+//            } else {
+//                valByte -= valInc;
+//            }
+//            qDebug() << " -> valByte " << valByte;
+
+//            if (valByte > 255) {
+//                valByte = 255;
+//            } else if (valByte < 0) {
+//                valByte = 0;
+//            }
+//            waveOut = valByte;
+            break;
+        case functionType::Saw:
+//            if (tCnt == 0) {
+//                waveOut = 0;
+//            } else {
+                waveOut = resolution * ((float)tCnt / (float)period);
+//                qDebug() << "tCnt" <<  tCnt << "tCnt / period" << tCnt / period << " waveOut: " << waveOut;
+//            }
+            break;
+        default:
+            break;
+        }
+//    }
+    pCnt++;
+    tCnt++;
+    if (tCnt >= period) {
+        tCnt = 0;
+    }
+    qDebug() << QDateTime::currentMSecsSinceEpoch() - time0;
+    time0 = QDateTime::currentMSecsSinceEpoch();
+    QString msg =  ui->cmdLabelId->text() + " " + QString::number(waveOut);
+    sendToPort(msg);
+
+}
+
+void siggenW::on_goBtn_toggled(bool checked) {
+    qDebug() << "on_goBtn_toggled";
+
+
+
+    if (checked) {
+        pCnt = 0;
+        tCnt = 0;
+        valByte = 0;
+        waveOut = 0;
+//        updateGenValues();
+//        genTimer.start();
+        pp.StartWork();
+    } else {
+//        genTimer.stop();
+        pp.StopWork();
+    }
 }

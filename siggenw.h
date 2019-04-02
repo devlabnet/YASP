@@ -3,6 +3,9 @@
 
 #include "boxwidget.h"
 #include <QIntValidator>
+#include <QTimer>
+#include <QThread>
+#include "precisepolling.h"
 
 namespace Ui {
 class siggenw;
@@ -21,6 +24,7 @@ private slots:
     void updateTabSizes(int index);
 //    void labelMoveClicked(Qt::MouseButton b);
 //    void labelDelClicked(Qt::MouseButton b);
+    void timerSlot();
     void on_cmdLabel_editingFinished();
     void freqValueChanged(int v);
     void pulseTrackingToggle(bool t);
@@ -34,14 +38,21 @@ private slots:
     void pulsePcValLineChanged();
     void resChanged(const QString& s);
     void pulsePcChanged(int v);
-//    void freqSpinPressed();
-    void slideMoveOk();
-
+    void on_goBtn_toggled(bool checked);
+    void send(QString s);
 private:
+    enum functionType { Pulse     = 0x00,
+                        Triangle  = 0x01,
+                        Saw       = 0x02,
+                        Sinus     = 0x03
+                     };
     Ui::siggenw *ui;
     int minFreqRange = 1;
-    int maxFreqRange = 10000;
-    int sampleRate = 100000;
+    const int maxSampleRate = 1000;
+    const int maxFreqRange = 1000;
+    int sampleRate = maxSampleRate;
+    functionType functionMode = functionType::Sinus;
+    QTimer genTimer;
     QString mode;
     int resolution = 1024;
     int pulsePerCent = 50;
@@ -52,6 +63,21 @@ private:
     QIntValidator* frequencyValidator;
     void updateInfo();
     void buildXml(QDomDocument& doc);
+    void checkRadioMode(QString m);
+    void updateGenValues();
+    int frequency;
+    int pulseWidthScaled;
+    int period;
+    int tickCnt;
+    int tCnt;
+    int pCnt;
+    int valInc;
+    int valByte;
+    int waveOut;
+    qint64 time0;
+
+    QThread thread;
+    PrecisePolling pp;
 
 };
 

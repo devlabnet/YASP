@@ -38,7 +38,8 @@ SOURCES += \
     boxwidget.cpp \
     widgetswindow.cpp \
     buttonw.cpp \
-    siggenw.cpp
+    siggenw.cpp \
+    precisepolling.cpp
 
 HEADERS  += \
     formsliderinfo.h \
@@ -57,7 +58,8 @@ HEADERS  += \
     boxwidget.h \
     widgetswindow.h \
     buttonw.h \
-    siggenw.h
+    siggenw.h \
+    precisepolling.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
