@@ -84,6 +84,10 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAdd_SliderWidget">
+   <property name="icon">
+    <iconset resource="appresources.qrc">
+     <normaloff>:/Icons/Icons/icons8-paramètres-48.png</normaloff>:/Icons/Icons/icons8-paramètres-48.png</iconset>
+   </property>
    <property name="text">
     <string>Slider</string>
    </property>
@@ -92,26 +96,46 @@
    </property>
   </action>
   <action name="actionAdd_Dial_Widget">
+   <property name="icon">
+    <iconset resource="appresources.qrc">
+     <normaloff>:/Icons/Icons/knob.png</normaloff>:/Icons/Icons/knob.png</iconset>
+   </property>
    <property name="text">
     <string>Dial</string>
    </property>
   </action>
   <action name="actionLoad">
+   <property name="icon">
+    <iconset resource="appresources.qrc">
+     <normaloff>:/Icons/Icons/icons8-téléchargements-48.png</normaloff>:/Icons/Icons/icons8-téléchargements-48.png</iconset>
+   </property>
    <property name="text">
     <string>Load</string>
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset resource="appresources.qrc">
+     <normaloff>:/Icons/Icons/icons8-save-48.png</normaloff>:/Icons/Icons/icons8-save-48.png</iconset>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
   </action>
   <action name="actionRemove_All">
+   <property name="icon">
+    <iconset resource="appresources.qrc">
+     <normaloff>:/Icons/Icons/icons8-supprimer-la-table-48.png</normaloff>:/Icons/Icons/icons8-supprimer-la-table-48.png</iconset>
+   </property>
    <property name="text">
     <string>Remove All</string>
    </property>
   </action>
   <action name="actionButton">
+   <property name="icon">
+    <iconset resource="appresources.qrc">
+     <normaloff>:/Icons/Icons/icons8-natural-user-interface-2-48.png</normaloff>:/Icons/Icons/icons8-natural-user-interface-2-48.png</iconset>
+   </property>
    <property name="text">
     <string>Button</string>
    </property>
@@ -122,6 +146,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="appresources.qrc"/>
+ </resources>
  <connections/>
 </ui>

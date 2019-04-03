@@ -34,7 +34,7 @@ public:
     QLayoutItem *takeAt(int index) override;
     void widgetMoveClicked(boxWidget *li, Qt::MouseButton b);
     void widgetDelClicked(boxWidget *li);
-    bool checkWidgetId(boxWidget* wFrom, QString id);
+    bool checkWidgetId(boxWidget* wFrom, QString id, bool showAlert = true);
     void cleanWidgets();
 
 private:

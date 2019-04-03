@@ -14,6 +14,7 @@ void boxWidget::sendToPort(QString str) {
 
 void boxWidget::enterEvent(QEvent * event) {
     Q_UNUSED(event);
+    mouseInWidget = true;
 //    qDebug() << "enterEvent";
 //    setStyleSheet("background-color:rgb(228, 228, 228)");
     setStyleSheet("#frame {background-color:rgb(245,255,255)}");
@@ -22,6 +23,7 @@ void boxWidget::enterEvent(QEvent * event) {
 
 void boxWidget::leaveEvent(QEvent * event) {
     Q_UNUSED(event);
+    mouseInWidget = false;
 //    qDebug() << "leaveEvent";
     setStyleSheet("#frame {background-color:rgb(240,240,240)}");
 }
@@ -40,6 +42,7 @@ void boxWidget::labelDelClicked(Qt::MouseButton b) {
 }
 
 bool boxWidget::checkId(QString newId) {
+//    if (mouseInWidget == false) return true;
     // Check for duplicate
-    return dynamic_cast<WidgetsAreaLayout*>(this->parentWidget()->layout())->checkWidgetId(this, newId);
+    return dynamic_cast<WidgetsAreaLayout*>(this->parentWidget()->layout())->checkWidgetId(this, newId, mouseInWidget);
 }

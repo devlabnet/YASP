@@ -15,6 +15,8 @@ SliderW::SliderW(QDomElement* dom, boxWidget *parent) :
     ui->frameSlider->setStyleSheet("#frameSlider{padding:0px; margin:0px; background-color:rgb(236, 243, 255);border-radius:10px;border:2px solid rgb(100, 150, 255)} ");
     value = (maxValRange + minValRange)/2;
     singleStep = abs(maxValRange - minValRange)/20;
+    ui->minSpin->setRange(minValRange, maxValRange);
+    ui->maxSpin->setRange(minValRange, maxValRange);
     if (dom != nullptr) {
         QDomElement Child = *dom;
         while (!Child.isNull()) {
@@ -39,16 +41,14 @@ SliderW::SliderW(QDomElement* dom, boxWidget *parent) :
         }
     }
     ui->tabBox->setTabEnabled(0, !ui->cmdLabel->text().isEmpty());
-    qDebug() << "singleStep " << singleStep;
-    ui->minSpin->setRange(minValRange, maxValRange);
     ui->minSpin->setValue(minValRange);
-    ui->maxSpin->setRange(minValRange, maxValRange);
     ui->maxSpin->setValue(maxValRange);
+    ui->slider->setRange(minValRange, maxValRange);
+    singleStep = abs(ui->slider->maximum() - ui->slider->minimum())/20;
+    ui->slider->setSingleStep(singleStep);
     ui->stepSpin->setRange(1, singleStep*10);
     ui->stepSpin->setValue(singleStep);
     ui->slider->setValue(value);
-    ui->slider->setRange(minValRange, maxValRange);
-    ui->slider->setSingleStep(singleStep);
     ui->ValueLine->setText(QString::number(value));
     updateInfo();
     connect(ui->labelPos, SIGNAL(clicked(Qt::MouseButton)), this, SLOT(labelMoveClicked(Qt::MouseButton)));
@@ -75,19 +75,15 @@ void SliderW::buildXml(QDomDocument& doc) {
     QDomElement tag = doc.createElement("CMD_ID");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(ui->labelId->text()));
-//    root.appendChild(widget);
     tag = doc.createElement("VALUE");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(ui->slider->value())));
-//    root.appendChild(widget);
     tag = doc.createElement("VALUE_MIN");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(ui->minSpin->value())));
-//    root.appendChild(widget);
     tag = doc.createElement("VALUE_MAX");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(ui->maxSpin->value())));
-//    root.appendChild(widget);
     tag = doc.createElement("VALUE_STEP");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(ui->stepSpin->value())));
@@ -98,10 +94,9 @@ void SliderW::buildXml(QDomDocument& doc) {
 }
 
 void SliderW::updateInfo() {
-//    Min:-1000 Max:1000\nStep:100 Track:NO
     QString txt = "Min:" + QString::number(ui->slider->minimum())
             + " Max:" + QString::number(ui->slider->maximum())
-            + "\n Step:" + QString::number(ui->stepSpin->value())
+            + "\n Step:" + QString::number(ui->slider->singleStep())
             + " Track: ";
     if (ui->Tracking->isChecked()) {
         txt += "YES";
@@ -116,41 +111,34 @@ void SliderW::valueBoxEditingFinished() {
 }
 
 void SliderW::trackingToggle(bool t) {
-//    tracking = t;
     ui->slider->setTracking(t);
     updateInfo();
 }
 
 void SliderW::setMinimumSlide(int v) {
-    qDebug() << "setMinimumSlide: " << v;
-    qDebug() << "slideMinVal: " << v;
     if (v > ui->slider->maximum()) {
         ui->minSpin->setValue(ui->slider->maximum());
         v = ui->slider->maximum();
     }
-    qDebug() << "slide->setMinimum: " << v;
     ui->slider->setMinimum(v);
-//    if (ui->slider->value() < v) {
-//        ui->slider->setValue(v);
-//    }
-//    ui->slider->setValue((ui->slider->maximum() + ui->slider->minimum()) / 2);
-    updateInfo();
+    singleStep = abs(ui->slider->maximum() - ui->slider->minimum())/20;
+    ui->stepSpin->setValue(singleStep);
+//    ui->slider->setSingleStep(singleStep);
+//    ui->stepSpin->setRange(1, singleStep*10);
+//    updateInfo();
 }
 
 void SliderW::setMaximumSlide(int v) {
-    qDebug() << "setMaximumSlide: " << v;
-    qDebug() << "slideMaxVal: " << v;
     if (v < ui->slider->minimum()) {
         ui->maxSpin->setValue(ui->slider->maximum());
         v = ui->slider->minimum();
     }
-    qDebug() << "slide->setMaximum: " << v;
     ui->slider->setMaximum(v);
-//    if (ui->slider->value() > v) {
-//        ui->slider->setValue(v);
-//    }
-//    ui->slider->setValue((ui->slider->maximum() + ui->slider->minimum()) / 2);
-    updateInfo();
+    singleStep = abs(ui->slider->maximum() - ui->slider->minimum())/20;
+    ui->stepSpin->setValue(singleStep);
+//    ui->slider->setSingleStep(singleStep);
+//    ui->stepSpin->setRange(1, singleStep*10);
+//    updateInfo();
 }
 
 void SliderW::slideValueChanged(int v) {
@@ -161,9 +149,10 @@ void SliderW::slideValueChanged(int v) {
 }
 
 void SliderW::slideStepChanged(int v) {
-    qDebug() << "slideStepChanged " << v;
     singleStep = v;
     ui->slider->setSingleStep(singleStep);
+    ui->stepSpin->setRange(1, singleStep*10);
+    updateInfo();
 }
 
 void SliderW::updateTabSizes(int index) {
@@ -177,7 +166,6 @@ void SliderW::on_cmdLabel_editingFinished() {
     if (checkId(newId)) {
         id = newId;
         ui->tabBox->setTabEnabled(0, true);
-//        cmdLabelValue->setText(cmdLabelLine->text());
     } else {
         // restore last id
         ui->cmdLabel->setText(id);

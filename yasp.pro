@@ -37,9 +37,7 @@ SOURCES += \
     sliderw.cpp \
     boxwidget.cpp \
     widgetswindow.cpp \
-    buttonw.cpp \
-    siggenw.cpp \
-    precisepolling.cpp
+    buttonw.cpp
 
 HEADERS  += \
     formsliderinfo.h \
@@ -57,9 +55,7 @@ HEADERS  += \
     dialw.h \
     boxwidget.h \
     widgetswindow.h \
-    buttonw.h \
-    siggenw.h \
-    precisepolling.h
+    buttonw.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
@@ -67,8 +63,7 @@ FORMS    += mainwindow.ui \
     widgetswindow.ui \
     dialW.ui \
     sliderW.ui \
-    buttonW.ui \
-    siggenW.ui
+    buttonW.ui
 
 RESOURCES += \
     appresources.qrc \

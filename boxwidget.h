@@ -26,7 +26,7 @@ public:
     virtual void buildXml(QDomDocument& doc) = 0;
 
 private:
-
+    bool mouseInWidget = false;
 protected:
     QString id;
     bool checkId(QString newId);

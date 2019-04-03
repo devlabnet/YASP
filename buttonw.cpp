@@ -18,6 +18,8 @@ ButtonW::ButtonW(QDomElement* dom, boxWidget *parent) :
     ui->Repeat->setVisible(false);
     ui->RepeatVal->setVisible(false);
     ui->AutoRepeat->setVisible(false);
+    ui->DelayVal->setRange(1, maxDelay);
+    ui->RepeatVal->setRange(1, maxRepeat);
     setBackGroundButton("icons8-bouton-urgence-48.png");
     if (dom != nullptr) {
         QDomElement Child = *dom;
@@ -46,9 +48,9 @@ ButtonW::ButtonW(QDomElement* dom, boxWidget *parent) :
         }
     }
     ui->tabBox->setTabEnabled(0, !ui->cmdLabel->text().isEmpty());
-    ui->DelayVal->setRange(1, maxDelay);
+//    ui->DelayVal->setRange(1, maxDelay);
     ui->DelayVal->setValue(delayVal);
-    ui->RepeatVal->setRange(1, maxRepeat);
+//    ui->RepeatVal->setRange(1, maxRepeat);
     ui->RepeatVal->setValue(repeatVal);
     updateInfo();
     connect(ui->labelPos, SIGNAL(clicked(Qt::MouseButton)), this, SLOT(labelMoveClicked(Qt::MouseButton)));
@@ -69,7 +71,7 @@ ButtonW::~ButtonW() {
 }
 
 void ButtonW::buildXml(QDomDocument& doc) {
-    qDebug() << "ButtonW::buildXml";
+//    qDebug() << "ButtonW::buildXml";
     QDomNode root = doc.firstChild();
     QDomElement widget = doc.createElement("WIDGET");
     widget.setAttribute("TYPE", "Button");
@@ -105,27 +107,36 @@ void ButtonW::setBackGroundButton(QString img) {
 
 void ButtonW::updateInfo() {
     QString txt = "";
-    if (ui->Checkable->isChecked()) {
+    bool autoR = ui->AutoRepeat->isChecked();
+    bool checkable = ui->Checkable->isChecked();
+//    qDebug() << "updateInfo " << checkable << " / " << autoR;
+    ui->AutoRepeat->setVisible(checkable);
+    ui->pushButton->setCheckable(checkable);
+    ui->pushButton->setAutoRepeat(autoR);
+    ui->Delay->setVisible(autoR);
+    ui->DelayVal->setVisible(autoR);
+    ui->Repeat->setVisible(autoR);
+    ui->RepeatVal->setVisible(autoR);
+    if (checkable) {
         txt += "TOGGLE";
         if (ui->pushButton->isChecked()) {
             setBackGroundButton("icons8-toggle-on-48.png");
         } else {
             setBackGroundButton("icons8-toggle-off-48.png");
         }
+        if (autoR) {
+            ui->pushButton->setAutoRepeatInterval(ui->RepeatVal->value());
+            txt += " AUTO REPEAT";
+            txt += "\nDel: ";
+            txt += QString::number(ui->DelayVal->value());
+            txt += " Rep: ";
+            txt += QString::number(ui->RepeatVal->value());
+        } else {
+            txt += " NO AUTO REPEAT";
+        }
     } else {
         txt += "PUSH";
         setBackGroundButton("icons8-bouton-urgence-48.png");
-    }
-    if (ui->AutoRepeat->isChecked()) {
-        ui->pushButton->setAutoRepeat(true);
-        txt += " AUTO REPEAT";
-        txt += "\nDel: ";
-        txt += QString::number(ui->DelayVal->value());
-        txt += " Rep: ";
-        txt += QString::number(ui->RepeatVal->value());
-    } else {
-        ui->pushButton->setAutoRepeat(false);
-        txt += " NO AUTO REPEAT";
     }
     ui->labelInfo->setText(txt);
 }
@@ -141,9 +152,9 @@ void ButtonW::repeatChanged(int v) {
 }
 
 void ButtonW::checkableToggle(bool b) {
-    ui->pushButton->setCheckable(b);
-    ui->pushButton->setChecked(false);
-    ui->AutoRepeat->setVisible(b);
+//    ui->pushButton->setCheckable(b);
+//    ui->pushButton->setChecked(false);
+//    ui->AutoRepeat->setVisible(b);
     if (!b) {
         ui->AutoRepeat->setChecked(false);
     }
@@ -151,10 +162,10 @@ void ButtonW::checkableToggle(bool b) {
 }
 
 void ButtonW::autoRepeatToggle(bool b) {
-    ui->Delay->setVisible(b);
-    ui->DelayVal->setVisible(b);
-    ui->Repeat->setVisible(b);
-    ui->RepeatVal->setVisible(b);
+//    ui->Delay->setVisible(b);
+//    ui->DelayVal->setVisible(b);
+//    ui->Repeat->setVisible(b);
+//    ui->RepeatVal->setVisible(b);
     updateInfo();
 }
 

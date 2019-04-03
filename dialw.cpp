@@ -12,6 +12,8 @@ dialW::dialW(QDomElement *dom, boxWidget *parent) :
     ui->Tracking->setChecked(false);
     ui->dial->setTracking(false);
     ui->dial->setWrapping(false);
+    ui->MinVal->setRange(minValRange, maxValRange);
+    ui->MaxVal->setRange(minValRange, maxValRange);
     ui->frameDial->setObjectName("frameDial");
     ui->frameDial->setStyleSheet("#frameDial{padding:0px; margin:0px; background-color:rgb(209, 255, 209);border-radius:10px;border:2px solid rgb(80, 200, 80)} ");
     value = (maxValRange + minValRange)/2;
@@ -44,22 +46,16 @@ dialW::dialW(QDomElement *dom, boxWidget *parent) :
             Child = Child.nextSibling().toElement();
         }
     }
-
     ui->tabBox->setTabEnabled(0, !ui->cmdLabel->text().isEmpty());
-    qDebug() << "singleStep " << singleStep;
-    ui->MinVal->setRange(minValRange, maxValRange);
+    ui->dial->setRange(minValRange, maxValRange);
+    singleStep = abs(maxValRange - minValRange)/20;
     ui->MinVal->setValue(minValRange);
-    ui->MaxVal->setRange(minValRange, maxValRange);
     ui->MaxVal->setValue(maxValRange);
     ui->StepVal->setRange(1, singleStep*10);
     ui->StepVal->setValue(singleStep);
     ui->dial->setValue(value);
-    ui->dial->setRange(minValRange, maxValRange);
     ui->dial->setSingleStep(singleStep);
     ui->ValueLine->setText(QString::number(value));
-//    ui->labelInfo->setText("Min:" + QString::number(minValRange)
-//                           + " Max:" + QString::number(minValRange)
-//                           + " Track: No");
     updateInfo();
     connect(ui->labelPos, SIGNAL(clicked(Qt::MouseButton)), this, SLOT(labelMoveClicked(Qt::MouseButton)));
     connect(ui->labelDel, SIGNAL(clicked(Qt::MouseButton)), this, SLOT(labelDelClicked(Qt::MouseButton)));
@@ -90,19 +86,15 @@ void dialW::buildXml(QDomDocument& doc) {
     QDomElement tag = doc.createElement("CMD_ID");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(ui->cmdLabelId->text()));
-//    root.appendChild(widget);
     tag = doc.createElement("VALUE");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(ui->dial->value())));
-//    root.appendChild(widget);
     tag = doc.createElement("VALUE_MIN");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(ui->MinVal->value())));
-//    root.appendChild(widget);
     tag = doc.createElement("VALUE_MAX");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(ui->MaxVal->value())));
-//    root.appendChild(widget);
     tag = doc.createElement("VALUE_STEP");
     widget.appendChild(tag);
     tag.appendChild(doc.createTextNode(QString::number(ui->StepVal->value())));
@@ -116,10 +108,9 @@ void dialW::buildXml(QDomDocument& doc) {
 }
 
 void dialW::updateInfo() {
-//    Min:-1000 Max:1000\nStep:100 Track:NO
     QString txt = "Min:" + QString::number(ui->dial->minimum())
             + " Max:" + QString::number(ui->dial->maximum())
-            + "\n Step:" + QString::number(ui->StepVal->value());
+            + "\n Step:" + QString::number(ui->dial->singleStep());
     if (ui->Tracking->isChecked()) {
         txt += " Track: YES";
     } else {
@@ -148,35 +139,29 @@ void dialW::wrappingToggle(bool t) {
 }
 
 void dialW::setMinimumSlide(int v) {
-    qDebug() << "setMinimumSlide: " << v;
-    qDebug() << "slideMinVal: " << v;
     if (v > ui->dial->maximum()) {
         ui->MinVal->setValue(ui->dial->maximum());
         v = ui->dial->maximum();
     }
-    qDebug() << "slide->setMinimum: " << v;
     ui->dial->setMinimum(v);
-//    if (ui->slider->value() < v) {
-//        ui->slider->setValue(v);
-//    }
-//    ui->slider->setValue((ui->slider->maximum() + ui->slider->minimum()) / 2);
-    updateInfo();
+    singleStep = abs(ui->dial->maximum() - ui->dial->minimum())/20;
+    ui->StepVal->setValue(singleStep);
+//    ui->dial->setSingleStep(singleStep);
+//    ui->StepVal->setRange(1, singleStep*10);
+//    updateInfo();
 }
 
 void dialW::setMaximumSlide(int v) {
-    qDebug() << "setMaximumSlide: " << v;
-    qDebug() << "slideMaxVal: " << v;
     if (v < ui->dial->minimum()) {
         ui->MaxVal->setValue(ui->dial->maximum());
         v = ui->dial->minimum();
     }
-    qDebug() << "slide->setMaximum: " << v;
     ui->dial->setMaximum(v);
-//    if (ui->slider->value() > v) {
-//        ui->slider->setValue(v);
-//    }
-//    ui->slider->setValue((ui->slider->maximum() + ui->slider->minimum()) / 2);
-    updateInfo();
+    singleStep = abs(ui->dial->maximum() - ui->dial->minimum())/20;
+    ui->StepVal->setValue(singleStep);
+//    ui->dial->setSingleStep(singleStep);
+//    ui->StepVal->setRange(1, singleStep*10);
+//    updateInfo();
 }
 
 void dialW::slideValueChanged(int v) {
@@ -187,9 +172,10 @@ void dialW::slideValueChanged(int v) {
 }
 
 void dialW::slideStepChanged(int v) {
-    qDebug() << "slideStepChanged " << v;
     singleStep = v;
     ui->dial->setSingleStep(singleStep);
+    ui->StepVal->setRange(1, singleStep*10);
+    updateInfo();
 }
 
 void dialW::updateTabSizes(int index) {

@@ -1102,16 +1102,28 @@
    <addaction name="menuHelo"/>
   </widget>
   <action name="actionHow_to_use">
+   <property name="icon">
+    <iconset resource="appresources.qrc">
+     <normaloff>:/Icons/Icons/icons8-info-48.png</normaloff>:/Icons/Icons/icons8-info-48.png</iconset>
+   </property>
    <property name="text">
     <string>How to use </string>
    </property>
   </action>
   <action name="actionShowWidgets">
+   <property name="icon">
+    <iconset resource="appresources.qrc">
+     <normaloff>:/Icons/Icons/icons8-boîte-de-rangement-complète-d&amp;#39;outils-48.png</normaloff>:/Icons/Icons/icons8-boîte-de-rangement-complète-d&amp;#39;outils-48.png</iconset>
+   </property>
    <property name="text">
     <string>Show Hide Widgets</string>
    </property>
   </action>
   <action name="actionOnline_Documentation">
+   <property name="icon">
+    <iconset resource="appresources.qrc">
+     <normaloff>:/Icons/Icons/icons8-manuel-utilisateur-48.png</normaloff>:/Icons/Icons/icons8-manuel-utilisateur-48.png</iconset>
+   </property>
    <property name="text">
     <string>Online Documentation</string>
    </property>
@@ -1126,6 +1138,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="appresources.qrc"/>
+ </resources>
  <connections/>
 </ui>

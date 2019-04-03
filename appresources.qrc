@@ -27,6 +27,15 @@
         <file>Icons/icons8-bouton-urgence-48.png</file>
         <file>Icons/icons8-données-dans-les-deux-directions-48.png</file>
         <file>Icons/icons8-supprimer-pour-toujours-48.png</file>
+        <file>Icons/knob.png</file>
+        <file>Icons/icons8-tourner-à-droite-48.png</file>
+        <file>Icons/icons8-paramètres-48.png</file>
+        <file>Icons/icons8-supprimer-la-table-48.png</file>
+        <file>Icons/icons8-info-48.png</file>
+        <file>Icons/icons8-manuel-utilisateur-48.png</file>
+        <file>Icons/icons8-opinion-contraire-48.png</file>
+        <file>Icons/icons8-téléchargements-48.png</file>
+        <file>Icons/icons8-boîte-de-rangement-complète-d&amp;#39;outils-48.png</file>
     </qresource>
     <qresource prefix="/StyleSheet">
         <file>StyleSheet/style.qss</file>

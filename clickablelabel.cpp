@@ -5,10 +5,9 @@
 #include <QMouseEvent>
 
 ClickableLabel::ClickableLabel(QWidget *parent) : QLabel(parent) {
-
 }
 
 void ClickableLabel::mousePressEvent(QMouseEvent* event) {
-    qDebug() << " clicked()";
+    qDebug() << "ClickableLabel clicked()";
     emit clicked(event->button());
 }

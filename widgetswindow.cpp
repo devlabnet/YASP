@@ -3,7 +3,6 @@
 #include "sliderw.h"
 #include "dialw.h"
 #include "buttonw.h"
-#include "siggenw.h"
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -16,11 +15,18 @@ widgetsWindow::widgetsWindow(QSerialPort* p, QWidget *parent) :
     widgetsLayout = new WidgetsAreaLayout();
     topWidget->setLayout(widgetsLayout);
     ui->scrollArea->setWidget(topWidget);
+    ui->actionSignal_Generator->setVisible(false);
+//    ui->scrollArea->installEventFilter(this);
 }
 
 widgetsWindow::~widgetsWindow() {
     delete ui;
 }
+
+//bool widgetsWindow::eventFilter(QObject *object, QEvent *event) {
+//    qDebug() << "widgetsWindow::eventFilter : " << object << " event: " << event->type();
+//    return false;
+//}
 
 void widgetsWindow::sendToPort(QString msg) {
     if (msg.isEmpty()) return; // Nothing to send
@@ -82,10 +88,11 @@ void widgetsWindow::createWidget(QString type, QDomElement* domElt) {
     } else if (type == "Button") {
         ButtonW* f = new ButtonW(domElt);
         widgetsLayout->addWidget(f);
-    } else if (type == "SigGen") {
-        siggenW* f = new siggenW(domElt);
-        widgetsLayout->addWidget(f);
     }
+//    else if (type == "SigGen") {
+//        siggenW* f = new siggenW(domElt);
+//        widgetsLayout->addWidget(f);
+//    }
 }
 
 void widgetsWindow::doXml() {
@@ -144,7 +151,7 @@ void widgetsWindow::on_actionButton_triggered() {
     widgetsLayout->addWidget(f);
 }
 
-void widgetsWindow::on_actionSignal_Generator_triggered() {
-    siggenW* f = new siggenW();
-    widgetsLayout->addWidget(f);
-}
+//void widgetsWindow::on_actionSignal_Generator_triggered() {
+//    siggenW* f = new siggenW();
+//    widgetsLayout->addWidget(f);
+//}

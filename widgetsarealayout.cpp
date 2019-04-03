@@ -62,19 +62,23 @@ void WidgetsAreaLayout::widgetDelClicked(boxWidget *li) {
      }
 }
 
-bool WidgetsAreaLayout::checkWidgetId(boxWidget* wFrom, QString id) {
+bool WidgetsAreaLayout::checkWidgetId(boxWidget* wFrom, QString id, bool showAlert) {
     if (id.isEmpty()) {
-        QMessageBox msgBox(parentWidget());
-        msgBox.setText("Command ID cannot be empty !!!.");
-        msgBox.exec();
+        if (showAlert) {
+            QMessageBox msgBox(parentWidget());
+            msgBox.setText("Command ID cannot be empty !!!.");
+            msgBox.exec();
+        }
         return false;
     }
     foreach (boxWidget* w, widgetsList) {
         if (w == wFrom) continue;
         if (w->getId() == id) {
-            QMessageBox msgBox(parentWidget());
-            msgBox.setText("Command ID already used by another Widget !!!.");
-            msgBox.exec();
+            if (showAlert) {
+                QMessageBox msgBox(parentWidget());
+                msgBox.setText("Command ID already used by another Widget !!!.");
+                msgBox.exec();
+            }
             return false;
         }
     }

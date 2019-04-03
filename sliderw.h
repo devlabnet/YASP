@@ -31,8 +31,8 @@ protected:
 
 private:
     Ui::sliderw *ui;
-    int maxValRange = 1000;
-    int minValRange = -1000;
+    int maxValRange = 10000;
+    int minValRange = -10000;
     int singleStep;
     int value;
     void updateInfo();

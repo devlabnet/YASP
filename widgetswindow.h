@@ -27,7 +27,7 @@ private slots:
     void on_actionLoad_triggered();
     void on_actionRemove_All_triggered();
     void on_actionButton_triggered();
-    void on_actionSignal_Generator_triggered();
+//    void on_actionSignal_Generator_triggered();
 
 signals:
     void messageSent(QString msg);
@@ -40,6 +40,8 @@ private:
     void createWidget(QString type, QDomElement* domElt);
     bool openXml();
     void doXml();
+//    bool eventFilter(QObject *object, QEvent *event);
+
 };
 
 #endif // MAINWINDOW_H
