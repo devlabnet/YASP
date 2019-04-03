@@ -6,6 +6,8 @@
       "download-url": "https://www.devlabnet.eu/softdev/yasp/yasp.php",
       "changelog": "<FONT COLOR='#800000'><ol>
       <li>Added to GITHUB</li>
+      <li>New Widgets Windows</li>
+      <li>Added Button Widget</li>
       <li>Added ability to Save log</li>
       <li>Added ability to Reset (Reboot) Device</li>
       <li>Added Frequency MODE Measure</li>
