@@ -470,16 +470,45 @@
                   </widget>
                  </item>
                  <item>
-                  <spacer name="horizontalSpacer_13">
+                  <spacer name="horizontalSpacer_7">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                    </property>
                    <property name="sizeType">
-                    <enum>QSizePolicy::Expanding</enum>
+                    <enum>QSizePolicy::MinimumExpanding</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
-                     <width>10</width>
+                     <width>5</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="yAutoRange">
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>AutoRange</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_6">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeType">
+                    <enum>QSizePolicy::MinimumExpanding</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>5</width>
                      <height>20</height>
                     </size>
                    </property>
@@ -712,19 +741,6 @@
                   </widget>
                  </item>
                  <item>
-                  <spacer name="horizontalSpacer_6">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item>
                   <spacer name="horizontalSpacer_18">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
@@ -752,7 +768,7 @@
                     <enum>Qt::RightToLeft</enum>
                    </property>
                    <property name="text">
-                    <string>AutoScroll</string>
+                    <string>AutoScrolling</string>
                    </property>
                    <property name="checked">
                     <bool>true</bool>

@@ -51,7 +51,10 @@ MainWindow::MainWindow(QWidget *parent) :
     // Hide dynamicFrame and autoScrollCheckBox
     ui->dynamicFrame->setVisible(false);
     ui->autoScrollCheckBox->setVisible(false);
+    ui->checkBoxDynamicMeasures->setVisible(false);
     // ----------------------------------------
+    ui->dynamicFrame->setVisible(true);
+    ui->autoScrollCheckBox->setVisible(true);
     QColor gridColor = QColor(170,170,170);
     ui->bgColorButton->setAutoFillBackground(true);
     ui->bgColorButton->setStyleSheet("background-color:" + bgColor.name() + "; color: rgb(0, 0, 0)");
@@ -651,6 +654,9 @@ void MainWindow::portOpenedSuccess() {
     // Slot is refreshed 20 times per second
     connected = true;                                                                     // Set flags
     plotting = true;
+    minValue = DBL_MAX;
+    maxValue = -DBL_MAX;
+
     ui->tabWidget->setCurrentIndex(1);
     // Reset the Device via DTR
     serialPort->setDataTerminalReady(true);
@@ -793,7 +799,12 @@ void MainWindow:: closePort() {
 void MainWindow::replot() {
     if(connected) {
         if (plotting) {
+            if (ui->autoScrollCheckBox->isChecked()) {
+                lastDataTtime += (ui->plot->xAxis->range().size() / 2000);
+            }
             ui->plot->xAxis->setRange(lastDataTtime - plotTimeInMilliSeconds, lastDataTtime);
+//            double rVal = 2 * qMax(abs(minValue), abs(maxValue));
+//            ui->plot->yAxis->setRange(-rVal, rVal);
             ui->plot->replot();
         } else {
             ui->plot->xAxis->setRange(ui->plot->xAxis->range());
@@ -963,6 +974,12 @@ void MainWindow::onNewDataArrived(const QString &str) {
             val += yGraph->offset();
             yGraph->updateMinMax(val);
             plot->addData(lastDataTtime, val);
+            if (val < minValue) {
+                minValue = val;
+            }
+            if (val > maxValue) {
+                maxValue = val;
+            }
             ui->dataInfoLabel->setNum(dataPointNumber);
             QString plotInfoStr = " val: ";
             plotInfoStr += QString::number(val, 'f', 3);
@@ -978,13 +995,17 @@ void MainWindow::onNewDataArrived(const QString &str) {
                 plotInfoStr +=  + " max: ";
                 plotInfoStr += QString::number(yGraph->getMax(), 'f', 3);
             }
-            if (ui->autoScrollCheckBox->isChecked() == false) {
+//            if (ui->autoScrollCheckBox->isChecked() == false) {
                 if (plotting) {
                     if (canReplot) {
                         replot();
                     }
                 }
-            }
+//            } else {
+//                if (plotting) {
+//                    replot();
+//                }
+//            }
             updateLabel(plotId, plotInfoStr);
         } else {
             qDebug() << "------------> BAD DATA : " << plotId << " / " << dataListSize << " --> " << str;
@@ -1408,6 +1429,17 @@ void MainWindow::doMenuPlotResetAction() {
     ui->plot->replot();
     infoModeLabel->setText(workingGraph->plot()->name() + " --> MENU MODE");
 }
+
+/******************************************************************************************************************/
+void MainWindow::doMenuPlotAutoRangeAction() {
+    resetMouseWheelState();
+    Q_ASSERT(workingGraph);
+    double rVal = 2 * qMax(abs(workingGraph->getMin()), abs(workingGraph->getMax()));
+    ui->plot->yAxis->setRange(-rVal, rVal);
+    ui->plot->replot();
+    infoModeLabel->setText(workingGraph->plot()->name() + " --> MENU MODE");
+}
+
 
 /******************************************************************************************************************/
 void MainWindow::doMenuPlotShowHideAction() {
@@ -2297,6 +2329,8 @@ void MainWindow::plotLabelSelectionChanged(bool b) {
             if (workingGraph->plot()->visible()) {
                 action = contextMenu->addAction("Reset", this, SLOT(doMenuPlotResetAction()));
                 action->setIcon(QIcon(":/Icons/Icons/icons8-available-updates-40.png"));
+                action = contextMenu->addAction("AutoRange", this, SLOT(doMenuPlotAutoRangeAction()));
+                action->setIcon(QIcon(":/Icons/Icons/icons8-height-48.png"));
                 action = contextMenu->addAction("Save", this, SLOT(saveSelectedGraph()));
                 action->setIcon(QIcon(":/Icons/Icons/icons8-save-48.png"));
                 if (plotting == false) {
@@ -2431,4 +2465,11 @@ void MainWindow::on_autoScrollCheckBox_stateChanged(int arg1) {
         updateTimer.stop();
     }
 
+}
+
+/******************************************************************************************************************/
+void MainWindow::on_yAutoRange_clicked() {
+    double rVal = 2 * qMax(abs(minValue), abs(maxValue));
+    ui->plot->yAxis->setRange(-rVal, rVal);
+    ui->plot->replot();
 }

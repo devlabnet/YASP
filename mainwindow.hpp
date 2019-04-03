@@ -100,6 +100,7 @@ private slots:
 #endif
 //    void doMenuPlotScaleAction();
     void doMenuPlotResetAction();
+    void doMenuPlotAutoRangeAction();
     void doMenuPlotMeasureBoxAction();
     void doMenuPlotMeasureFreqAction();
     void doMenuPlotMeasureAction();
@@ -131,6 +132,8 @@ private slots:
     void on_actionOnline_Documentation_triggered();
 
     void on_autoScrollCheckBox_stateChanged(int arg1);
+
+    void on_yAutoRange_clicked();
 
 signals:
     void portOpenFail();                                                                  // Emitted when cannot open port
@@ -254,6 +257,9 @@ private:
     void checkForUpdate();
     bool compareVersions(const QString& x, const QString& y);
     void setUpdateAvailable(bool available, QString latestVersion="", QString changelog="");
+
+    double minValue = DBL_MAX;
+    double maxValue = -DBL_MAX;
 //    bool boolTest;
 //    double round(long double number, int precision) {
 //      int decimals = std::pow(10, precision);
