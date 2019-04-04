@@ -29,7 +29,7 @@ ButtonW::ButtonW(QDomElement* dom, boxWidget *parent) :
                 id = Child.firstChild().toText().data();
                 ui->labelId->setText(id);
                 ui->cmdLabel->setText(id);
-                ui->label->setText("Button " + id);
+                ui->label->setText("B " + id);
             }
             if (Child.tagName() == "DELAY") delayVal = Child.firstChild().toText().data().toInt();
             if (Child.tagName() == "REPEAT") repeatVal = Child.firstChild().toText().data().toInt();
@@ -118,6 +118,7 @@ void ButtonW::updateInfo() {
     ui->Repeat->setVisible(autoR);
     ui->RepeatVal->setVisible(autoR);
     if (checkable) {
+        ui->label->setText("Switch " + ui->labelId->text());
         txt += "TOGGLE";
         if (ui->pushButton->isChecked()) {
             setBackGroundButton("icons8-toggle-on-48.png");
@@ -135,6 +136,7 @@ void ButtonW::updateInfo() {
             txt += " NO AUTO REPEAT";
         }
     } else {
+        ui->label->setText("Push Button " + ui->labelId->text());
         txt += "PUSH";
         setBackGroundButton("icons8-bouton-urgence-48.png");
     }
@@ -188,7 +190,7 @@ void ButtonW::on_cmdLabel_editingFinished() {
         }
     }
     ui->labelId->setText(id);
-    ui->label->setText("Slider " + id);
+    updateInfo();
 }
 
 void ButtonW::btnPressed() {
