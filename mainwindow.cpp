@@ -31,8 +31,9 @@
 #include <QNetworkReply>
 
 //static const QString DEFS_URL = "https://www.devlabnet.eu/softdev/yasp/updates.json";
-static const QString DEFS_URL = "https://raw.githubusercontent.com/devlabnet/YASP/master/installer/updates.json";
-static const QString YASP_VERSION = "1.2.1";
+//static const QString DEFS_URL = "https://raw.githubusercontent.com/devlabnet/YASP/master/installer/updates.json";
+static const QString YASP_VERSION = "v1.2.0";
+static const QString DEFS_URL = "https://api.github.com/repos/devlabnet/YASP/releases/latest";
 static const QString DOC_URL = "https://gdoc.pub/doc/e/2PACX-1vQmyyZDie11-NvYd0V3Ry10cUGisbMw1lMT7EOq4qnecPBSdgyicpQix47Plv0QDT93KMiAFPEK7MNc";
 /******************************************************************************************************************/
 /* Constructor */
@@ -207,9 +208,10 @@ bool MainWindow::compareVersions(const QString& x, const QString& y) {
     QStringList versionsX = x.split (".");
     QStringList versionsY = y.split (".");
     int count = qMin (versionsX.count(), versionsY.count());
-    for (int i = 0; i < count; ++i) {
-        int a = QString (versionsX.at (i)).toInt();
-        int b = QString (versionsY.at (i)).toInt();
+//    qDebug() << "count: " << count;
+    for (int i = 0; i < count; i++) {
+        int a = versionsX.at(i).toInt();
+        int b = versionsY.at(i).toInt();
         if (a > b) {
             return true;
         }
@@ -280,13 +282,6 @@ void MainWindow::checkForUpdateFinished(QNetworkReply* reply) {
     }
     else
     {
-//        qDebug() << __LINE__ << reply->header(QNetworkRequest::ContentTypeHeader).toString();
-//        qDebug() << __LINE__ << reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toString();;
-//        qDebug() << __LINE__ << reply->header(QNetworkRequest::ContentLengthHeader).toULongLong();
-//        qDebug() << __LINE__ << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-//        qDebug() << __LINE__ << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
-//        QString response =  reply->readAll();
-//        qDebug() << "response: " << response;
         QJsonDocument document = QJsonDocument::fromJson (reply->readAll());
         /* JSON is invalid */
         if (document.isNull()) {
@@ -294,18 +289,28 @@ void MainWindow::checkForUpdateFinished(QNetworkReply* reply) {
             downloadUrl = "";
             return;
         }
-        QString platformKey = "windows";
-        /* Get the platform information */
-        QJsonObject updates = document.object().value ("updates").toObject();
-        QJsonObject platform = updates.value (platformKey).toObject();
-        /* Get update information */
-        QString changelog = platform.value ("changelog").toString();
-        downloadUrl = platform.value ("download-url").toString();
-        QString latestVersion = platform.value ("latest-version").toString();
+        QJsonValue tag = document.object().value("tag_name");
+        QString latestVersion = tag.toString();;
+        QJsonValue body = document.object().value("body");
+        QString bodyStr = body.toString();;
+        QJsonArray assets = document.object().value("assets").toArray();
+        QJsonObject obj = assets[0].toObject();
+//        QVariantList v = assets.toVariantList();
+        downloadUrl = obj.value("browser_download_url").toString();
+//        qDebug() << "downloadUrl: " << downloadUrl;
+
+//        QString platformKey = "windows";
+//        /* Get the platform information */
+//        QJsonObject updates = document.object().value ("updates").toObject();
+//        QJsonObject platform = updates.value (platformKey).toObject();
+//        /* Get update information */
+//        QString changelog = platform.value ("changelog").toString();
+//        downloadUrl = platform.value ("download-url").toString();
+//        QString latestVersion = platform.value ("latest-version").toString();
 //        qDebug() << "changelog: " << changelog;
 //        qDebug() << "downloadUrl: " << downloadUrl;
 //        qDebug() << "latestVersion: " << latestVersion;
-        setUpdateAvailable(compareVersions(latestVersion, YASP_VERSION), latestVersion, changelog);
+        setUpdateAvailable(compareVersions(latestVersion, YASP_VERSION), latestVersion, bodyStr);
     }
     reply->deleteLater();
 }
@@ -2449,6 +2454,8 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 
 /******************************************************************************************************************/
 void MainWindow::on_aboutNevVersionButton_clicked() {
+    qDebug() << "on_aboutNevVersionButton_clicked: " << downloadUrl;
+
     QDesktopServices::openUrl(QUrl (downloadUrl));
 }
 

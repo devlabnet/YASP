@@ -73,7 +73,6 @@ DISTFILES += \
     README.md \
     installer/updates.json \
     installer/readMe.txt \
-    installer/YASP_Setup.exe \
     installer/yasp.iss \
     installer/1.bmp \
     yaspLib/yasplib.cpp \
