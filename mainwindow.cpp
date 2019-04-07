@@ -32,7 +32,7 @@
 
 //static const QString DEFS_URL = "https://www.devlabnet.eu/softdev/yasp/updates.json";
 //static const QString DEFS_URL = "https://raw.githubusercontent.com/devlabnet/YASP/master/installer/updates.json";
-static const QString YASP_VERSION = "v1.2.1";
+static const QString YASP_VERSION = "v1.3.0";
 static const QString DEFS_URL = "https://api.github.com/repos/devlabnet/YASP/releases/latest";
 static const QString DOC_URL = "https://gdoc.pub/doc/e/2PACX-1vQmyyZDie11-NvYd0V3Ry10cUGisbMw1lMT7EOq4qnecPBSdgyicpQix47Plv0QDT93KMiAFPEK7MNc";
 /******************************************************************************************************************/

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "YASP"
-#define MyAppVersion "1.2.1"
+#define MyAppVersion "v1.3.0"
 #define MyAppPublisher "Devlabnet"
 #define MyAppURL "http://www.example.com/"
 #define MyAppExeName "yasp.exe"
