@@ -6,10 +6,12 @@ TO DO When Putting New Update on GitHub :
 
 0) Select YASP Desktop_Qt_5_12_1_MSVC2017_64bit-Release and compile all
 1) Update Version YASP_VERSION in mainwindow.cpp.
-2) Update file "updates.json" on download server.
-3) Edit "yasp.iss" to change Version
-4) Run the new "yasp.iss" to create new YASP_Setup.exe
-5) Put the new install file on download server
+2) Edit "yasp.iss" to change Version
+3) Run the new "yasp.iss" to create new YASP_Setup.exe
+
+// GitHub Release
+1) Update releasse Tag info on https://github.com/devlabnet/YASP/releases.
+2) Put the new install file "YASP_Setup.exe" on GitHub release server
 
 That's All Folks, Enjoy !!
 

@@ -71,7 +71,6 @@ RESOURCES += \
 
 DISTFILES += \
     README.md \
-    installer/updates.json \
     installer/readMe.txt \
     installer/yasp.iss \
     installer/1.bmp \
