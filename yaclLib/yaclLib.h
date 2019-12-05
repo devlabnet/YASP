@@ -82,7 +82,6 @@ private:
     cmdLineCommand* commands;
     size_t userFuncSize;
     char commandLine[COMMAND_BUFFER_LENGTH + 1]; //Read commands into this buffer from Serial.  +1 in length for a termination char
-    uint8_t charsRead = 0;						 //note: COMAND_BUFFER_LENGTH must be less than 255 chars long
     bool ok;
     const char *delimiters = " "; //commands must be separated by space
     char *cmdToken = "";
