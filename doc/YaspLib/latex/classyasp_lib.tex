@@ -1,0 +1,160 @@
+\hypertarget{classyasp_lib}{}\section{yasp\+Lib Class Reference}
+\label{classyasp_lib}\index{yaspLib@{yaspLib}}
+
+
+{\ttfamily \#include $<$yasplib.\+h$>$}
+
+Inheritance diagram for yasp\+Lib\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classyasp_lib}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classyasp_lib_a683109c112526b3eb2cb53c4e1b36a01}{yasp\+Lib}} (Stream \&dev)
+\item 
+void \mbox{\hyperlink{classyasp_lib_aa1305be6988159432ed5a41e515796aa}{Setup}} (int ind, char $\ast$name, char $\ast$color)
+\item 
+void \mbox{\hyperlink{classyasp_lib_a49bbfb260ce51983694c3a3d415e7857}{Color}} (int ind, char $\ast$color)
+\item 
+void \mbox{\hyperlink{classyasp_lib_a5020a42b49db74ebd02fc41e2b9e3b91}{Data}} (int ind, double val)
+\item 
+void \mbox{\hyperlink{classyasp_lib_a3477505d716271e0ef72f9d645f3ce96}{Data\+Micros}} (int ind, unsigned long m, double val)
+\item 
+void \mbox{\hyperlink{classyasp_lib_a6b16e66f55632fa5c28dc70a07ff831c}{Data\+Millis}} (int ind, unsigned long m, double val)
+\end{DoxyCompactItemize}
+\subsection*{Private Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{classyasp_lib_ac6d51b8644093b83092ae9041c655cdf}{Msg\+Type}} \{ \mbox{\hyperlink{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfadbb368120a901b8b1cc94cf7f876a022}{S\+T\+A\+R\+T\+\_\+\+M\+SG}} = 0x10, 
+\mbox{\hyperlink{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfa30ce626c05e03c2912b32df8f2391564}{P\+L\+O\+T\+\_\+\+M\+SG}} = 0x11, 
+\mbox{\hyperlink{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfa7e3ed958b79e2e406b4b50ece022a1b7}{E\+N\+D\+\_\+\+M\+SG}} = 0x12, 
+\mbox{\hyperlink{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfa3bbcc479f0d60df39ca424caa73937a0}{S\+P\+A\+C\+E\+\_\+\+M\+SG}} = 0x13
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classyasp_lib_a9336c4c9856879c5cff7d631d1e283bc}{read}} ()
+\item 
+int \mbox{\hyperlink{classyasp_lib_a7c052a8592e42a0b57044ddfada102e1}{available}} ()
+\item 
+int \mbox{\hyperlink{classyasp_lib_a91694d687c8c92726bceaeb71dbbb744}{peek}} ()
+\item 
+size\+\_\+t \mbox{\hyperlink{classyasp_lib_a56f661b7a24d7269f9c8169a96129e27}{write}} (uint8\+\_\+t b)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Stream \& \mbox{\hyperlink{classyasp_lib_a57b0f8951e55f287de5f8381efe08930}{stream}}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Enumeration Documentation}
+\mbox{\Hypertarget{classyasp_lib_ac6d51b8644093b83092ae9041c655cdf}\label{classyasp_lib_ac6d51b8644093b83092ae9041c655cdf}} 
+\index{yaspLib@{yaspLib}!MsgType@{MsgType}}
+\index{MsgType@{MsgType}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{MsgType}{MsgType}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classyasp_lib_ac6d51b8644093b83092ae9041c655cdf}{yasp\+Lib\+::\+Msg\+Type}}\hspace{0.3cm}{\ttfamily [private]}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{START\_MSG@{START\_MSG}!yaspLib@{yaspLib}}\index{yaspLib@{yaspLib}!START\_MSG@{START\_MSG}}}\mbox{\Hypertarget{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfadbb368120a901b8b1cc94cf7f876a022}\label{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfadbb368120a901b8b1cc94cf7f876a022}} 
+S\+T\+A\+R\+T\+\_\+\+M\+SG&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{PLOT\_MSG@{PLOT\_MSG}!yaspLib@{yaspLib}}\index{yaspLib@{yaspLib}!PLOT\_MSG@{PLOT\_MSG}}}\mbox{\Hypertarget{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfa30ce626c05e03c2912b32df8f2391564}\label{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfa30ce626c05e03c2912b32df8f2391564}} 
+P\+L\+O\+T\+\_\+\+M\+SG&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{END\_MSG@{END\_MSG}!yaspLib@{yaspLib}}\index{yaspLib@{yaspLib}!END\_MSG@{END\_MSG}}}\mbox{\Hypertarget{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfa7e3ed958b79e2e406b4b50ece022a1b7}\label{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfa7e3ed958b79e2e406b4b50ece022a1b7}} 
+E\+N\+D\+\_\+\+M\+SG&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SPACE\_MSG@{SPACE\_MSG}!yaspLib@{yaspLib}}\index{yaspLib@{yaspLib}!SPACE\_MSG@{SPACE\_MSG}}}\mbox{\Hypertarget{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfa3bbcc479f0d60df39ca424caa73937a0}\label{classyasp_lib_ac6d51b8644093b83092ae9041c655cdfa3bbcc479f0d60df39ca424caa73937a0}} 
+S\+P\+A\+C\+E\+\_\+\+M\+SG&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classyasp_lib_a683109c112526b3eb2cb53c4e1b36a01}\label{classyasp_lib_a683109c112526b3eb2cb53c4e1b36a01}} 
+\index{yaspLib@{yaspLib}!yaspLib@{yaspLib}}
+\index{yaspLib@{yaspLib}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{yaspLib()}{yaspLib()}}
+{\footnotesize\ttfamily yasp\+Lib\+::yasp\+Lib (\begin{DoxyParamCaption}\item[{Stream \&}]{dev }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classyasp_lib_a7c052a8592e42a0b57044ddfada102e1}\label{classyasp_lib_a7c052a8592e42a0b57044ddfada102e1}} 
+\index{yaspLib@{yaspLib}!available@{available}}
+\index{available@{available}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{available()}{available()}}
+{\footnotesize\ttfamily int yasp\+Lib\+::available (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyasp_lib_a49bbfb260ce51983694c3a3d415e7857}\label{classyasp_lib_a49bbfb260ce51983694c3a3d415e7857}} 
+\index{yaspLib@{yaspLib}!Color@{Color}}
+\index{Color@{Color}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{Color()}{Color()}}
+{\footnotesize\ttfamily void yasp\+Lib\+::\+Color (\begin{DoxyParamCaption}\item[{int}]{ind,  }\item[{char $\ast$}]{color }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyasp_lib_a5020a42b49db74ebd02fc41e2b9e3b91}\label{classyasp_lib_a5020a42b49db74ebd02fc41e2b9e3b91}} 
+\index{yaspLib@{yaspLib}!Data@{Data}}
+\index{Data@{Data}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{Data()}{Data()}}
+{\footnotesize\ttfamily void yasp\+Lib\+::\+Data (\begin{DoxyParamCaption}\item[{int}]{ind,  }\item[{double}]{val }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyasp_lib_a3477505d716271e0ef72f9d645f3ce96}\label{classyasp_lib_a3477505d716271e0ef72f9d645f3ce96}} 
+\index{yaspLib@{yaspLib}!DataMicros@{DataMicros}}
+\index{DataMicros@{DataMicros}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{DataMicros()}{DataMicros()}}
+{\footnotesize\ttfamily void yasp\+Lib\+::\+Data\+Micros (\begin{DoxyParamCaption}\item[{int}]{ind,  }\item[{unsigned long}]{m,  }\item[{double}]{val }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyasp_lib_a6b16e66f55632fa5c28dc70a07ff831c}\label{classyasp_lib_a6b16e66f55632fa5c28dc70a07ff831c}} 
+\index{yaspLib@{yaspLib}!DataMillis@{DataMillis}}
+\index{DataMillis@{DataMillis}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{DataMillis()}{DataMillis()}}
+{\footnotesize\ttfamily void yasp\+Lib\+::\+Data\+Millis (\begin{DoxyParamCaption}\item[{int}]{ind,  }\item[{unsigned long}]{m,  }\item[{double}]{val }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyasp_lib_a91694d687c8c92726bceaeb71dbbb744}\label{classyasp_lib_a91694d687c8c92726bceaeb71dbbb744}} 
+\index{yaspLib@{yaspLib}!peek@{peek}}
+\index{peek@{peek}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{peek()}{peek()}}
+{\footnotesize\ttfamily int yasp\+Lib\+::peek (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyasp_lib_a9336c4c9856879c5cff7d631d1e283bc}\label{classyasp_lib_a9336c4c9856879c5cff7d631d1e283bc}} 
+\index{yaspLib@{yaspLib}!read@{read}}
+\index{read@{read}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{read()}{read()}}
+{\footnotesize\ttfamily int yasp\+Lib\+::read (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyasp_lib_aa1305be6988159432ed5a41e515796aa}\label{classyasp_lib_aa1305be6988159432ed5a41e515796aa}} 
+\index{yaspLib@{yaspLib}!Setup@{Setup}}
+\index{Setup@{Setup}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily void yasp\+Lib\+::\+Setup (\begin{DoxyParamCaption}\item[{int}]{ind,  }\item[{char $\ast$}]{name,  }\item[{char $\ast$}]{color }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyasp_lib_a56f661b7a24d7269f9c8169a96129e27}\label{classyasp_lib_a56f661b7a24d7269f9c8169a96129e27}} 
+\index{yaspLib@{yaspLib}!write@{write}}
+\index{write@{write}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{write()}{write()}}
+{\footnotesize\ttfamily size\+\_\+t yasp\+Lib\+::write (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{b }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classyasp_lib_a57b0f8951e55f287de5f8381efe08930}\label{classyasp_lib_a57b0f8951e55f287de5f8381efe08930}} 
+\index{yaspLib@{yaspLib}!stream@{stream}}
+\index{stream@{stream}!yaspLib@{yaspLib}}
+\subsubsection{\texorpdfstring{stream}{stream}}
+{\footnotesize\ttfamily Stream\& yasp\+Lib\+::stream\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{yasplib_8h}{yasplib.\+h}}\item 
+\mbox{\hyperlink{yasplib_8cpp}{yasplib.\+cpp}}\end{DoxyCompactItemize}

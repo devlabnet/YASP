@@ -1,0 +1,11 @@
+digraph "yaclLibSpace::yaclLib"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node2 [label="yaclLibSpace::yaclLib",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node3 [label="Stream",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node4 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" commands" ];
+  Node4 [label="yaclLibSpace::cmdLineCommand",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structyacl_lib_space_1_1cmd_line_command.html",tooltip=" "];
+}

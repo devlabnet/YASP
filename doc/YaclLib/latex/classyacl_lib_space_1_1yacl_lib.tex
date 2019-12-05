@@ -1,0 +1,239 @@
+\hypertarget{classyacl_lib_space_1_1yacl_lib}{}\section{yacl\+Lib\+Space\+::yacl\+Lib Class Reference}
+\label{classyacl_lib_space_1_1yacl_lib}\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+
+
+{\ttfamily \#include $<$yacl\+Lib.\+h$>$}
+
+Inheritance diagram for yacl\+Lib\+Space\+::yacl\+Lib\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classyacl_lib_space_1_1yacl_lib}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_aa4d00d08ccca7681664fb834b021d4ef}{yacl\+Lib}} (Stream \&dev, \mbox{\hyperlink{structyacl_lib_space_1_1cmd_line_command}{cmd\+Line\+Command}} $\ast$cmds, size\+\_\+t s)
+\item 
+\mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_aeba285285a7c9f9ec69348f5e0373ec5}{$\sim$yacl\+Lib}} ()
+\item 
+bool \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_aafffa242222d116ceba1352b076dec62}{get\+Command\+Line\+From\+Serial\+Port}} ()
+\item 
+int \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_ac1bf1763da556804be2f1a5e99d67cf3}{read\+Number}} ()
+\item 
+long \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a9cae301de3febbd9729b6b1a98e1babe}{read\+Long}} ()
+\item 
+float \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_afc65d88691ee736904288e1225dcc047}{read\+Float}} ()
+\item 
+char $\ast$ \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a4c977d203e4246a6739ba90a4556c53e}{read\+Word}} ()
+\item 
+char $\ast$ \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a7d87b7a96b320c48236e9e411063f42b}{token}} ()
+\item 
+void \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a0348513dc670e82c241ac88bcb24bd54}{check\+Commands}} ()
+\item 
+bool \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_aad6cf02e5731fefd436e3194f608718e}{read\+Ok}} ()
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Stream \& \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a4fb40a58a7acee546aee1fc4fc45403a}{stream}}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a23f26c18f2e9127510b52ad6114245a6}{read}} ()
+\item 
+int \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a653154efc839c8e9e127e41347abfaf4}{available}} ()
+\item 
+int \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_aafd5aeb3f3dba65fead3d7f0cbe21584}{peek}} ()
+\item 
+size\+\_\+t \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_af2d480c162e7057901d046a7112cacbf}{write}} (uint8\+\_\+t b)
+\item 
+int \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a9f9863154f0212fa4bb7568cea29f681}{is\+Numeric\+String}} (char $\ast$s)
+\item 
+void \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_ab0df81e79e6a6f44ba30fec8724ef7ae}{null\+Command}} (char $\ast$ptr\+To\+Command\+Name)
+\item 
+void \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a6f31fcc04bc66f08fe4a4087edd91f68}{Do\+My\+Command}} ()
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structyacl_lib_space_1_1cmd_line_command}{cmd\+Line\+Command}} $\ast$ \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a346a850b37ab94f3d88a38e270fab114}{commands}}
+\item 
+size\+\_\+t \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_aa8b8c329cf27a215b122388f32de866d}{user\+Func\+Size}}
+\item 
+char \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_abc39ab3ac3ee31d1ad7152922e87430b}{command\+Line}} \mbox{[}\mbox{\hyperlink{namespaceyacl_lib_space_a3247d520bbfd9b82183519c563e54ef3}{C\+O\+M\+M\+A\+N\+D\+\_\+\+B\+U\+F\+F\+E\+R\+\_\+\+L\+E\+N\+G\+TH}}+1\mbox{]}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a6dcc9c7aa69e08e24287e56a4d8f3ce9}{chars\+Read}} = 0
+\item 
+bool \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a013bc2c8f632e7f0a272196e751b0af8}{ok}}
+\item 
+const char $\ast$ \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_abf15ba80be3d08a9fa7b676c6568be68}{delimiters}} = \char`\"{} \char`\"{}
+\item 
+char $\ast$ \mbox{\hyperlink{classyacl_lib_space_1_1yacl_lib_a27b028d8afb6425559d37b748337af74}{cmd\+Token}} = \char`\"{}\char`\"{}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_aa4d00d08ccca7681664fb834b021d4ef}\label{classyacl_lib_space_1_1yacl_lib_aa4d00d08ccca7681664fb834b021d4ef}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!yaclLib@{yaclLib}}
+\index{yaclLib@{yaclLib}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{yaclLib()}{yaclLib()}}
+{\footnotesize\ttfamily yacl\+Lib\+Space\+::yacl\+Lib\+::yacl\+Lib (\begin{DoxyParamCaption}\item[{Stream \&}]{dev,  }\item[{\mbox{\hyperlink{structyacl_lib_space_1_1cmd_line_command}{cmd\+Line\+Command}} $\ast$}]{cmds,  }\item[{size\+\_\+t}]{s }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_aeba285285a7c9f9ec69348f5e0373ec5}\label{classyacl_lib_space_1_1yacl_lib_aeba285285a7c9f9ec69348f5e0373ec5}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!````~yaclLib@{$\sim$yaclLib}}
+\index{````~yaclLib@{$\sim$yaclLib}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{$\sim$yaclLib()}{~yaclLib()}}
+{\footnotesize\ttfamily yacl\+Lib\+Space\+::yacl\+Lib\+::$\sim$yacl\+Lib (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a653154efc839c8e9e127e41347abfaf4}\label{classyacl_lib_space_1_1yacl_lib_a653154efc839c8e9e127e41347abfaf4}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!available@{available}}
+\index{available@{available}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{available()}{available()}}
+{\footnotesize\ttfamily int yacl\+Lib\+Space\+::yacl\+Lib\+::available (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a0348513dc670e82c241ac88bcb24bd54}\label{classyacl_lib_space_1_1yacl_lib_a0348513dc670e82c241ac88bcb24bd54}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!checkCommands@{checkCommands}}
+\index{checkCommands@{checkCommands}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{checkCommands()}{checkCommands()}}
+{\footnotesize\ttfamily void yacl\+Lib\+Space\+::yacl\+Lib\+::check\+Commands (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a6f31fcc04bc66f08fe4a4087edd91f68}\label{classyacl_lib_space_1_1yacl_lib_a6f31fcc04bc66f08fe4a4087edd91f68}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!DoMyCommand@{DoMyCommand}}
+\index{DoMyCommand@{DoMyCommand}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{DoMyCommand()}{DoMyCommand()}}
+{\footnotesize\ttfamily void yacl\+Lib\+Space\+::yacl\+Lib\+::\+Do\+My\+Command (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_aafffa242222d116ceba1352b076dec62}\label{classyacl_lib_space_1_1yacl_lib_aafffa242222d116ceba1352b076dec62}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!getCommandLineFromSerialPort@{getCommandLineFromSerialPort}}
+\index{getCommandLineFromSerialPort@{getCommandLineFromSerialPort}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{getCommandLineFromSerialPort()}{getCommandLineFromSerialPort()}}
+{\footnotesize\ttfamily bool yacl\+Lib\+Space\+::yacl\+Lib\+::get\+Command\+Line\+From\+Serial\+Port (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a9f9863154f0212fa4bb7568cea29f681}\label{classyacl_lib_space_1_1yacl_lib_a9f9863154f0212fa4bb7568cea29f681}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!isNumericString@{isNumericString}}
+\index{isNumericString@{isNumericString}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{isNumericString()}{isNumericString()}}
+{\footnotesize\ttfamily int yacl\+Lib\+Space\+::yacl\+Lib\+::is\+Numeric\+String (\begin{DoxyParamCaption}\item[{char $\ast$}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_ab0df81e79e6a6f44ba30fec8724ef7ae}\label{classyacl_lib_space_1_1yacl_lib_ab0df81e79e6a6f44ba30fec8724ef7ae}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!nullCommand@{nullCommand}}
+\index{nullCommand@{nullCommand}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{nullCommand()}{nullCommand()}}
+{\footnotesize\ttfamily void yacl\+Lib\+Space\+::yacl\+Lib\+::null\+Command (\begin{DoxyParamCaption}\item[{char $\ast$}]{ptr\+To\+Command\+Name }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_aafd5aeb3f3dba65fead3d7f0cbe21584}\label{classyacl_lib_space_1_1yacl_lib_aafd5aeb3f3dba65fead3d7f0cbe21584}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!peek@{peek}}
+\index{peek@{peek}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{peek()}{peek()}}
+{\footnotesize\ttfamily int yacl\+Lib\+Space\+::yacl\+Lib\+::peek (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a23f26c18f2e9127510b52ad6114245a6}\label{classyacl_lib_space_1_1yacl_lib_a23f26c18f2e9127510b52ad6114245a6}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!read@{read}}
+\index{read@{read}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{read()}{read()}}
+{\footnotesize\ttfamily int yacl\+Lib\+Space\+::yacl\+Lib\+::read (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_afc65d88691ee736904288e1225dcc047}\label{classyacl_lib_space_1_1yacl_lib_afc65d88691ee736904288e1225dcc047}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!readFloat@{readFloat}}
+\index{readFloat@{readFloat}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{readFloat()}{readFloat()}}
+{\footnotesize\ttfamily float yacl\+Lib\+Space\+::yacl\+Lib\+::read\+Float (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a9cae301de3febbd9729b6b1a98e1babe}\label{classyacl_lib_space_1_1yacl_lib_a9cae301de3febbd9729b6b1a98e1babe}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!readLong@{readLong}}
+\index{readLong@{readLong}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{readLong()}{readLong()}}
+{\footnotesize\ttfamily long yacl\+Lib\+Space\+::yacl\+Lib\+::read\+Long (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_ac1bf1763da556804be2f1a5e99d67cf3}\label{classyacl_lib_space_1_1yacl_lib_ac1bf1763da556804be2f1a5e99d67cf3}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!readNumber@{readNumber}}
+\index{readNumber@{readNumber}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{readNumber()}{readNumber()}}
+{\footnotesize\ttfamily int yacl\+Lib\+Space\+::yacl\+Lib\+::read\+Number (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_aad6cf02e5731fefd436e3194f608718e}\label{classyacl_lib_space_1_1yacl_lib_aad6cf02e5731fefd436e3194f608718e}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!readOk@{readOk}}
+\index{readOk@{readOk}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{readOk()}{readOk()}}
+{\footnotesize\ttfamily bool yacl\+Lib\+Space\+::yacl\+Lib\+::read\+Ok (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a4c977d203e4246a6739ba90a4556c53e}\label{classyacl_lib_space_1_1yacl_lib_a4c977d203e4246a6739ba90a4556c53e}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!readWord@{readWord}}
+\index{readWord@{readWord}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{readWord()}{readWord()}}
+{\footnotesize\ttfamily char $\ast$ yacl\+Lib\+Space\+::yacl\+Lib\+::read\+Word (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a7d87b7a96b320c48236e9e411063f42b}\label{classyacl_lib_space_1_1yacl_lib_a7d87b7a96b320c48236e9e411063f42b}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!token@{token}}
+\index{token@{token}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{token()}{token()}}
+{\footnotesize\ttfamily char$\ast$ yacl\+Lib\+Space\+::yacl\+Lib\+::token (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_af2d480c162e7057901d046a7112cacbf}\label{classyacl_lib_space_1_1yacl_lib_af2d480c162e7057901d046a7112cacbf}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!write@{write}}
+\index{write@{write}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{write()}{write()}}
+{\footnotesize\ttfamily size\+\_\+t yacl\+Lib\+Space\+::yacl\+Lib\+::write (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{b }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a6dcc9c7aa69e08e24287e56a4d8f3ce9}\label{classyacl_lib_space_1_1yacl_lib_a6dcc9c7aa69e08e24287e56a4d8f3ce9}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!charsRead@{charsRead}}
+\index{charsRead@{charsRead}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{charsRead}{charsRead}}
+{\footnotesize\ttfamily uint8\+\_\+t yacl\+Lib\+Space\+::yacl\+Lib\+::chars\+Read = 0\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a27b028d8afb6425559d37b748337af74}\label{classyacl_lib_space_1_1yacl_lib_a27b028d8afb6425559d37b748337af74}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!cmdToken@{cmdToken}}
+\index{cmdToken@{cmdToken}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{cmdToken}{cmdToken}}
+{\footnotesize\ttfamily char$\ast$ yacl\+Lib\+Space\+::yacl\+Lib\+::cmd\+Token = \char`\"{}\char`\"{}\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_abc39ab3ac3ee31d1ad7152922e87430b}\label{classyacl_lib_space_1_1yacl_lib_abc39ab3ac3ee31d1ad7152922e87430b}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!commandLine@{commandLine}}
+\index{commandLine@{commandLine}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{commandLine}{commandLine}}
+{\footnotesize\ttfamily char yacl\+Lib\+Space\+::yacl\+Lib\+::command\+Line\mbox{[}\mbox{\hyperlink{namespaceyacl_lib_space_a3247d520bbfd9b82183519c563e54ef3}{C\+O\+M\+M\+A\+N\+D\+\_\+\+B\+U\+F\+F\+E\+R\+\_\+\+L\+E\+N\+G\+TH}}+1\mbox{]}\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a346a850b37ab94f3d88a38e270fab114}\label{classyacl_lib_space_1_1yacl_lib_a346a850b37ab94f3d88a38e270fab114}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!commands@{commands}}
+\index{commands@{commands}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{commands}{commands}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structyacl_lib_space_1_1cmd_line_command}{cmd\+Line\+Command}}$\ast$ yacl\+Lib\+Space\+::yacl\+Lib\+::commands\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_abf15ba80be3d08a9fa7b676c6568be68}\label{classyacl_lib_space_1_1yacl_lib_abf15ba80be3d08a9fa7b676c6568be68}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!delimiters@{delimiters}}
+\index{delimiters@{delimiters}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{delimiters}{delimiters}}
+{\footnotesize\ttfamily const char$\ast$ yacl\+Lib\+Space\+::yacl\+Lib\+::delimiters = \char`\"{} \char`\"{}\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a013bc2c8f632e7f0a272196e751b0af8}\label{classyacl_lib_space_1_1yacl_lib_a013bc2c8f632e7f0a272196e751b0af8}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!ok@{ok}}
+\index{ok@{ok}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{ok}{ok}}
+{\footnotesize\ttfamily bool yacl\+Lib\+Space\+::yacl\+Lib\+::ok\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_a4fb40a58a7acee546aee1fc4fc45403a}\label{classyacl_lib_space_1_1yacl_lib_a4fb40a58a7acee546aee1fc4fc45403a}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!stream@{stream}}
+\index{stream@{stream}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{stream}{stream}}
+{\footnotesize\ttfamily Stream\& yacl\+Lib\+Space\+::yacl\+Lib\+::stream}
+
+\mbox{\Hypertarget{classyacl_lib_space_1_1yacl_lib_aa8b8c329cf27a215b122388f32de866d}\label{classyacl_lib_space_1_1yacl_lib_aa8b8c329cf27a215b122388f32de866d}} 
+\index{yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}!userFuncSize@{userFuncSize}}
+\index{userFuncSize@{userFuncSize}!yaclLibSpace::yaclLib@{yaclLibSpace::yaclLib}}
+\subsubsection{\texorpdfstring{userFuncSize}{userFuncSize}}
+{\footnotesize\ttfamily size\+\_\+t yacl\+Lib\+Space\+::yacl\+Lib\+::user\+Func\+Size\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+S\+:/yasp/yacl\+Lib/\mbox{\hyperlink{yacl_lib_8h}{yacl\+Lib.\+h}}\item 
+S\+:/yasp/yacl\+Lib/\mbox{\hyperlink{yacl_lib_8cpp}{yacl\+Lib.\+cpp}}\end{DoxyCompactItemize}
